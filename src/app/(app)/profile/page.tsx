@@ -8,7 +8,7 @@ export default async function Perfil() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  let badges: any[] = [];
+  let badges: { slug: string; earned_at?: string }[] = [];
   let dbUser = null;
   if (user) {
     const { data: userBadges } = await supabase.from('badges').select('*').eq('user_id', user.id);

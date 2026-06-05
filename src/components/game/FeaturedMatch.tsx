@@ -5,17 +5,16 @@ import { submitBet } from "@/app/(app)/dashboard/actions";
 import ShareBet from "./ShareBet";
 
 export default function FeaturedMatch() {
-  const [homeBet, setHomeBet] = useState(2);
-  const [awayBet, setAwayBet] = useState(1);
+  const [bet, setBet] = useState<{ home: number; away: number }>({ home: 2, away: 1 })
   const [confirmed, setConfirmed] = useState(false);
 
   const handleConfirm = async () => {
     try {
-      await submitBet('mock-featured', homeBet, awayBet, false);
+      await submitBet('mock-featured', bet.home, bet.away, false);
       setConfirmed(true);
       setTimeout(() => setConfirmed(false), 2000);
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error) {
+      alert((error as Error).message);
     }
   };
 
@@ -36,15 +35,15 @@ export default function FeaturedMatch() {
             <input 
               type="number" 
               className="w-14 h-12 bg-[#2b2b2b] rounded-xl flex items-center justify-center font-bebas text-3xl shadow-inner text-center border-2 border-yellow-400 text-white appearance-none outline-none focus:ring-2 focus:ring-yellow-400" 
-              value={homeBet}
-              onChange={e => setHomeBet(parseInt(e.target.value) || 0)}
+              value={bet.home}
+              onChange={e => setBet({ ...bet, home: parseInt(e.target.value) || 0 })}
             />
             <span className="text-white/60 text-sm font-bold">x</span>
             <input 
               type="number" 
               className="w-14 h-12 bg-[#2b2b2b] rounded-xl flex items-center justify-center font-bebas text-3xl shadow-inner text-center border-2 border-yellow-400 text-white appearance-none outline-none focus:ring-2 focus:ring-yellow-400" 
-              value={awayBet}
-              onChange={e => setAwayBet(parseInt(e.target.value) || 0)}
+              value={bet.away}
+              onChange={e => setBet({ ...bet, away: parseInt(e.target.value) || 0 })}
             />
           </div>
           <div className="mt-4 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full w-max flex items-center gap-1.5 shadow-sm">
@@ -76,8 +75,8 @@ export default function FeaturedMatch() {
       {confirmed && (
         <ShareBet 
           game={{ home_team: 'Brasil', away_team: 'Argentina' }} 
-          homeBet={homeBet} 
-          awayBet={awayBet} 
+          homeBet={bet.home} 
+          awayBet={bet.away} 
         />
       )}
     </div>

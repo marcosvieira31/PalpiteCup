@@ -7,10 +7,9 @@ interface ShareBetProps {
   };
   homeBet: number;
   awayBet: number;
-  username?: string;
 }
 
-export default function ShareBet({ game, homeBet, awayBet, username }: ShareBetProps) {
+export default function ShareBet({ game, homeBet, awayBet }: ShareBetProps) {
   const text = `🏆 Meu palpite no PalpiteCup:\n⚽ ${game.home_team} ${homeBet} x ${awayBet} ${game.away_team}\n\nEntre no meu grupo: palpitecup.vercel.app`
 
   const shareWhatsApp = () => {
