@@ -30,7 +30,7 @@ export default async function CopaPage() {
       </div>
 
       <div className="px-4 mt-6 space-y-8">
-        {Object.entries(grouped).map(([groupName, groupGames]) => (
+        {(Object.entries(grouped) as [string, Game[]][]).map(([groupName, groupGames]) => (
           <section key={groupName}>
             <h2 className="font-bebas text-2xl tracking-widest text-slate-800 mb-4 uppercase">
               {groupName}
