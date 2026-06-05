@@ -3,6 +3,8 @@ import Header from '@/components/layout/Header'
 import FeaturedMatch from '@/components/game/FeaturedMatch'
 import GameList from '@/components/game/GameList'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import MyGroupsPreview from '@/components/dashboard/MyGroupsPreview'
 
 export const revalidate = 0; // Ensures fresh data load on request
 
@@ -90,6 +92,14 @@ export default async function Dashboard() {
 
         {/* Dynamic Game List */}
         <GameList games={finalGames} bets={finalBets} />
+
+        <div className="mt-6">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="font-bebas text-xl tracking-widest text-slate-800">MEUS GRUPOS</h2>
+            <Link href="/groups" className="text-xs text-green-600 font-bold">Ver todos →</Link>
+          </div>
+          <MyGroupsPreview userId={user?.id ?? ''} />
+        </div>
       </div>
     </div>
   )
