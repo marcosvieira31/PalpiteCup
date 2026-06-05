@@ -35,7 +35,7 @@ export default function GruposTab() {
     return () => { supabase.removeChannel(channel) }
   }, [])
 
-  const groups = [...new Set(standings.map(s => s.group_name))].sort()
+  const groups = Array.from(new Set(standings.map(s => s.group_name))).sort()
 
   if (loading) return <p className="text-center text-slate-400 py-8">Carregando...</p>
 
