@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getFlagUrl } from '@/lib/flags'
 
 interface Props {
@@ -9,26 +9,37 @@ interface Props {
 }
 
 export default function TeamFlag({ team, size = 40, className = '' }: Props) {
-  const [error, setError] = useState(false)
+  const [imgError, setImgError] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    setImgError(false)
+  }, [team])
+
   const flagUrl = getFlagUrl(team, size)
 
-  if (!flagUrl || error) return (
-    <div className={`bg-slate-100 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-500 flex-shrink-0 ${className}`}
-      style={{ width: size, height: size, minWidth: size }}>
+  const Fallback = () => (
+    <div
+      className={`bg-slate-100 rounded-full flex items-center justify-center font-bold text-slate-500 flex-shrink-0 ${className}`}
+      style={{ width: size, height: size, minWidth: size, fontSize: size * 0.28 }}>
       {team?.substring(0, 3).toUpperCase()}
     </div>
   )
 
+  if (!mounted || !flagUrl || imgError) return <Fallback />
+
   return (
-    <div className={`rounded-full overflow-hidden border border-slate-200 flex-shrink-0 ${className}`}
-      style={{ width: size, height: size, minWidth: size }}>
+    <div
+      className={`rounded-full overflow-hidden border border-slate-200 flex-shrink-0 ${className}`}
+      style={{ width: size, height: size, minWidth: size }}
+      suppressHydrationWarning>
       <img
         src={flagUrl}
         alt={team}
-        width={size}
-        height={size}
         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        onError={() => setError(true)}
+        onError={() => setImgError(true)}
+        suppressHydrationWarning
       />
     </div>
   )
