@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Header from '@/components/layout/Header'
 import FeaturedMatch from '@/components/game/FeaturedMatch'
 import GameList from '@/components/game/GameList'
+import { redirect } from 'next/navigation'
 
 export const revalidate = 0; // Ensures fresh data load on request
 
@@ -16,8 +17,11 @@ export default async function Dashboard() {
     .lte('kickoff_at', `${today}T23:59:59`)
     .order('kickoff_at')
 
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  
+  if (authError || !user) {
+    redirect('/login')
+  }
   const { data: bets } = await supabase
     .from('bets')
     .select('*')

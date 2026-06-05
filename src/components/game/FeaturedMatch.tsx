@@ -34,16 +34,20 @@ export default function FeaturedMatch() {
           <div className="flex items-center gap-3">
             <input 
               type="number" 
+              min="0"
+              max="99"
               className="w-14 h-12 bg-[#2b2b2b] rounded-xl flex items-center justify-center font-bebas text-3xl shadow-inner text-center border-2 border-yellow-400 text-white appearance-none outline-none focus:ring-2 focus:ring-yellow-400" 
               value={bet.home}
-              onChange={e => setBet({ ...bet, home: parseInt(e.target.value) || 0 })}
+              onChange={e => setBet({ ...bet, home: Math.max(0, parseInt(e.target.value) || 0) })}
             />
             <span className="text-white/60 text-sm font-bold">x</span>
             <input 
               type="number" 
+              min="0"
+              max="99"
               className="w-14 h-12 bg-[#2b2b2b] rounded-xl flex items-center justify-center font-bebas text-3xl shadow-inner text-center border-2 border-yellow-400 text-white appearance-none outline-none focus:ring-2 focus:ring-yellow-400" 
               value={bet.away}
-              onChange={e => setBet({ ...bet, away: parseInt(e.target.value) || 0 })}
+              onChange={e => setBet({ ...bet, away: Math.max(0, parseInt(e.target.value) || 0) })}
             />
           </div>
           <div className="mt-4 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full w-max flex items-center gap-1.5 shadow-sm">

@@ -22,13 +22,13 @@ export default function GameCard({ game, bet, onBetChange, onJokerToggle, curren
 
   const handleHomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onBetChange && !isStarted) {
-      onBetChange(game.id, parseInt(e.target.value) || 0, bet?.away_bet || 0, bet?.is_joker || false);
+      onBetChange(game.id, Math.max(0, parseInt(e.target.value) || 0), bet?.away_bet || 0, bet?.is_joker || false);
     }
   };
 
   const handleAwayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onBetChange && !isStarted) {
-      onBetChange(game.id, bet?.home_bet || 0, parseInt(e.target.value) || 0, bet?.is_joker || false);
+      onBetChange(game.id, bet?.home_bet || 0, Math.max(0, parseInt(e.target.value) || 0), bet?.is_joker || false);
     }
   };
 
@@ -84,6 +84,8 @@ export default function GameCard({ game, bet, onBetChange, onJokerToggle, curren
           <div className="flex items-center gap-2">
             <input 
               type="number" 
+              min="0"
+              max="99"
               className="w-10 h-10 bg-[#2b2b2b] rounded-lg flex items-center justify-center text-white font-bebas text-2xl text-center outline-none focus:ring-2 focus:ring-primary disabled:opacity-70 disabled:bg-slate-800" 
               defaultValue={bet?.home_bet ?? ""} 
               placeholder="-"
@@ -93,6 +95,8 @@ export default function GameCard({ game, bet, onBetChange, onJokerToggle, curren
             <span className="text-slate-400 text-xs font-bold">x</span>
             <input 
               type="number" 
+              min="0"
+              max="99"
               className="w-10 h-10 bg-[#2b2b2b] rounded-lg flex items-center justify-center text-white font-bebas text-2xl text-center outline-none focus:ring-2 focus:ring-primary disabled:opacity-70 disabled:bg-slate-800" 
               defaultValue={bet?.away_bet ?? ""} 
               placeholder="-"

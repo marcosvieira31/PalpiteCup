@@ -3,10 +3,15 @@ import Header from "@/components/layout/Header";
 import { Settings, HelpCircle, ChevronRight } from "lucide-react";
 import LogoutButton from "@/components/profile/LogoutButton";
 import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
 export default async function Perfil() {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    redirect('/login')
+  }
 
   let badges: { slug: string; earned_at?: string }[] = [];
   let dbUser = null;
