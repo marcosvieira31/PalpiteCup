@@ -5,8 +5,6 @@ export default async function PalpitarPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const now = new Date().toISOString()
-
   // Busca a próxima rodada com jogos ainda não iniciados
   // Agrupa por group_stage e pega o menor kickoff_at futuro
   const { data: nextRoundGames } = await supabase
