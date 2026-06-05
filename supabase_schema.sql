@@ -227,3 +227,52 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- Tabela de posições nos grupos da Copa
+create table public.group_standings (
+  id serial primary key,
+  group_name text not null,
+  team text not null,
+  played integer default 0,
+  wins integer default 0,
+  draws integer default 0,
+  losses integer default 0,
+  goals_for integer default 0,
+  goals_against integer default 0,
+  goal_diff integer default 0,
+  points integer default 0,
+  position integer,
+  updated_at timestamptz default now(),
+  unique(group_name, team)
+);
+
+-- Tabela de previsões de bracket
+create table public.bracket_predictions (
+  id serial primary key,
+  user_id uuid references public.users(id) on delete cascade,
+  round text not null,
+  position integer not null,
+  predicted_team text not null,
+  points_earned integer default 0,
+  locked boolean default false,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique(user_id, round, position)
+);
+
+-- RLS
+alter table public.group_standings enable row level security;
+alter table public.bracket_predictions enable row level security;
+
+-- Policies
+create policy "Qualquer um lê standings"
+  on public.group_standings for select using (true);
+
+create policy "Usuário lê próprio bracket"
+  on public.bracket_predictions for select using (auth.uid() = user_id);
+
+create policy "Usuário cria próprio bracket"
+  on public.bracket_predictions for insert with check (auth.uid() = user_id);
+
+create policy "Usuário edita próprio bracket se não travado"
+  on public.bracket_predictions for update using (auth.uid() = user_id and locked = false);

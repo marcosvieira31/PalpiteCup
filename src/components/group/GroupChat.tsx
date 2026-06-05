@@ -26,6 +26,8 @@ export default function GroupChat({ groupId }: { groupId: string }) {
       setCurrentUserId(data.user?.id || null);
     });
 
+    if (!groupId) return;
+
     supabase
       .from('messages')
       .select('*, users(username, avatar_url)')

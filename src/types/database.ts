@@ -220,6 +220,88 @@ export interface Database {
           created_at?: string
         }
       }
+      group_standings: {
+        Row: {
+          id: number
+          group_name: string
+          team: string
+          played: number
+          wins: number
+          draws: number
+          losses: number
+          goals_for: number
+          goals_against: number
+          goal_diff: number
+          points: number
+          position: number | null
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          group_name: string
+          team: string
+          played?: number
+          wins?: number
+          draws?: number
+          losses?: number
+          goals_for?: number
+          goals_against?: number
+          goal_diff?: number
+          points?: number
+          position?: number | null
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          group_name?: string
+          team?: string
+          played?: number
+          wins?: number
+          draws?: number
+          losses?: number
+          goals_for?: number
+          goals_against?: number
+          goal_diff?: number
+          points?: number
+          position?: number | null
+          updated_at?: string
+        }
+      }
+      bracket_predictions: {
+        Row: {
+          id: number
+          user_id: string
+          round: 'round_of_32' | 'round_of_16' | 'quarter' | 'semi' | 'final' | 'champion'
+          position: number
+          predicted_team: string
+          points_earned: number
+          locked: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          user_id: string
+          round: 'round_of_32' | 'round_of_16' | 'quarter' | 'semi' | 'final' | 'champion'
+          position: number
+          predicted_team: string
+          points_earned?: number
+          locked?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          user_id?: string
+          round?: 'round_of_32' | 'round_of_16' | 'quarter' | 'semi' | 'final' | 'champion'
+          position?: number
+          predicted_team?: string
+          points_earned?: number
+          locked?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -250,4 +332,32 @@ export interface Badge {
   user_id: string
   slug: string
   earned_at: string
+}
+
+export interface GroupStanding {
+  id: number
+  group_name: string
+  team: string
+  played: number
+  wins: number
+  draws: number
+  losses: number
+  goals_for: number
+  goals_against: number
+  goal_diff: number
+  points: number
+  position: number | null
+  updated_at: string
+}
+
+export interface BracketPrediction {
+  id: number
+  user_id: string
+  round: 'round_of_32' | 'round_of_16' | 'quarter' | 'semi' | 'final' | 'champion'
+  position: number
+  predicted_team: string
+  points_earned: number
+  locked: boolean
+  created_at: string
+  updated_at: string
 }
