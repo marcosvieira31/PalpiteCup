@@ -6,11 +6,17 @@ import MatchTimeline from '@/components/game/MatchTimeline'
 export default async function GamePage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
 
-  let { data: game } = await supabase
-    .from('games')
-    .select('*')
-    .eq('id', params.id)
-    .single()
+  let game = null
+  const numericId = parseInt(params.id)
+  
+  if (!isNaN(numericId) && !params.id.startsWith('mock-')) {
+    const { data } = await supabase
+      .from('games')
+      .select('*')
+      .eq('id', numericId)
+      .single()
+    game = data
+  }
 
   // For testing the UI without real DB data
   if (!game && params.id.startsWith("mock")) {

@@ -7,13 +7,19 @@ import GroupChat from '@/components/group/GroupChat'
 export default async function GroupPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
 
-  let { data: group } = await supabase
-    .from('groups')
-    .select('*, group_members(*, users(username, avatar_url, points_total))')
-    .eq('id', params.id)
-    .single()
+  let group = null;
+  const isMock = params.id.startsWith('mock-') || params.id === '1';
 
-  if (!group && params.id.startsWith("mock") || params.id === "1") {
+  if (!isMock) {
+    const { data } = await supabase
+      .from('groups')
+      .select('*, group_members(*, users(username, avatar_url, points_total))')
+      .eq('id', params.id)
+      .single()
+    group = data;
+  }
+
+  if (!group && isMock) {
     // Mock Data for Layout Validation
     group = {
       id: "mock-group",

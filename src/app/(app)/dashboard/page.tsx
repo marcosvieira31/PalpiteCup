@@ -22,12 +22,17 @@ export default async function Dashboard() {
   if (authError || !user) {
     redirect('/login')
   }
-  const { data: bets } = await supabase
-    .from('bets')
-    .select('*')
-    .eq('user_id', user?.id || '')
-    .in('game_id', games?.map(g => g.id) ?? [])
+  const numericGameIds = (games ?? [])
+    .map(g => g.id)
+    .filter(id => typeof id === 'number')
 
+  const { data: bets } = numericGameIds.length > 0
+    ? await supabase
+        .from('bets')
+        .select('*')
+        .eq('user_id', user?.id || '')
+        .in('game_id', numericGameIds)
+    : { data: [] }
   let finalGames = games || []
   const finalBets = bets || []
 

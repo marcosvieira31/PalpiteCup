@@ -9,6 +9,10 @@ export async function submitBet(gameId: string, home: number, away: number, joke
     throw new Error('Usuário não autenticado');
   }
 
+  if (typeof gameId === 'string' && gameId.startsWith('mock-')) {
+    return { success: true }
+  }
+
   // Upsert the bet. The unique constraint on user_id and game_id handles the logic.
   const { error } = await supabase.from('bets').upsert({
     user_id: user.id,
