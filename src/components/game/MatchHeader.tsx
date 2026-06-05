@@ -1,6 +1,7 @@
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Database } from "@/types/database";
+import TeamFlag from "@/components/ui/TeamFlag";
 
 type Game = Database["public"]["Tables"]["games"]["Row"];
 
@@ -20,9 +21,7 @@ export default function MatchHeader({ game }: { game: Game }) {
 
       <div className="flex justify-center items-center gap-6 mt-4 w-full px-6">
         <div className="flex flex-col items-center gap-2">
-          <div className="w-20 h-20 rounded-full border-4 border-slate-100 bg-white flex items-center justify-center font-bebas text-4xl shadow-md text-slate-800">
-            {game.home_team.substring(0,3).toUpperCase()}
-          </div>
+          <TeamFlag team={game.home_team ?? ''} size={64} className="shadow-md border-white" />
           <span className="font-bold text-slate-800 uppercase tracking-widest text-sm">{game.home_team}</span>
         </div>
 
@@ -53,9 +52,7 @@ export default function MatchHeader({ game }: { game: Game }) {
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <div className="w-20 h-20 rounded-full border-4 border-slate-100 bg-white flex items-center justify-center font-bebas text-4xl shadow-md text-slate-800">
-            {game.away_team.substring(0,3).toUpperCase()}
-          </div>
+          <TeamFlag team={game.away_team ?? ''} size={64} className="shadow-md border-white" />
           <span className="font-bold text-slate-800 uppercase tracking-widest text-sm">{game.away_team}</span>
         </div>
       </div>

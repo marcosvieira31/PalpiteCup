@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { Game } from '@/types/database'
 import Link from 'next/link'
+import TeamFlag from '@/components/ui/TeamFlag'
 
 type Filter = 'hoje' | 'proximos' | 'encerrados'
 
@@ -89,14 +90,20 @@ export default function PartidaTab() {
                     : new Date(game.kickoff_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-800 text-sm flex-1">{game.home_team ?? 'A definir'}</span>
-                <span className="font-bebas text-xl text-slate-800 px-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-1">
+                  <TeamFlag team={game.home_team ?? ''} size={32} />
+                  <span className="font-bold text-slate-800 text-sm line-clamp-1">{game.home_team ?? 'A definir'}</span>
+                </div>
+                <span className="font-bebas text-xl text-slate-800 px-2 whitespace-nowrap">
                   {game.status !== 'scheduled'
                     ? `${game.home_score ?? 0} × ${game.away_score ?? 0}`
                     : 'VS'}
                 </span>
-                <span className="font-bold text-slate-800 text-sm flex-1 text-right">{game.away_team ?? 'A definir'}</span>
+                <div className="flex items-center justify-end gap-2 flex-1">
+                  <span className="font-bold text-slate-800 text-sm text-right line-clamp-1">{game.away_team ?? 'A definir'}</span>
+                  <TeamFlag team={game.away_team ?? ''} size={32} />
+                </div>
               </div>
               {game.venue && (
                 <p className="text-[10px] text-slate-400 text-center mt-2">{game.venue}</p>

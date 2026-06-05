@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Zap, Check } from "lucide-react";
 import { submitBet } from "@/app/(app)/dashboard/actions";
 import ShareBet from "./ShareBet";
+import TeamFlag from "@/components/ui/TeamFlag";
 
 import { Database } from "@/types/database";
 
@@ -39,9 +40,7 @@ export default function FeaturedMatch({ game, bet: initialBet }: FeaturedMatchPr
       
       <div className="flex items-center justify-between px-2">
         <div className="flex flex-col items-center gap-2">
-          <div className="w-16 h-16 rounded-full border-2 border-white bg-white/20 flex items-center justify-center font-bebas text-3xl shadow-sm">
-            {game.home_team.substring(0, 2).toUpperCase()}
-          </div>
+          <TeamFlag team={game.home_team ?? ''} size={56} className="shadow-sm border-white/20" />
           <span className="font-bold text-sm tracking-wide text-center">{game.home_team}</span>
         </div>
         
@@ -77,9 +76,7 @@ export default function FeaturedMatch({ game, bet: initialBet }: FeaturedMatchPr
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <div className="w-16 h-16 rounded-full border-2 border-white bg-white/20 flex items-center justify-center font-bebas text-3xl shadow-sm">
-            {game.away_team.substring(0, 2).toUpperCase()}
-          </div>
+          <TeamFlag team={game.away_team ?? ''} size={56} className="shadow-sm border-white/20" />
           <span className="font-bold text-sm tracking-wide text-center">{game.away_team}</span>
         </div>
       </div>

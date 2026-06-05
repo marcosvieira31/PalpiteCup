@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { Game, Bet } from '@/types/database'
 import { submitBet } from '@/app/(app)/dashboard/actions'
+import TeamFlag from '@/components/ui/TeamFlag'
 
 interface Props {
   games: Game[]
@@ -124,7 +125,10 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
 
                     <div className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <span className="font-bold text-slate-800 text-sm flex-1 text-right">{game.home_team}</span>
+                        <div className="flex items-center gap-2 flex-1 justify-end">
+                          <span className="font-bold text-slate-800 text-sm text-right line-clamp-1">{game.home_team}</span>
+                          <TeamFlag team={game.home_team ?? ''} size={32} />
+                        </div>
                         <div className="flex items-center gap-2">
                           <input
                             type="number" min="0" max="99"
@@ -142,7 +146,10 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
                             className="w-12 h-12 text-center font-bebas text-2xl border-2 border-slate-200 rounded-xl focus:border-green-500 outline-none"
                           />
                         </div>
-                        <span className="font-bold text-slate-800 text-sm flex-1">{game.away_team}</span>
+                        <div className="flex items-center gap-2 flex-1">
+                          <TeamFlag team={game.away_team ?? ''} size={32} />
+                          <span className="font-bold text-slate-800 text-sm line-clamp-1">{game.away_team}</span>
+                        </div>
                       </div>
 
                       <div className="flex items-center justify-between mt-3">

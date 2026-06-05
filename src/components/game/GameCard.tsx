@@ -2,6 +2,7 @@
 
 import { Database } from "@/types/database";
 import { useRouter } from "next/navigation";
+import TeamFlag from "@/components/ui/TeamFlag";
 
 type Game = Database["public"]["Tables"]["games"]["Row"];
 type Bet = Database["public"]["Tables"]["bets"]["Row"];
@@ -54,9 +55,7 @@ export default function GameCard({ game, bet, onBetChange, onJokerToggle, curren
       <div className="flex items-center justify-between mt-2">
         {/* Home Team */}
         <div className="flex items-center gap-3 w-1/3">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-sm border border-slate-200 shadow-inner">
-            {game.home_team.substring(0, 3).toUpperCase()}
-          </div>
+          <TeamFlag team={game.home_team ?? ''} size={36} className="shadow-sm" />
           <div className="flex flex-col">
             <span className="font-bold text-slate-800 text-sm line-clamp-1">{game.home_team}</span>
           </div>
@@ -114,9 +113,7 @@ export default function GameCard({ game, bet, onBetChange, onJokerToggle, curren
           <div className="flex flex-col items-end">
             <span className="font-bold text-slate-800 text-sm line-clamp-1">{game.away_team}</span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-sm border border-slate-200">
-            {game.away_team.substring(0, 3).toUpperCase()}
-          </div>
+          <TeamFlag team={game.away_team ?? ''} size={36} className="shadow-sm" />
         </div>
       </div>
     </div>
