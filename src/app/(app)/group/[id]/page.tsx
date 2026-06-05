@@ -7,7 +7,7 @@ import GroupChat from '@/components/group/GroupChat'
 export default async function GroupPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
 
-  let { data: group } = await supabase
+  const { data: group } = await supabase
     .from('groups')
     .select('*, group_members(*, users(username, avatar_url, points_total))')
     .eq('id', params.id)
