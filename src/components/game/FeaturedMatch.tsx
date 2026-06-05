@@ -10,8 +10,8 @@ type Game = Database["public"]["Tables"]["games"]["Row"];
 type Bet = Database["public"]["Tables"]["bets"]["Row"];
 
 interface FeaturedMatchProps {
-  game: Game | null;
-  bet: Bet | undefined;
+  game: Game
+  bet: Bet | null
 }
 
 export default function FeaturedMatch({ game, bet: initialBet }: FeaturedMatchProps) {
@@ -20,8 +20,6 @@ export default function FeaturedMatch({ game, bet: initialBet }: FeaturedMatchPr
     away: initialBet?.away_bet ?? 0 
   })
   const [confirmed, setConfirmed] = useState(false);
-
-  if (!game) return null;
 
   const handleConfirm = async () => {
     try {

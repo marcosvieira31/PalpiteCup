@@ -50,7 +50,12 @@ export default async function Dashboard() {
   return (
     <div className="pb-24">
       <Header>
-        <FeaturedMatch />
+        {nextMatch && (
+          <FeaturedMatch
+            game={nextMatch}
+            bet={finalBets.find(b => b.game_id === nextMatch.id) ?? null}
+          />
+        )}
       </Header>
       
       <div className="px-4 mt-8 space-y-6">
