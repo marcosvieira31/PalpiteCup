@@ -86,6 +86,7 @@ export default function GameCard({ game, bet, onBetChange, onJokerToggle, curren
               type="number" 
               min="0"
               max="99"
+              onFocus={e => e.target.select()}
               className="w-10 h-10 bg-[#2b2b2b] rounded-lg flex items-center justify-center text-white font-bebas text-2xl text-center outline-none focus:ring-2 focus:ring-primary disabled:opacity-70 disabled:bg-slate-800" 
               defaultValue={bet?.home_bet ?? ""} 
               placeholder="-"
@@ -97,6 +98,7 @@ export default function GameCard({ game, bet, onBetChange, onJokerToggle, curren
               type="number" 
               min="0"
               max="99"
+              onFocus={e => e.target.select()}
               className="w-10 h-10 bg-[#2b2b2b] rounded-lg flex items-center justify-center text-white font-bebas text-2xl text-center outline-none focus:ring-2 focus:ring-primary disabled:opacity-70 disabled:bg-slate-800" 
               defaultValue={bet?.away_bet ?? ""} 
               placeholder="-"

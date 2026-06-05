@@ -51,6 +51,7 @@ export default function FeaturedMatch({ game, bet: initialBet }: FeaturedMatchPr
               type="number" 
               min="0"
               max="99"
+              onFocus={e => e.target.select()}
               className="w-14 h-12 bg-[#2b2b2b] rounded-xl flex items-center justify-center font-bebas text-3xl shadow-inner text-center border-2 border-yellow-400 text-white appearance-none outline-none focus:ring-2 focus:ring-yellow-400" 
               value={bet.home}
               onChange={e => setBet({ ...bet, home: Math.max(0, parseInt(e.target.value) || 0) })}
@@ -60,6 +61,7 @@ export default function FeaturedMatch({ game, bet: initialBet }: FeaturedMatchPr
               type="number" 
               min="0"
               max="99"
+              onFocus={e => e.target.select()}
               className="w-14 h-12 bg-[#2b2b2b] rounded-xl flex items-center justify-center font-bebas text-3xl shadow-inner text-center border-2 border-yellow-400 text-white appearance-none outline-none focus:ring-2 focus:ring-yellow-400" 
               value={bet.away}
               onChange={e => setBet({ ...bet, away: Math.max(0, parseInt(e.target.value) || 0) })}

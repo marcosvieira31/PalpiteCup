@@ -130,6 +130,7 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
                             type="number" min="0" max="99"
                             value={bet.home}
                             onChange={e => updateBet(game.id, 'home', parseInt(e.target.value) || 0)}
+                            onFocus={e => e.target.select()}
                             className="w-12 h-12 text-center font-bebas text-2xl border-2 border-slate-200 rounded-xl focus:border-green-500 outline-none"
                           />
                           <span className="font-bebas text-xl text-slate-400">×</span>
@@ -137,6 +138,7 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
                             type="number" min="0" max="99"
                             value={bet.away}
                             onChange={e => updateBet(game.id, 'away', parseInt(e.target.value) || 0)}
+                            onFocus={e => e.target.select()}
                             className="w-12 h-12 text-center font-bebas text-2xl border-2 border-slate-200 rounded-xl focus:border-green-500 outline-none"
                           />
                         </div>
