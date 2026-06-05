@@ -19,12 +19,12 @@ export default function GameList({ games, bets }: GameListProps) {
     });
   };
 
-  const currentJoker = bets.find(b => b.is_joker)?.game_id;
+  const currentJoker = bets.find(b => b.used_joker)?.game_id;
   const jokerUsed = !!currentJoker;
 
   const handleJokerToggle = (gameId: string) => {
     const bet = bets.find(b => b.game_id === gameId);
-    handleBetChange(gameId, bet?.home_bet || 0, bet?.away_bet || 0, !bet?.is_joker);
+    handleBetChange(gameId, bet?.home_bet || 0, bet?.away_bet || 0, !bet?.used_joker);
   };
 
   return (

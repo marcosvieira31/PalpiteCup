@@ -47,7 +47,7 @@ create table public.bets (
   game_id uuid references public.games(id) on delete cascade not null,
   home_bet integer not null,
   away_bet integer not null,
-  is_joker boolean default false,
+  used_joker boolean default false,
   points_earned integer default 0,
   submitted_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique (user_id, game_id)
@@ -189,7 +189,7 @@ begin
 
       -- Joker doubles points
       final_points := base_points;
-      if bet_record.is_joker then
+      if bet_record.used_joker then
         final_points := final_points * 2;
       end if;
 

@@ -22,13 +22,13 @@ export default function GameCard({ game, bet, onBetChange, onJokerToggle, curren
 
   const handleHomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onBetChange && !isStarted) {
-      onBetChange(game.id, Math.max(0, parseInt(e.target.value) || 0), bet?.away_bet || 0, bet?.is_joker || false);
+      onBetChange(game.id, Math.max(0, parseInt(e.target.value) || 0), bet?.away_bet || 0, bet?.used_joker || false);
     }
   };
 
   const handleAwayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onBetChange && !isStarted) {
-      onBetChange(game.id, bet?.home_bet || 0, Math.max(0, parseInt(e.target.value) || 0), bet?.is_joker || false);
+      onBetChange(game.id, bet?.home_bet || 0, Math.max(0, parseInt(e.target.value) || 0), bet?.used_joker || false);
     }
   };
 
@@ -38,7 +38,7 @@ export default function GameCard({ game, bet, onBetChange, onJokerToggle, curren
       className="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-4 flex flex-col relative overflow-hidden group cursor-pointer hover:border-green-400 transition-colors"
     >
       {/* Joker tag */}
-      {bet?.is_joker && (
+      {bet?.used_joker && (
         <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[9px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider z-10">
           Coringa Ativo
         </div>

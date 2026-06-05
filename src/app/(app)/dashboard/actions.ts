@@ -15,7 +15,7 @@ export async function submitBet(gameId: string, home: number, away: number, joke
     game_id: gameId,
     home_bet: home,
     away_bet: away,
-    is_joker: joker
+    used_joker: joker
   }, { onConflict: 'user_id,game_id' })
 
   if (error) {
