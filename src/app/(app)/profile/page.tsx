@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import { LogOut, Settings, HelpCircle, ChevronRight } from "lucide-react";
 
 export default function Perfil() {
