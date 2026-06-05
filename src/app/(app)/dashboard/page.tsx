@@ -22,9 +22,19 @@ export default async function Dashboard() {
   if (authError || !user) {
     redirect('/login')
   }
-  const numericGameIds = (games ?? [])
-    .map(g => g.id)
-    .filter(id => typeof id === 'number')
+  const { data: nextMatches } = await supabase
+    .from('games')
+    .select('*')
+    .gte('kickoff_at', new Date().toISOString())
+    .order('kickoff_at')
+    .limit(1)
+
+  const nextMatch = nextMatches?.[0] || null
+
+  const gameIdsToFetch = new Set((games ?? []).map(g => g.id))
+  if (nextMatch) gameIdsToFetch.add(nextMatch.id)
+
+  const numericGameIds = Array.from(gameIdsToFetch).filter(id => typeof id === 'number')
 
   const { data: bets } = numericGameIds.length > 0
     ? await supabase
@@ -33,38 +43,9 @@ export default async function Dashboard() {
         .eq('user_id', user?.id || '')
         .in('game_id', numericGameIds)
     : { data: [] }
-  let finalGames = games || []
-  const finalBets = bets || []
 
-  // Mock data if database is empty for visual testing
-  if (finalGames.length === 0) {
-    finalGames = [
-      {
-        id: "mock-1",
-        home_team: "Espanha",
-        away_team: "Alemanha",
-        kickoff_at: new Date(new Date().setHours(16, 0, 0, 0)).toISOString(),
-        status: "pending",
-        home_score: 0,
-        away_score: 0,
-        api_football_id: null,
-        round_id: 1,
-        created_at: new Date().toISOString()
-      },
-      {
-        id: "mock-2",
-        home_team: "França",
-        away_team: "Inglaterra",
-        kickoff_at: new Date(new Date().setHours(20, 0, 0, 0)).toISOString(),
-        status: "pending",
-        home_score: 0,
-        away_score: 0,
-        api_football_id: null,
-        round_id: 1,
-        created_at: new Date().toISOString()
-      }
-    ]
-  }
+  const finalGames = games || []
+  const finalBets = bets || []
 
   return (
     <div className="pb-24">

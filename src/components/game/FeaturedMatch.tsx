@@ -4,13 +4,28 @@ import { Zap, Check } from "lucide-react";
 import { submitBet } from "@/app/(app)/dashboard/actions";
 import ShareBet from "./ShareBet";
 
-export default function FeaturedMatch() {
-  const [bet, setBet] = useState<{ home: number; away: number }>({ home: 2, away: 1 })
+import { Database } from "@/types/database";
+
+type Game = Database["public"]["Tables"]["games"]["Row"];
+type Bet = Database["public"]["Tables"]["bets"]["Row"];
+
+interface FeaturedMatchProps {
+  game: Game | null;
+  bet: Bet | undefined;
+}
+
+export default function FeaturedMatch({ game, bet: initialBet }: FeaturedMatchProps) {
+  const [bet, setBet] = useState<{ home: number; away: number }>({ 
+    home: initialBet?.home_bet ?? 0, 
+    away: initialBet?.away_bet ?? 0 
+  })
   const [confirmed, setConfirmed] = useState(false);
+
+  if (!game) return null;
 
   const handleConfirm = async () => {
     try {
-      await submitBet('mock-featured', bet.home, bet.away, false);
+      await submitBet(game.id.toString(), bet.home, bet.away, false);
       setConfirmed(true);
       setTimeout(() => setConfirmed(false), 2000);
     } catch (error) {
@@ -21,13 +36,15 @@ export default function FeaturedMatch() {
   return (
     <div className="border border-white/30 rounded-3xl p-5 bg-white/10 backdrop-blur-sm text-white shadow-lg mt-6">
       <p className="text-[10px] text-center font-bold tracking-widest uppercase mb-5 opacity-90 flex items-center justify-center gap-1">
-        <span>🏆</span> COPA DO MUNDO • FASE DE GRUPOS
+        <span>🏆</span> COPA DO MUNDO • {game.group_stage?.toUpperCase() || 'FASE DE GRUPOS'}
       </p>
       
       <div className="flex items-center justify-between px-2">
         <div className="flex flex-col items-center gap-2">
-          <div className="w-16 h-16 rounded-full border-2 border-white bg-white/20 flex items-center justify-center font-bebas text-3xl shadow-sm">BR</div>
-          <span className="font-bold text-sm tracking-wide">Brasil</span>
+          <div className="w-16 h-16 rounded-full border-2 border-white bg-white/20 flex items-center justify-center font-bebas text-3xl shadow-sm">
+            {game.home_team.substring(0, 2).toUpperCase()}
+          </div>
+          <span className="font-bold text-sm tracking-wide text-center">{game.home_team}</span>
         </div>
         
         <div className="flex flex-col items-center">
@@ -50,14 +67,20 @@ export default function FeaturedMatch() {
               onChange={e => setBet({ ...bet, away: Math.max(0, parseInt(e.target.value) || 0) })}
             />
           </div>
-          <div className="mt-4 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full w-max flex items-center gap-1.5 shadow-sm">
-            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" /> AO VIVO • 45+2&apos;
+          <div className="mt-4 bg-slate-900/40 text-white text-[10px] font-bold px-3 py-1 rounded-full w-max flex items-center gap-1.5 shadow-sm">
+            {game.status === 'live' ? (
+              <><div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" /> AO VIVO</>
+            ) : (
+              <>{new Date(game.kickoff_at).toLocaleDateString('pt-BR')} • {new Date(game.kickoff_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</>
+            )}
           </div>
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <div className="w-16 h-16 rounded-full border-2 border-white bg-white/20 flex items-center justify-center font-bebas text-3xl shadow-sm">AR</div>
-          <span className="font-bold text-sm tracking-wide">Argentina</span>
+          <div className="w-16 h-16 rounded-full border-2 border-white bg-white/20 flex items-center justify-center font-bebas text-3xl shadow-sm">
+            {game.away_team.substring(0, 2).toUpperCase()}
+          </div>
+          <span className="font-bold text-sm tracking-wide text-center">{game.away_team}</span>
         </div>
       </div>
       
@@ -78,7 +101,7 @@ export default function FeaturedMatch() {
 
       {confirmed && (
         <ShareBet 
-          game={{ home_team: 'Brasil', away_team: 'Argentina' }} 
+          game={game} 
           homeBet={bet.home} 
           awayBet={bet.away} 
         />

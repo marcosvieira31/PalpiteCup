@@ -30,9 +30,9 @@ export default function GameList({ games, bets }: GameListProps) {
   return (
     <div className="space-y-4 pb-24">
       {games.length === 0 ? (
-        <div className="text-center text-slate-500 py-8 text-sm">
-          Nenhum jogo programado para hoje.
-        </div>
+        <p className="text-center text-slate-400 py-8">
+          Nenhum jogo hoje. A Copa começa em 11 de junho! ⚽
+        </p>
       ) : (
         games.map((game) => (
           <GameCard 
