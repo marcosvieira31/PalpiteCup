@@ -1,5 +1,6 @@
 import Header from "@/components/layout/Header";
-import { LogOut, Settings, HelpCircle, ChevronRight } from "lucide-react";
+import { Settings, HelpCircle, ChevronRight } from "lucide-react";
+import LogoutButton from "@/components/profile/LogoutButton";
 
 export default function Perfil() {
   return (
@@ -35,13 +36,10 @@ export default function Perfil() {
               </div>
               <ChevronRight className="text-gray-300" size={20} />
             </button>
-            <button className="w-full flex items-center justify-between p-4 hover:bg-red-50 transition-colors group">
-              <div className="flex items-center gap-3">
-                <LogOut className="text-red-400 group-hover:text-red-500" size={20} />
-                <span className="font-medium text-red-500 text-sm">Sair da Conta</span>
-              </div>
-            </button>
+          <div className="p-4">
+            <LogoutButton />
           </div>
+        </div>
         </section>
 
       </div>
