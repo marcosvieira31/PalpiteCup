@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Users, Trophy, User } from "lucide-react";
+import { Home, Trophy, User, Globe } from "lucide-react";
 import { clsx } from "clsx";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
@@ -32,9 +32,9 @@ export default function BottomNav() {
             <Home size={24} strokeWidth={pathname === "/dashboard" ? 2.5 : 2} />
             <span className="text-[10px] font-bold uppercase tracking-wider">Home</span>
           </Link>
-          <Link href="/groups" className={clsx("flex flex-col items-center justify-center space-y-1 transition-colors", pathname?.startsWith("/groups") ? "text-primary" : "text-slate-400 hover:text-slate-600")}>
-            <Users size={24} strokeWidth={pathname?.startsWith("/groups") ? 2.5 : 2} />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Grupos</span>
+          <Link href="/copa" className={clsx("flex flex-col items-center justify-center space-y-1 transition-colors", pathname?.startsWith("/copa") ? "text-primary" : "text-slate-400 hover:text-slate-600")}>
+            <Globe size={24} strokeWidth={pathname?.startsWith("/copa") ? 2.5 : 2} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Copa</span>
           </Link>
         </div>
 
