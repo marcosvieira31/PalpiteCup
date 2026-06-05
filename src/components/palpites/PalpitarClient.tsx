@@ -55,6 +55,15 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
 
   const pending = games.filter(g => !existingBets.find(b => b.game_id === g.id))
 
+  const gamesByDate = games.reduce((acc, game) => {
+    const date = new Date(game.kickoff_at).toLocaleDateString('pt-BR', {
+      weekday: 'long', day: '2-digit', month: 'long'
+    })
+    if (!acc[date]) acc[date] = []
+    acc[date].push(game)
+    return acc
+  }, {} as Record<string, Game[]>)
+
   return (
     <div className="pb-24">
       <div className="bg-blue-900 px-4 pt-6 pb-6 sticky top-0 z-10"
@@ -73,7 +82,7 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
         </p>
       </div>
 
-      <div className="px-4 mt-4 space-y-4">
+      <div className="px-4 mt-4">
         {games.length === 0 && (
           <div className="text-center py-12">
             <p className="text-4xl mb-3">⚽</p>
@@ -82,86 +91,94 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
           </div>
         )}
 
-        {games.map(game => {
-          const bet = bets[String(game.id)] ?? { home: 0, away: 0, joker: false }
-          const isSaving = saving[String(game.id)]
-          const isSaved = saved[String(game.id)]
-          const hasExisting = existingBets.find(b => b.game_id === game.id)
-          const kickoff = new Date(game.kickoff_at)
-          const diffHours = (kickoff.getTime() - Date.now()) / 1000 / 60 / 60
-          const isUrgent = diffHours < 2
+        {Object.entries(gamesByDate).map(([date, dateGames]) => (
+          <div key={date}>
+            <h3 className="font-bebas text-base tracking-widest text-slate-500 uppercase mt-6 mb-3">
+              📅 {date}
+            </h3>
+            <div className="space-y-4">
+              {dateGames.map(game => {
+                const bet = bets[String(game.id)] ?? { home: 0, away: 0, joker: false }
+                const isSaving = saving[String(game.id)]
+                const isSaved = saved[String(game.id)]
+                const hasExisting = existingBets.find(b => b.game_id === game.id)
+                const kickoff = new Date(game.kickoff_at)
+                const diffHours = (kickoff.getTime() - Date.now()) / 1000 / 60 / 60
+                const isUrgent = diffHours < 2
 
-          return (
-            <div key={game.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden ${
-              isUrgent ? 'border-red-200' : 'border-slate-200'
-            }`}>
-              <div className={`px-4 py-2 flex justify-between items-center ${
-                isUrgent ? 'bg-red-50' : 'bg-slate-50'
-              }`}>
-                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
-                  {game.group_stage ?? 'Mata-Mata'}
-                </span>
-                <span className={`text-[10px] font-bold ${isUrgent ? 'text-red-500' : 'text-slate-400'}`}>
-                  {isUrgent ? '🔴 ' : '🕐 '}
-                  {kickoff.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} às{' '}
-                  {kickoff.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
+                return (
+                  <div key={game.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden ${
+                    isUrgent ? 'border-red-200' : 'border-slate-200'
+                  }`}>
+                    <div className={`px-4 py-2 flex justify-between items-center ${
+                      isUrgent ? 'bg-red-50' : 'bg-slate-50'
+                    }`}>
+                      <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+                        {game.group_stage ?? 'Mata-Mata'}
+                      </span>
+                      <span className={`text-[10px] font-bold ${isUrgent ? 'text-red-500' : 'text-slate-400'}`}>
+                        {isUrgent ? '🔴 ' : '🕐 '}
+                        {kickoff.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
 
-              <div className="px-4 py-4">
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-slate-800 text-sm flex-1 text-right">{game.home_team}</span>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number" min="0" max="99"
-                      value={bet.home}
-                      onChange={e => updateBet(game.id, 'home', parseInt(e.target.value) || 0)}
-                      className="w-12 h-12 text-center font-bebas text-2xl border-2 border-slate-200 rounded-xl focus:border-green-500 outline-none"
-                    />
-                    <span className="font-bebas text-xl text-slate-400">×</span>
-                    <input
-                      type="number" min="0" max="99"
-                      value={bet.away}
-                      onChange={e => updateBet(game.id, 'away', parseInt(e.target.value) || 0)}
-                      className="w-12 h-12 text-center font-bebas text-2xl border-2 border-slate-200 rounded-xl focus:border-green-500 outline-none"
-                    />
+                    <div className="px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <span className="font-bold text-slate-800 text-sm flex-1 text-right">{game.home_team}</span>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number" min="0" max="99"
+                            value={bet.home}
+                            onChange={e => updateBet(game.id, 'home', parseInt(e.target.value) || 0)}
+                            className="w-12 h-12 text-center font-bebas text-2xl border-2 border-slate-200 rounded-xl focus:border-green-500 outline-none"
+                          />
+                          <span className="font-bebas text-xl text-slate-400">×</span>
+                          <input
+                            type="number" min="0" max="99"
+                            value={bet.away}
+                            onChange={e => updateBet(game.id, 'away', parseInt(e.target.value) || 0)}
+                            className="w-12 h-12 text-center font-bebas text-2xl border-2 border-slate-200 rounded-xl focus:border-green-500 outline-none"
+                          />
+                        </div>
+                        <span className="font-bold text-slate-800 text-sm flex-1">{game.away_team}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-3">
+                        <button
+                          onClick={() => toggleJoker(game.id)}
+                          disabled={jokerUsed && !bet.joker}
+                          className={`text-xs font-bebas tracking-wider px-3 py-1.5 rounded-full transition-colors ${
+                            bet.joker
+                              ? 'bg-yellow-400 text-blue-900'
+                              : jokerUsed
+                              ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                              : 'bg-slate-100 text-slate-500 hover:bg-yellow-100'
+                          }`}
+                        >
+                          ⚡ CORINGA {bet.joker ? '(ATIVO)' : ''}
+                        </button>
+
+                        <button
+                          onClick={() => handleSubmit(game.id)}
+                          disabled={isSaving}
+                          className={`font-bebas tracking-wider px-5 py-2 rounded-xl text-sm transition-colors ${
+                            isSaved
+                              ? 'bg-green-500 text-white'
+                              : hasExisting
+                              ? 'bg-blue-900 text-yellow-400'
+                              : 'bg-green-500 text-white'
+                          }`}
+                        >
+                          {isSaving ? 'SALVANDO...' : isSaved ? '✅ SALVO!' : hasExisting ? '✏️ EDITAR' : 'PALPITAR'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <span className="font-bold text-slate-800 text-sm flex-1">{game.away_team}</span>
-                </div>
-
-                <div className="flex items-center justify-between mt-3">
-                  <button
-                    onClick={() => toggleJoker(game.id)}
-                    disabled={jokerUsed && !bet.joker}
-                    className={`text-xs font-bebas tracking-wider px-3 py-1.5 rounded-full transition-colors ${
-                      bet.joker
-                        ? 'bg-yellow-400 text-blue-900'
-                        : jokerUsed
-                        ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                        : 'bg-slate-100 text-slate-500 hover:bg-yellow-100'
-                    }`}
-                  >
-                    ⚡ CORINGA {bet.joker ? '(ATIVO)' : ''}
-                  </button>
-
-                  <button
-                    onClick={() => handleSubmit(game.id)}
-                    disabled={isSaving}
-                    className={`font-bebas tracking-wider px-5 py-2 rounded-xl text-sm transition-colors ${
-                      isSaved
-                        ? 'bg-green-500 text-white'
-                        : hasExisting
-                        ? 'bg-blue-900 text-yellow-400'
-                        : 'bg-green-500 text-white'
-                    }`}
-                  >
-                    {isSaving ? 'SALVANDO...' : isSaved ? '✅ SALVO!' : hasExisting ? '✏️ EDITAR' : 'PALPITAR'}
-                  </button>
-                </div>
-              </div>
+                )
+              })}
             </div>
-          )
-        })}
+          </div>
+        ))}
       </div>
     </div>
   )
