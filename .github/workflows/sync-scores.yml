@@ -1,0 +1,15 @@
+name: Sync Scores
+
+on:
+  schedule:
+    - cron: '* * * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call sync endpoint
+        run: |
+          curl -s -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+          https://palpitecup.vercel.app/api/cron/sync-scores
