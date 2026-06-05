@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
       synced: matches.length
     })
 
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ error: 'Sync failed', details: String(error) }, { status: 500 })
   }
 }
