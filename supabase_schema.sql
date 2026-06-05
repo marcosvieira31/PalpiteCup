@@ -276,3 +276,121 @@ create policy "Usuário cria próprio bracket"
 
 create policy "Usuário edita próprio bracket se não travado"
   on public.bracket_predictions for update using (auth.uid() = user_id and locked = false);
+
+-- FUNÇÃO PARA CALCULAR STANDINGS E TRIGGER
+create or replace function recalculate_group_standings()
+returns trigger as $$
+declare
+  affected_group text;
+  team_record record;
+  pos integer := 1;
+begin
+  -- Só recalcula se o jogo virou 'finished' e tem grupo definido
+  if NEW.status = 'finished' and NEW.group_stage is not null then
+    affected_group := NEW.group_stage;
+
+    -- Deleta standings antigas do grupo
+    delete from group_standings where group_name = affected_group;
+
+    -- Insere standings recalculadas, ordenadas por critérios FIFA
+    for team_record in
+      select
+        team_name,
+        count(*) as played,
+        sum(wins) as wins,
+        sum(draws) as draws,
+        sum(losses) as losses,
+        sum(gf) as goals_for,
+        sum(ga) as goals_against,
+        sum(gf) - sum(ga) as goal_diff,
+        sum(pts) as points
+      from (
+        -- Times jogando em casa
+        select
+          home_team as team_name,
+          case when home_score > away_score then 1 else 0 end as wins,
+          case when home_score = away_score then 1 else 0 end as draws,
+          case when home_score < away_score then 1 else 0 end as losses,
+          home_score as gf,
+          away_score as ga,
+          case
+            when home_score > away_score then 3
+            when home_score = away_score then 1
+            else 0
+          end as pts
+        from games
+        where group_stage = affected_group
+          and status = 'finished'
+          and home_score is not null
+          and away_score is not null
+
+        union all
+
+        -- Times jogando fora
+        select
+          away_team as team_name,
+          case when away_score > home_score then 1 else 0 end as wins,
+          case when away_score = home_score then 1 else 0 end as draws,
+          case when away_score < home_score then 1 else 0 end as losses,
+          away_score as gf,
+          home_score as ga,
+          case
+            when away_score > home_score then 3
+            when away_score = home_score then 1
+            else 0
+          end as pts
+        from games
+        where group_stage = affected_group
+          and status = 'finished'
+          and home_score is not null
+          and away_score is not null
+      ) as all_matches
+      group by team_name
+      order by points desc, goal_diff desc, goals_for desc, team_name asc
+    loop
+      insert into group_standings (
+        group_name, team, played, wins, draws, losses,
+        goals_for, goals_against, goal_diff, points, position, updated_at
+      ) values (
+        affected_group,
+        team_record.team_name,
+        team_record.played,
+        team_record.wins,
+        team_record.draws,
+        team_record.losses,
+        team_record.goals_for,
+        team_record.goals_against,
+        team_record.goal_diff,
+        team_record.points,
+        pos,
+        now()
+      );
+      pos := pos + 1;
+    end loop;
+  end if;
+
+  return NEW;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trigger_recalculate_standings on games;
+
+create trigger trigger_recalculate_standings
+after update of status on games
+for each row
+execute function recalculate_group_standings();
+
+-- Insere todos os 48 times do banco de games com posição inicial
+insert into group_standings (group_name, team, position, updated_at)
+select
+  group_stage as group_name,
+  team,
+  row_number() over (partition by group_stage order by team) as position,
+  now()
+from (
+  select group_stage, home_team as team from games where group_stage is not null
+  union
+  select group_stage, away_team as team from games where group_stage is not null
+) as teams
+where group_stage is not null
+on conflict (group_name, team) do nothing;

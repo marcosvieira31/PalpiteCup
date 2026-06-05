@@ -19,8 +19,3 @@ export async function fetchMatchById(matchId: number) {
   const res = await fetch(`${BASE_URL}/matches/${matchId}`, { headers })
   return res.json()
 }
-
-export async function fetchStandings() {
-  const res = await fetch(`${BASE_URL}/standings`, { headers })
-  return res.json()
-}

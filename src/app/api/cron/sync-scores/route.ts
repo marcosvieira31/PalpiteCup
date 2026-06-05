@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { fetchAllMatches, fetchMatchesByStatus, fetchStandings } from '@/lib/wc2026/client'
+import { fetchAllMatches, fetchMatchesByStatus } from '@/lib/wc2026/client'
 import { translateTeam, translatePhase } from '@/lib/wc2026/translations'
 
 const supabase = createClient(
@@ -38,32 +38,6 @@ export async function GET(req: NextRequest) {
         group_stage: m.group_stage ? translatePhase(m.group_stage) : (m.group_name ? `Grupo ${m.group_name}` : null),
         venue: m.venue || m.stadium
       }, { onConflict: 'api_football_id' })
-    }
-
-    // Sync Standings
-    const standingsData = await fetchStandings()
-
-    if (standingsData && Array.isArray(standingsData)) {
-      for (const group of standingsData) {
-        let position = 1
-        for (const team of group.standings) {
-          await supabase.from('group_standings').upsert({
-            group_name: group.group_name,
-            team: translateTeam(team.team),
-            played: team.played,
-            wins: team.wins,
-            draws: team.draws,
-            losses: team.losses,
-            goals_for: team.goals_for,
-            goals_against: team.goals_against,
-            goal_diff: team.goal_diff,
-            points: team.points,
-            position,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'group_name,team' })
-          position++
-        }
-      }
     }
 
     return NextResponse.json({
