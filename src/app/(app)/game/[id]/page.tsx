@@ -4,7 +4,7 @@ import MatchHeader from '@/components/game/MatchHeader'
 import MatchTimeline from '@/components/game/MatchTimeline'
 
 export default async function GamePage({ params }: { params: { id: string } }) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   let { data: game } = await supabase
     .from('games')

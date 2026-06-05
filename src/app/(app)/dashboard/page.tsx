@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation'
 export const revalidate = 0; // Ensures fresh data load on request
 
 export default async function Dashboard() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const today = new Date().toISOString().split('T')[0]
 
   const { data: games } = await supabase

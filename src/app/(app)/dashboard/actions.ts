@@ -2,7 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 
 export async function submitBet(gameId: string, home: number, away: number, joker: boolean) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {

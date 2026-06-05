@@ -5,7 +5,7 @@ import RankingList from '@/components/group/RankingList'
 import GroupChat from '@/components/group/GroupChat'
 
 export default async function GroupPage({ params }: { params: { id: string } }) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   let { data: group } = await supabase
     .from('groups')
