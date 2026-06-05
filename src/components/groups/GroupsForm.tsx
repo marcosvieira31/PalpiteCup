@@ -10,7 +10,6 @@ export default function GroupsForm() {
 
   const createGroup = async () => {
     const { data: { user } } = await supabase.auth.getUser()
-    console.log('USER:', user?.id)
 
     const code = Math.random().toString(36).substring(2, 8).toUpperCase()
 
@@ -19,9 +18,6 @@ export default function GroupsForm() {
       .insert({ name: groupName, invite_code: code, owner_id: user?.id })
       .select()
       .single()
-
-    console.log('GROUP:', group)
-    console.log('ERROR:', JSON.stringify(error))
 
     if (error || !group) {
       return alert(`Erro: ${error?.message} | Code: ${error?.code} | Details: ${error?.details}`)

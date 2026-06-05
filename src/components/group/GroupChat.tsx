@@ -51,9 +51,7 @@ export default function GroupChat({ groupId }: { groupId: string }) {
           .single()
         if (data) setMessages(prev => [...prev, data as unknown as Message])
       })
-      .subscribe((status) => {
-        console.log('REALTIME STATUS:', status)
-      });
+      .subscribe();
 
     return () => { supabase.removeChannel(channel) };
   }, [groupId]);
