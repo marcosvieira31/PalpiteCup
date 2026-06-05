@@ -6,18 +6,10 @@ import { Database } from '@/types/database'
 
 type MatchEvent = Database['public']['Tables']['match_events']['Row'];
 
-const mockEvents: MatchEvent[] = [
-  { id: '1', game_id: 'mock', type: 'goal', minute: 45, team: 'Brasil', player_name: 'Vinicius Jr.', assist_name: 'Rodrygo', player_out: null, created_at: '' },
-  { id: '2', game_id: 'mock', type: 'yellow_card', minute: 34, team: 'Argentina', player_name: 'De Paul', assist_name: null, player_out: null, created_at: '' },
-  { id: '3', game_id: 'mock', type: 'substitution', minute: 25, team: 'Brasil', player_name: 'Endrick', player_out: 'Richarlison', assist_name: null, created_at: '' },
-  { id: '4', game_id: 'mock', type: 'goal', minute: 12, team: 'Argentina', player_name: 'Messi', assist_name: 'Di María', player_out: null, created_at: '' },
-]
-
 export default function MatchTimeline({ gameId }: { gameId: string }) {
-  const [events, setEvents] = useState<MatchEvent[]>(mockEvents)
+  const [events, setEvents] = useState<MatchEvent[]>([])
 
   useEffect(() => {
-    // Fetch initial
     supabase
       .from('match_events')
       .select('*')
@@ -53,7 +45,7 @@ export default function MatchTimeline({ gameId }: { gameId: string }) {
         ))}
         {events.length === 0 && (
            <div className="text-center text-slate-400 bg-white p-4 rounded-2xl shadow-sm z-10 w-3/4 mx-auto border border-slate-200 mt-10">
-             Nenhum evento registrado.
+             Eventos da partida aparecerão aqui ao vivo. ⚽
            </div>
         )}
       </div>

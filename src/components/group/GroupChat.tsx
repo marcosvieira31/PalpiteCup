@@ -21,23 +21,10 @@ export default function GroupChat({ groupId }: { groupId: string }) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Mock messages when no DB connection is present
-  const [useMock, setUseMock] = useState(false);
-
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setCurrentUserId(data.user?.id || '2'); // fallback to mock user '2' if not logged in
+      setCurrentUserId(data.user?.id || null);
     });
-
-    if (groupId.startsWith('mock')) {
-      setUseMock(true);
-      setMessages([
-        { id: '1', user_id: '2', users: { username: 'Carioca10' }, content: 'Brasil vai golear hoje!' },
-        { id: '2', user_id: '1', users: { username: 'Renatinho' }, content: 'Tô na liderança e não saio 😎' },
-        { id: '3', user_id: '3', users: { username: 'ProfetaFC' }, content: 'Meu coringa tá guardado pro jogo certo' },
-      ]);
-      return;
-    }
 
     supabase
       .from('messages')
@@ -54,92 +41,90 @@ export default function GroupChat({ groupId }: { groupId: string }) {
         table: 'messages',
         filter: `group_id=eq.${groupId}`
       }, async (payload) => {
-        // Fetch user details for the new message
         const { data: userData } = await supabase.from('users').select('username, avatar_url').eq('id', payload.new.user_id).single();
         const newMessage = {
           ...payload.new,
           users: userData
-        };
-        setMessages(prev => [...prev, newMessage as Message])
+        } as Message;
+        setMessages(prev => [...prev, newMessage]);
       })
-      .subscribe()
+      .subscribe();
 
-    return () => { supabase.removeChannel(channel) }
-  }, [groupId])
+    return () => { supabase.removeChannel(channel) };
+  }, [groupId]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || !currentUserId) return;
 
-    if (useMock) {
-      setMessages(prev => [...prev, {
-        id: Math.random().toString(),
-        user_id: currentUserId || '2',
-        users: { username: 'Você' },
-        content: input.trim()
-      }]);
-      setInput('');
-      return;
-    }
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const content = input.trim();
+    setInput("");
 
     await supabase.from('messages').insert({
       group_id: groupId,
-      user_id: user.id,
-      content: input.trim()
+      user_id: currentUserId,
+      content
     });
-    setInput('');
-  }
+  };
 
   return (
-    <div className="px-4 pt-8 pb-32">
-      <h2 className="font-bebas text-2xl tracking-widest text-slate-800 mb-4 flex items-center gap-2">
-        <span className="text-xl">💬</span> RESENHA
-      </h2>
-      
-      <div className="flex flex-col gap-4 mb-4">
-        {messages.map(msg => {
-          const isMe = msg.user_id === currentUserId;
-          return (
-            <div key={msg.id} className={clsx("flex w-full", isMe ? "justify-end" : "justify-start")}>
-              <div className={clsx("max-w-[80%] flex flex-col", isMe ? "items-end" : "items-start")}>
-                {!isMe && <span className="text-[10px] font-bold text-slate-400 ml-2 mb-1">{msg.users?.username}</span>}
-                <div 
-                  className={clsx(
-                    "px-4 py-3 rounded-2xl shadow-sm text-sm",
-                    isMe ? "bg-green-100 text-green-900 rounded-br-sm" : "bg-white border border-slate-100 text-slate-700 rounded-bl-sm"
-                  )}
-                >
+    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 mt-6 overflow-hidden flex flex-col h-[500px]">
+      <div className="bg-slate-50 px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+        <h3 className="font-bebas text-xl text-slate-800 tracking-wide flex items-center gap-2">
+          <span>💬</span> RESENHA DO GRUPO
+        </h3>
+        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{messages.length} msgs</span>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
+        {messages.length === 0 ? (
+          <div className="h-full flex items-center justify-center">
+            <p className="text-slate-400 text-sm text-center">Seja o primeiro a mandar a resenha! 💬</p>
+          </div>
+        ) : (
+          messages.map((msg) => {
+            const isMe = msg.user_id === currentUserId;
+            return (
+              <div key={msg.id} className={clsx("flex flex-col", isMe ? "items-end" : "items-start")}>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">
+                  {isMe ? 'Você' : msg.users?.username}
+                </span>
+                <div className={clsx(
+                  "px-4 py-2 rounded-2xl max-w-[85%] text-sm shadow-sm",
+                  isMe 
+                    ? "bg-blue-600 text-white rounded-tr-sm" 
+                    : "bg-white text-slate-700 border border-slate-100 rounded-tl-sm"
+                )}>
                   {msg.content}
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
         <div ref={bottomRef} />
       </div>
 
-      <div className="fixed bottom-[80px] left-0 right-0 mx-auto max-w-[390px] px-4 bg-slate-50/90 backdrop-blur-md py-3 border-t border-slate-200">
-        <div className="flex gap-2">
+      <div className="p-3 bg-white border-t border-slate-100">
+        <form onSubmit={handleSend} className="relative flex items-center">
           <input
+            type="text"
             value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && sendMessage()}
-            placeholder="Manda a resenha..."
-            className="flex-1 rounded-full border border-slate-300 px-4 py-3 text-sm outline-none focus:border-green-500 shadow-sm"
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Mande uma mensagem..."
+            className="w-full bg-slate-100 text-slate-800 text-sm rounded-full py-3 pl-5 pr-12 outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all border border-transparent focus:border-blue-500/30 placeholder:text-slate-400"
           />
-          <button
-            onClick={sendMessage}
-            className="bg-[#1e3a8a] text-yellow-400 w-12 h-12 rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform"
+          <button 
+            type="submit"
+            disabled={!input.trim()}
+            className="absolute right-2 w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors"
           >
-            <Send size={18} />
+            <Send size={14} className="ml-[-2px]" />
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
