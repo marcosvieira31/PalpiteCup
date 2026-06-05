@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Users, Trophy, User, Circle } from "lucide-react";
+import { Home, Users, Trophy, User } from "lucide-react";
 import { clsx } from "clsx";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";

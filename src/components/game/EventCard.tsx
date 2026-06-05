@@ -1,19 +1,18 @@
-import clsx from "clsx";
+
 
 export interface EventCardProps {
   id?: string | number;
   type: 'goal' | 'yellow_card' | 'red_card' | 'substitution';
   minute: number;
-  team: string;
   player_name?: string | null;
   assist_name?: string | null;
   player_out?: string | null;
 }
 
-export default function EventCard({ type, minute, team, player_name, assist_name, player_out }: EventCardProps) {
+export default function EventCard({ type, minute, player_name, assist_name, player_out }: EventCardProps) {
   return (
     <div className="flex gap-4 items-center bg-white border border-slate-200 p-4 rounded-2xl shadow-sm z-10 w-[85%] mx-auto relative group hover:scale-[1.02] transition-transform">
-      <div className="font-bebas text-2xl text-slate-400 w-10 flex-shrink-0 text-right">{minute}'</div>
+      <div className="font-bebas text-2xl text-slate-400 w-10 flex-shrink-0 text-right">{minute}&apos;</div>
       
       <div className="flex-1">
         {type === 'goal' && (

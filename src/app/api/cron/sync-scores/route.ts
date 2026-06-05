@@ -47,6 +47,7 @@ export async function GET(req: NextRequest) {
     })
 
   } catch (error) {
+    console.error("Cron sync error:", error)
     return NextResponse.json({ error: 'Sync failed' }, { status: 500 })
   }
 }

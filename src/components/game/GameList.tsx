@@ -1,6 +1,5 @@
 "use client";
 
-import { useTransition } from "react";
 import GameCard from "./GameCard";
 import { submitBet } from "@/app/(app)/dashboard/actions";
 import { Database } from "@/types/database";
@@ -14,15 +13,9 @@ interface GameListProps {
 }
 
 export default function GameList({ games, bets }: GameListProps) {
-  const [isPending, startTransition] = useTransition();
-
   const handleBetChange = (gameId: string, home: number, away: number, joker: boolean) => {
-    startTransition(async () => {
-      try {
-        await submitBet(gameId, home, away, joker);
-      } catch (error: any) {
-        alert(error.message);
-      }
+    submitBet(gameId, home, away, joker).catch((error: Error) => {
+      alert(error.message);
     });
   };
 

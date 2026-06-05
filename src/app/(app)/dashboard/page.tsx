@@ -25,7 +25,7 @@ export default async function Dashboard() {
     .in('game_id', games?.map(g => g.id) ?? [])
 
   let finalGames = games || []
-  let finalBets = bets || []
+  const finalBets = bets || []
 
   // Mock data if database is empty for visual testing
   if (finalGames.length === 0) {

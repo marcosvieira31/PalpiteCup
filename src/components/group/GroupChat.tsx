@@ -44,7 +44,7 @@ export default function GroupChat({ groupId }: { groupId: string }) {
       .select('*, users(username, avatar_url)')
       .eq('group_id', groupId)
       .order('created_at')
-      .then(({ data }) => setMessages((data as any) ?? []))
+      .then(({ data }) => setMessages((data as unknown as Message[]) ?? []))
 
     const channel = supabase
       .channel(`chat-${groupId}`)

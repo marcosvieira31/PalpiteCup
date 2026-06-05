@@ -28,7 +28,7 @@ export default function FeaturedMatch() {
             />
           </div>
           <div className="mt-4 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full w-max flex items-center gap-1.5 shadow-sm">
-            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" /> AO VIVO • 45+2'
+            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" /> AO VIVO • 45+2&apos;
           </div>
         </div>
 
