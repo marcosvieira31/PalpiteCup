@@ -27,10 +27,10 @@ export async function GET(req: NextRequest) {
         ? 'live'
         : 'scheduled'
 
-      await supabase.from('games').upsert({
+      const { error } = await supabase.from('games').upsert({
         api_football_id: m.id,
-        home_team: translateTeam(m.home_team),
-        away_team: translateTeam(m.away_team),
+        home_team: translateTeam(m.home_team) || null,
+        away_team: translateTeam(m.away_team) || null,
         home_score: m.home_score ?? null,
         away_score: m.away_score ?? null,
         kickoff_at: m.date || m.kickoff_utc,
@@ -38,6 +38,11 @@ export async function GET(req: NextRequest) {
         group_stage: m.group_stage ? translatePhase(m.group_stage) : (m.group_name ? `Grupo ${m.group_name}` : null),
         venue: m.venue || m.stadium
       }, { onConflict: 'api_football_id' })
+
+      if (error) {
+        console.error('UPSERT ERROR:', error)
+        throw error
+      }
     }
 
     return NextResponse.json({
@@ -46,7 +51,7 @@ export async function GET(req: NextRequest) {
       synced: matches.length
     })
 
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ error: 'Sync failed', details: String(error) }, { status: 500 })
   }
 }

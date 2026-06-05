@@ -13,8 +13,8 @@ create table public.users (
 -- GAMES
 create table public.games (
   id uuid default uuid_generate_v4() primary key,
-  home_team text not null,
-  away_team text not null,
+  home_team text,
+  away_team text,
   kickoff_at timestamp with time zone not null,
   status text default 'pending' check (status in ('pending', 'live', 'finished')),
   home_score integer default 0,
@@ -388,9 +388,22 @@ select
   row_number() over (partition by group_stage order by team) as position,
   now()
 from (
-  select group_stage, home_team as team from games where group_stage is not null
+  select group_stage, home_team as team from games where group_stage is not null and home_team is not null
   union
-  select group_stage, away_team as team from games where group_stage is not null
+  select group_stage, away_team as team from games where group_stage is not null and away_team is not null
 ) as teams
 where group_stage is not null
 on conflict (group_name, team) do nothing;
+
+-- Grants for service_role
+grant select, insert, update, delete on public.games to service_role;
+grant select, insert, update, delete on public.bets to service_role;
+grant select, insert, update, delete on public.users to service_role;
+grant select, insert, update, delete on public.groups to service_role;
+grant select, insert, update, delete on public.group_members to service_role;
+grant select, insert, update, delete on public.messages to service_role;
+grant select, insert, update, delete on public.badges to service_role;
+grant select, insert, update, delete on public.group_standings to service_role;
+grant select, insert, update, delete on public.bracket_predictions to service_role;
+
+grant usage, select on all sequences in schema public to service_role;
