@@ -6,9 +6,10 @@ import { submitBet } from '@/app/(app)/dashboard/actions'
 interface Props {
   games: Game[]
   existingBets: Bet[]
+  roundName: string
 }
 
-export default function PalpitarClient({ games, existingBets }: Props) {
+export default function PalpitarClient({ games, existingBets, roundName }: Props) {
   const [bets, setBets] = useState<Record<string, { home: number; away: number; joker: boolean }>>(
     Object.fromEntries(
       existingBets.map(b => [b.game_id, {
@@ -62,6 +63,9 @@ export default function PalpitarClient({ games, existingBets }: Props) {
           style={{ textShadow: '2px 2px 0 rgba(0,0,0,0.3)' }}>
           PALPITAR
         </h1>
+        <p className="text-yellow-200 text-xs font-bold tracking-widest uppercase mt-1">
+          {roundName}
+        </p>
         <p className="text-blue-200 text-sm mt-1">
           {pending.length > 0
             ? `⚡ ${pending.length} jogo${pending.length > 1 ? 's' : ''} aguardando seu palpite`
