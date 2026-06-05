@@ -126,16 +126,16 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
                     <div className="px-4 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2 flex-1 justify-end">
-                          <span className="font-bold text-slate-800 text-sm text-right line-clamp-1">{game.home_team}</span>
-                          <TeamFlag team={game.home_team ?? ''} size={32} />
+                          <span className="font-bold text-slate-800 text-xs text-right leading-tight">{game.home_team}</span>
+                          <TeamFlag team={game.home_team ?? ''} size={28} />
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 px-2">
                           <input
                             type="number" min="0" max="99"
                             value={bet.home}
                             onChange={e => updateBet(game.id, 'home', parseInt(e.target.value) || 0)}
                             onFocus={e => e.target.select()}
-                            className="w-12 h-12 text-center font-bebas text-2xl border-2 border-slate-200 rounded-xl focus:border-green-500 outline-none"
+                            className="w-10 h-10 text-center font-bebas text-xl border-2 border-slate-200 rounded-xl focus:border-green-500 outline-none"
                           />
                           <span className="font-bebas text-xl text-slate-400">×</span>
                           <input
@@ -143,12 +143,12 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
                             value={bet.away}
                             onChange={e => updateBet(game.id, 'away', parseInt(e.target.value) || 0)}
                             onFocus={e => e.target.select()}
-                            className="w-12 h-12 text-center font-bebas text-2xl border-2 border-slate-200 rounded-xl focus:border-green-500 outline-none"
+                            className="w-10 h-10 text-center font-bebas text-xl border-2 border-slate-200 rounded-xl focus:border-green-500 outline-none"
                           />
                         </div>
                         <div className="flex items-center gap-2 flex-1">
-                          <TeamFlag team={game.away_team ?? ''} size={32} />
-                          <span className="font-bold text-slate-800 text-sm line-clamp-1">{game.away_team}</span>
+                          <TeamFlag team={game.away_team ?? ''} size={28} />
+                          <span className="font-bold text-slate-800 text-xs leading-tight">{game.away_team}</span>
                         </div>
                       </div>
 

@@ -92,8 +92,8 @@ export default function PartidaTab() {
               </div>
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-1">
-                  <TeamFlag team={game.home_team ?? ''} size={32} />
-                  <span className="font-bold text-slate-800 text-sm line-clamp-1">{game.home_team ?? 'A definir'}</span>
+                  <TeamFlag team={game.home_team ?? ''} size={28} />
+                  <span className="font-bold text-slate-800 text-xs leading-tight line-clamp-2">{game.home_team ?? 'A definir'}</span>
                 </div>
                 <span className="font-bebas text-xl text-slate-800 px-2 whitespace-nowrap">
                   {game.status !== 'scheduled'
@@ -101,8 +101,8 @@ export default function PartidaTab() {
                     : 'VS'}
                 </span>
                 <div className="flex items-center justify-end gap-2 flex-1">
-                  <span className="font-bold text-slate-800 text-sm text-right line-clamp-1">{game.away_team ?? 'A definir'}</span>
-                  <TeamFlag team={game.away_team ?? ''} size={32} />
+                  <span className="font-bold text-slate-800 text-xs text-right leading-tight line-clamp-2">{game.away_team ?? 'A definir'}</span>
+                  <TeamFlag team={game.away_team ?? ''} size={28} />
                 </div>
               </div>
               {game.venue && (

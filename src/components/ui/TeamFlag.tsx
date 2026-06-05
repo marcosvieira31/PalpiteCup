@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import { getFlagUrl } from '@/lib/flags'
 
 interface Props {
@@ -12,21 +11,18 @@ export default function TeamFlag({ team, size = 40, className = '' }: Props) {
 
   if (!flagUrl) return (
     <div className={`bg-slate-200 rounded-full flex items-center justify-center text-xs font-bold text-slate-500 ${className}`}
-      style={{ width: size, height: size }}>
+      style={{ width: size, height: size, minWidth: size }}>
       {team?.substring(0, 2).toUpperCase()}
     </div>
   )
 
   return (
-    <div className={`rounded-full overflow-hidden border-2 border-white shadow-sm flex-shrink-0 ${className}`}
-      style={{ width: size, height: size }}>
-      <Image
+    <div className={`rounded-full overflow-hidden border border-slate-200 flex-shrink-0 ${className}`}
+      style={{ width: size, height: size, minWidth: size }}>
+      <img
         src={flagUrl}
         alt={team}
-        width={size}
-        height={size}
-        className="w-full h-full object-cover"
-        unoptimized
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
       />
     </div>
   )

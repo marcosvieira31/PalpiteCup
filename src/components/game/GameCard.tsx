@@ -55,9 +55,9 @@ export default function GameCard({ game, bet, onBetChange, onJokerToggle, curren
       <div className="flex items-center justify-between mt-2">
         {/* Home Team */}
         <div className="flex items-center gap-3 w-1/3">
-          <TeamFlag team={game.home_team ?? ''} size={36} className="shadow-sm" />
+          <TeamFlag team={game.home_team ?? ''} size={28} className="shadow-sm" />
           <div className="flex flex-col">
-            <span className="font-bold text-slate-800 text-sm line-clamp-1">{game.home_team}</span>
+            <span className="font-bold text-slate-800 text-xs leading-tight line-clamp-2">{game.home_team}</span>
           </div>
         </div>
         
@@ -111,9 +111,9 @@ export default function GameCard({ game, bet, onBetChange, onJokerToggle, curren
         {/* Away Team */}
         <div className="flex items-center justify-end gap-3 w-1/3">
           <div className="flex flex-col items-end">
-            <span className="font-bold text-slate-800 text-sm line-clamp-1">{game.away_team}</span>
+            <span className="font-bold text-slate-800 text-xs text-right leading-tight line-clamp-2">{game.away_team}</span>
           </div>
-          <TeamFlag team={game.away_team ?? ''} size={36} className="shadow-sm" />
+          <TeamFlag team={game.away_team ?? ''} size={28} className="shadow-sm" />
         </div>
       </div>
     </div>
