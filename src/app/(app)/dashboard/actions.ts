@@ -21,4 +21,8 @@ export async function submitBet(gameId: string, home: number, away: number, joke
   if (error) {
     throw new Error(error.message);
   }
+
+  // Call check badges
+  const { checkBadges } = await import('@/lib/badges/check-badges');
+  await checkBadges(user.id);
 }

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Zap, Check } from "lucide-react";
 import { submitBet } from "@/app/(app)/dashboard/actions";
+import ShareBet from "./ShareBet";
 
 export default function FeaturedMatch() {
   const [homeBet, setHomeBet] = useState(2);
@@ -71,6 +72,14 @@ export default function FeaturedMatch() {
           </>
         )}
       </button>
+
+      {confirmed && (
+        <ShareBet 
+          game={{ home_team: 'Brasil', away_team: 'Argentina' }} 
+          homeBet={homeBet} 
+          awayBet={awayBet} 
+        />
+      )}
     </div>
   );
 }

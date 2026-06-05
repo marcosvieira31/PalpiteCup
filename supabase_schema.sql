@@ -62,6 +62,15 @@ create table public.messages (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+-- BADGES
+create table public.badges (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.users(id) on delete cascade not null,
+  slug text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique (user_id, slug)
+);
+
 -- MATCH EVENTS
 create table public.match_events (
   id uuid default uuid_generate_v4() primary key,

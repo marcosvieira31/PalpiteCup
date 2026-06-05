@@ -10,9 +10,12 @@ interface GameCardProps {
   game: Game;
   bet?: Bet | null;
   onBetChange?: (gameId: string, home: number, away: number, joker: boolean) => void;
+  onJokerToggle?: (gameId: string) => void;
+  currentJoker?: string | null;
+  jokerUsed?: boolean;
 }
 
-export default function GameCard({ game, bet, onBetChange }: GameCardProps) {
+export default function GameCard({ game, bet, onBetChange, onJokerToggle, currentJoker, jokerUsed }: GameCardProps) {
   const router = useRouter();
   const isStarted = new Date() >= new Date(game.kickoff_at);
   const time = new Date(game.kickoff_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -57,6 +60,23 @@ export default function GameCard({ game, bet, onBetChange }: GameCardProps) {
           <div className="flex flex-col">
             <span className="font-bold text-slate-800 text-sm line-clamp-1">{game.home_team}</span>
           </div>
+        </div>
+        
+        {/* Joker Toggle */}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
+          {onJokerToggle && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onJokerToggle(game.id) }}
+              disabled={jokerUsed && currentJoker !== game.id}
+              className={`text-[10px] font-bebas tracking-wider px-3 py-1 rounded-full transition-colors shadow-sm ${
+                currentJoker === game.id
+                  ? 'bg-yellow-400 text-blue-900'
+                  : 'bg-slate-100 text-slate-400'
+              } disabled:opacity-50`}
+            >
+              ⚡ CORINGA
+            </button>
+          )}
         </div>
         
         {/* Score & Time */}
