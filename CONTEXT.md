@@ -1,4 +1,4 @@
-# Bolão da Copa
+# PalpiteCup
 
 Web app de palpites para jogos da Copa do Mundo.
 15–20 usuários, grupos privados, ranking em tempo real.

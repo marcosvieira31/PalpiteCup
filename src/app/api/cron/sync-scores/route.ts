@@ -1,43 +1,52 @@
-import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { fetchLiveGames, fetchTodayGames } from '@/lib/api-football/client'
 
-export async function GET(request: Request) {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+export async function GET(req: NextRequest) {
+  const secret = req.headers.get('x-cron-secret')
+  if (secret !== process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
-    const authHeader = request.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
+    // Verifica se há jogos ao vivo
+    const liveData = await fetchLiveGames()
+    const hasLive = liveData.results > 0
 
-    // Verify CRON_SECRET to ensure only trusted external cron jobs can trigger this
-    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Busca jogos ao vivo ou do dia
+    const data = hasLive ? liveData : await fetchTodayGames()
+    const fixtures = data.response ?? []
+
+    for (const fixture of fixtures) {
+      const { fixture: f, goals, teams } = fixture
+
+      const status = f.status.short === 'FT' ? 'finished'
+        : ['1H', '2H', 'HT', 'ET', 'P'].includes(f.status.short) ? 'live'
+        : 'scheduled'
+
+      await supabase.from('games').upsert({
+        api_football_id: f.id,
+        home_team: teams.home.name,
+        away_team: teams.away.name,
+        home_score: goals.home,
+        away_score: goals.away,
+        kickoff_at: f.date,
+        status
+      }, { onConflict: 'api_football_id' })
     }
 
-    const apiKey = process.env.API_FOOTBALL_KEY;
-    if (!apiKey) {
-      throw new Error('Missing API_FOOTBALL_KEY');
-    }
+    return NextResponse.json({
+      ok: true,
+      mode: hasLive ? 'live' : 'daily',
+      synced: fixtures.length
+    })
 
-    /* 
-      1. FETCH LIVE SCORES FROM API-FOOTBALL
-      (Uncomment and adjust once API Football match IDs are mapped to your Supabase games.id)
-      
-      const res = await fetch('https://v3.football.api-sports.io/fixtures?live=all', {
-        headers: { 'x-apisports-key': apiKey }
-      });
-      const data = await res.json();
-      
-      2. UPDATE GAMES IN SUPABASE
-      for (const match of data.response) {
-        // e.g. mapping by api_football_id
-        await supabaseAdmin.from('games').update({
-          home_score: match.goals.home,
-          away_score: match.goals.away,
-          status: match.fixture.status.short === 'FT' ? 'finished' : 'live'
-        }).eq('api_football_id', match.fixture.id);
-      }
-    */
-
-    return NextResponse.json({ success: true, message: 'Scores sync job executed successfully' });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Sync failed' }, { status: 500 })
   }
 }

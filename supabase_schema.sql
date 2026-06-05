@@ -62,11 +62,25 @@ create table public.messages (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+-- MATCH EVENTS
+create table public.match_events (
+  id uuid default uuid_generate_v4() primary key,
+  game_id uuid references public.games(id) on delete cascade not null,
+  type text not null check (type in ('goal', 'yellow_card', 'red_card', 'substitution')),
+  minute integer not null,
+  team text not null,
+  player_name text,
+  assist_name text,
+  player_out text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
 -- REALTIME REPLICATION
 alter publication supabase_realtime add table public.games;
 alter publication supabase_realtime add table public.users;
 alter publication supabase_realtime add table public.messages;
 alter publication supabase_realtime add table public.group_members;
+alter publication supabase_realtime add table public.match_events;
 
 -- RLS POLICIES
 
@@ -116,6 +130,10 @@ for insert with check (
   auth.uid() = user_id and 
   exists (select 1 from public.group_members where group_id = messages.group_id and user_id = auth.uid())
 );
+
+-- MATCH EVENTS: viewable by everyone
+alter table public.match_events enable row level security;
+create policy "Match events viewable by everyone" on public.match_events for select using (true);
 
 -- TRIGGER FOR PREVENTING BETS AFTER KICKOFF
 create or replace function check_bet_cutoff()
@@ -177,17 +195,20 @@ begin
 end;
 $$ language plpgsql security definer;
 
-create trigger on_game_finished
-  after update of status on public.games
-  for each row
-  execute function calculate_points();
+create trigger calculate_points_after_game
+after update on public.games
+for each row execute function calculate_points();
 
--- Handle new user signup
-create or replace function public.handle_new_user()
+-- AUTO CREATE PROFILE FOR NEW USERS
+create or replace function handle_new_user()
 returns trigger as $$
 begin
   insert into public.users (id, username, avatar_url)
-  values (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1)),
+    null
+  );
   return new;
 end;
 $$ language plpgsql security definer;

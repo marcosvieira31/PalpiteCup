@@ -1,24 +1,22 @@
-export const fetchApiFootball = async (endpoint: string, options?: RequestInit) => {
-  const apiKey = process.env.API_FOOTBALL_KEY;
-  
-  if (!apiKey) {
-    throw new Error('API_FOOTBALL_KEY is not defined in environment variables.');
-  }
+const BASE_URL = 'https://v3.football.api-sports.io'
 
-  const url = `https://v3.football.api-sports.io${endpoint}`;
-  
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'x-apisports-key': apiKey,
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-  });
+const headers = {
+  'x-apisports-key': process.env.API_FOOTBALL_KEY!,
+  'Content-Type': 'application/json'
+}
 
-  if (!response.ok) {
-    throw new Error(`API-Football error: ${response.statusText}`);
-  }
+export async function fetchLiveGames() {
+  const res = await fetch(`${BASE_URL}/fixtures?live=all&league=1&season=2026`, { headers })
+  return res.json()
+}
 
-  return response.json();
-};
+export async function fetchTodayGames() {
+  const today = new Date().toISOString().split('T')[0]
+  const res = await fetch(`${BASE_URL}/fixtures?date=${today}&league=1&season=2026`, { headers })
+  return res.json()
+}
+
+export async function fetchFixture(fixtureId: number) {
+  const res = await fetch(`${BASE_URL}/fixtures?id=${fixtureId}`, { headers })
+  return res.json()
+}

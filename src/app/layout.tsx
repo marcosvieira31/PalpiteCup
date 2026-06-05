@@ -18,11 +18,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${barlow.variable} ${bebas.variable} font-sans antialiased bg-gray-100 flex justify-center`}>
-        <div className="w-full max-w-[390px] min-h-screen bg-background relative shadow-2xl overflow-x-hidden">
-          {children}
-          <BottomNav />
-        </div>
+      <body className={`${barlow.variable} ${bebas.variable} font-sans antialiased bg-gray-100`}>
+        {children}
       </body>
     </html>
   );

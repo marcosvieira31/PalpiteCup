@@ -1,11 +1,25 @@
-export default function Header({ title }: { title: string }) {
+import { Bell, Search } from "lucide-react";
+
+export default function Header({ children }: { children?: React.ReactNode }) {
   return (
-    <header className="bg-primary bg-halftone text-white shadow-md relative overflow-hidden">
-      <div className="container mx-auto px-4 h-24 flex items-end pb-4 relative z-10">
-        <h1 className="font-bebas text-4xl tracking-wide">{title}</h1>
+    <div className="bg-[#22c55e] bg-halftone px-4 pt-12 pb-8 shadow-sm relative">
+      <div className="flex justify-between items-start mb-6">
+        <div className="flex flex-col">
+          <h1 className="font-bebas text-5xl text-yellow-400 tracking-wider leading-none drop-shadow-md">PALPITE</h1>
+          <h1 className="font-bebas text-5xl text-white tracking-wider leading-none flex items-center gap-2 drop-shadow-md">
+            <span className="text-4xl">⚽</span> CUP
+          </h1>
+        </div>
+        <div className="flex gap-2">
+          <button className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-white backdrop-blur-md hover:bg-white/30 transition">
+            <Search size={18} />
+          </button>
+          <button className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-white backdrop-blur-md hover:bg-white/30 transition">
+            <Bell size={18} />
+          </button>
+        </div>
       </div>
-      {/* Optional decorative elements */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-10 -mt-10 blur-xl"></div>
-    </header>
+      {children}
+    </div>
   );
 }

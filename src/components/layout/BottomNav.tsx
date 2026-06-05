@@ -2,20 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Trophy, Activity, MessageCircle } from "lucide-react";
+import { Home, Users, Trophy, User, Circle } from "lucide-react";
 import { clsx } from "clsx";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const [groupId, setGroupId] = useState<string | null>(null);
 
+  useEffect(() => {
+    supabase.from('group_members').select('group_id').limit(1).then(({ data }) => {
+      if (data && data.length > 0) setGroupId(data[0].group_id);
+    });
+  }, []);
+
+  // Ocultar na tela de login
   if (pathname === "/login") return null;
 
-  const navItems = [
-    { name: "Dashboard", href: "/", icon: Home },
-    { name: "Partida", href: "/partida", icon: Activity },
-    { name: "Ranking", href: "/ranking", icon: Trophy },
-    { name: "Resenha", href: "/resenha", icon: MessageCircle },
-  ];
+  const rankingHref = groupId ? `/group/${groupId}` : "/groups";
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 mx-auto max-w-[390px] bg-white border-t border-slate-200 pb-safe z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
@@ -27,29 +32,32 @@ export default function BottomNav() {
             <Home size={24} strokeWidth={pathname === "/dashboard" ? 2.5 : 2} />
             <span className="text-[10px] font-bold uppercase tracking-wider">Home</span>
           </Link>
-          <Link href="/group/1" className={clsx("flex flex-col items-center justify-center space-y-1 transition-colors", pathname?.startsWith("/group/") ? "text-primary" : "text-slate-400 hover:text-slate-600")}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={pathname?.startsWith("/group/") ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          <Link href="/groups" className={clsx("flex flex-col items-center justify-center space-y-1 transition-colors", pathname?.startsWith("/groups") ? "text-primary" : "text-slate-400 hover:text-slate-600")}>
+            <Users size={24} strokeWidth={pathname?.startsWith("/groups") ? 2.5 : 2} />
             <span className="text-[10px] font-bold uppercase tracking-wider">Grupos</span>
           </Link>
         </div>
 
         {/* Central Elevated Button */}
         <div className="flex-shrink-0 flex items-center justify-center w-20 relative">
-          <div className="absolute -top-6">
-            <Link href="/game/1" className="flex items-center justify-center w-14 h-14 bg-white border border-slate-200 rounded-2xl shadow-lg transition-transform active:scale-95">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#facc15" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+          <div className="absolute -top-5 mb-4">
+            <Link href="/palpitar" className="flex flex-col items-center justify-center gap-1 group">
+              <div className="flex items-center justify-center w-14 h-14 bg-[#1e3a8a] rounded-full shadow-lg border-4 border-slate-50 transition-transform active:scale-95 group-hover:-translate-y-1">
+                <span className="text-2xl">⚽</span>
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-800">Palpitar</span>
             </Link>
           </div>
         </div>
 
         {/* Right Links */}
         <div className="flex flex-1 justify-around">
-          <Link href="/group/1/ranking" className={clsx("flex flex-col items-center justify-center space-y-1 transition-colors", pathname === "/group/1/ranking" ? "text-primary" : "text-slate-400 hover:text-slate-600")}>
-            <Trophy size={24} strokeWidth={pathname === "/group/1/ranking" ? 2.5 : 2} />
+          <Link href={rankingHref} className={clsx("flex flex-col items-center justify-center space-y-1 transition-colors", pathname?.startsWith("/group/") ? "text-primary" : "text-slate-400 hover:text-slate-600")}>
+            <Trophy size={24} strokeWidth={pathname?.startsWith("/group/") ? 2.5 : 2} />
             <span className="text-[10px] font-bold uppercase tracking-wider">Ranking</span>
           </Link>
           <Link href="/profile" className={clsx("flex flex-col items-center justify-center space-y-1 transition-colors", pathname === "/profile" ? "text-primary" : "text-slate-400 hover:text-slate-600")}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={pathname === "/profile" ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <User size={24} strokeWidth={pathname === "/profile" ? 2.5 : 2} />
             <span className="text-[10px] font-bold uppercase tracking-wider">Perfil</span>
           </Link>
         </div>

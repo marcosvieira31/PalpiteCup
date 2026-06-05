@@ -1,4 +1,4 @@
-# Design System — Bolão da Copa
+# Design System — PalpiteCup
 
 ## Fontes
 - Títulos: Bebas Neue (Google Fonts)

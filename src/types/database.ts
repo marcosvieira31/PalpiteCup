@@ -136,6 +136,41 @@ export interface Database {
           submitted_at?: string
         }
       }
+      match_events: {
+        Row: {
+          id: string
+          game_id: string
+          type: 'goal' | 'yellow_card' | 'red_card' | 'substitution'
+          minute: number
+          team: string
+          player_name: string | null
+          assist_name: string | null
+          player_out: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          game_id: string
+          type: 'goal' | 'yellow_card' | 'red_card' | 'substitution'
+          minute: number
+          team: string
+          player_name?: string | null
+          assist_name?: string | null
+          player_out?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          game_id?: string
+          type?: 'goal' | 'yellow_card' | 'red_card' | 'substitution'
+          minute?: number
+          team?: string
+          player_name?: string | null
+          assist_name?: string | null
+          player_out?: string | null
+          created_at?: string
+        }
+      }
     }
   }
 }

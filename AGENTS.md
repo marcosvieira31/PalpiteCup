@@ -1,4 +1,4 @@
-# Agente — Bolão da Copa
+# Agente — PalpiteCup
 
 Leia obrigatoriamente antes de qualquer ação:
 

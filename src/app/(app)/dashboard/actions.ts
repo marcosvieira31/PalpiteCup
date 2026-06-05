@@ -1,0 +1,24 @@
+'use server'
+import { createClient } from '@/lib/supabase/server'
+
+export async function submitBet(gameId: string, home: number, away: number, joker: boolean) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Usuário não autenticado');
+  }
+
+  // Upsert the bet. The unique constraint on user_id and game_id handles the logic.
+  const { error } = await supabase.from('bets').upsert({
+    user_id: user.id,
+    game_id: gameId,
+    home_bet: home,
+    away_bet: away,
+    is_joker: joker
+  }, { onConflict: 'user_id,game_id' })
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}

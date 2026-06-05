@@ -21,3 +21,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
 CRON_SECRET
 API_FOOTBALL_KEY
+
+## Execução Local / Deploy
+Cron executa a cada 60s via Vercel
+Em produção o header x-cron-secret é enviado automaticamente pela Vercel
+Localmente testar via: curl -H "x-cron-secret: SEU_CRON_SECRET" http://localhost:3000/api/cron/sync-scores
