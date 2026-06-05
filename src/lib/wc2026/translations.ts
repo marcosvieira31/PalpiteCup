@@ -1,44 +1,91 @@
 export const TEAM_TRANSLATIONS: Record<string, string> = {
-  'Brazil': 'Brasil',
-  'Argentina': 'Argentina',
-  'France': 'França',
-  'Germany': 'Alemanha',
-  'Spain': 'Espanha',
-  'Portugal': 'Portugal',
-  'England': 'Inglaterra',
-  'Netherlands': 'Holanda',
-  'Belgium': 'Bélgica',
-  'Italy': 'Itália',
-  'Croatia': 'Croácia',
-  'Uruguay': 'Uruguai',
+  // Grupo A
   'Mexico': 'México',
-  'United States': 'Estados Unidos',
+  'South Africa': 'África do Sul',
+  'Korea Republic': 'Coreia do Sul',
+  'Czechia': 'República Tcheca',
+
+  // Grupo B
   'Canada': 'Canadá',
-  'Japan': 'Japão',
-  'South Korea': 'Coreia do Sul',
-  'Morocco': 'Marrocos',
-  'Senegal': 'Senegal',
   'Switzerland': 'Suíça',
+  'Qatar': 'Catar',
+  'Bosnia-Herzegovina': 'Bósnia e Herzegovina',
+
+  // Grupo C
+  'Brazil': 'Brasil',
+  'Morocco': 'Marrocos',
+  'Haiti': 'Haiti',
+  'Scotland': 'Escócia',
+
+  // Grupo D
+  'United States': 'Estados Unidos',
+  'USA': 'Estados Unidos',
+  'Paraguay': 'Paraguai',
+  'Australia': 'Austrália',
+
+  // Grupo E
+  'Germany': 'Alemanha',
+  'Ivory Coast': 'Costa do Marfim',
+  "Côte d'Ivoire": 'Costa do Marfim',
+  'Ecuador': 'Equador',
+  'Curaçao': 'Curaçao',
+
+  // Grupo F
+  'Netherlands': 'Holanda',
+  'Japan': 'Japão',
+  'Tunisia': 'Tunísia',
+
+  // Grupo G
+  'Belgium': 'Bélgica',
+  'Egypt': 'Egito',
+  'Iran': 'Irã',
+  'IR Iran': 'Irã',
+  'New Zealand': 'Nova Zelândia',
+
+  // Grupo H
+  'Spain': 'Espanha',
+  'Uruguay': 'Uruguai',
+  'Saudi Arabia': 'Arábia Saudita',
+  'Cape Verde': 'Cabo Verde',
+
+  // Grupo I
+  'France': 'França',
+  'Senegal': 'Senegal',
+  'Norway': 'Noruega',
+
+  // Grupo J
+  'Argentina': 'Argentina',
+  'Algeria': 'Argélia',
+  'Austria': 'Áustria',
+  'Jordan': 'Jordânia',
+
+  // Grupo K
+  'Portugal': 'Portugal',
+  'Colombia': 'Colômbia',
+  'Uzbekistan': 'Uzbequistão',
+
+  // Grupo L
+  'England': 'Inglaterra',
+  'Croatia': 'Croácia',
+  'Ghana': 'Gana',
+  'Panama': 'Panamá',
+
+  // Aliases alternativos da API
+  'Korea DPR': 'Coreia do Norte',
+  'Bosnia and Herzegovina': 'Bósnia e Herzegovina',
+  'Czech Republic': 'República Tcheca',
+  'Türkiye': 'Turquia',
+  'Turkey': 'Turquia',
+  'Sweden': 'Suécia',
   'Denmark': 'Dinamarca',
   'Poland': 'Polônia',
-  'Australia': 'Austrália',
-  'Ecuador': 'Equador',
-  'Iran': 'Irã',
-  'Saudi Arabia': 'Arábia Saudita',
-  'Qatar': 'Catar',
-  'Wales': 'País de Gales',
-  'Tunisia': 'Tunísia',
-  'Cameroon': 'Camarões',
-  'Ghana': 'Gana',
   'Serbia': 'Sérvia',
-  'Norway': 'Noruega',
-  'Sweden': 'Suécia',
-  'Turkey': 'Turquia',
-  'Czechia': 'República Tcheca',
-  'Bosnia-Herzegovina': 'Bósnia e Herzegovina',
+  'Italy': 'Itália',
+  'Wales': 'País de Gales',
+  'Cameroon': 'Camarões',
   'Iraq': 'Iraque',
-  'Congo DR': 'República Democrática do Congo',
-  // adicione conforme necessário
+  'Congo DR': 'Rep. Dem. do Congo',
+  'South Korea': 'Coreia do Sul',
 }
 
 export const ROUND_TRANSLATIONS: Record<string, string> = {
