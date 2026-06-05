@@ -38,10 +38,9 @@ export default function BottomNav() {
           </Link>
         </div>
 
-        {/* Central Elevated Button */}
         <div className="flex-shrink-0 flex items-center justify-center w-20 relative">
           <div className="absolute -top-5 mb-4">
-            <Link href="/palpitar" className="flex flex-col items-center justify-center gap-1 group">
+            <Link href="/palpites" className="flex flex-col items-center justify-center gap-1 group">
               <div className="flex items-center justify-center w-14 h-14 bg-[#1e3a8a] rounded-full shadow-lg border-4 border-slate-50 transition-transform active:scale-95 group-hover:-translate-y-1">
                 <span className="text-2xl">⚽</span>
               </div>

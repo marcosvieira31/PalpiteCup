@@ -20,6 +20,8 @@ create table public.games (
   home_score integer default 0,
   away_score integer default 0,
   round_id integer default 1, -- to check joker usage per round
+  group_stage text,
+  venue text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -45,8 +47,8 @@ create table public.bets (
   id uuid default uuid_generate_v4() primary key,
   user_id uuid references public.users(id) on delete cascade not null,
   game_id uuid references public.games(id) on delete cascade not null,
-  home_bet integer not null,
-  away_bet integer not null,
+  home_bet integer not null check (home_bet >= 0 and home_bet <= 99),
+  away_bet integer not null check (away_bet >= 0 and away_bet <= 99),
   used_joker boolean default false,
   points_earned integer default 0,
   submitted_at timestamp with time zone default timezone('utc'::text, now()) not null,
