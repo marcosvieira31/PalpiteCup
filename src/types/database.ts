@@ -319,6 +319,17 @@ export interface Game {
   venue: string | null
 }
 
+export interface Bet {
+  id: string
+  user_id: string
+  game_id: string
+  home_bet: number
+  away_bet: number
+  used_joker: boolean
+  points_earned: number | null
+  submitted_at: string
+}
+
 export interface Message {
   id: string
   group_id: string
