@@ -1,3 +1,5 @@
+"use client"
+import { useState } from 'react'
 import { getFlagUrl } from '@/lib/flags'
 
 interface Props {
@@ -7,12 +9,13 @@ interface Props {
 }
 
 export default function TeamFlag({ team, size = 40, className = '' }: Props) {
+  const [error, setError] = useState(false)
   const flagUrl = getFlagUrl(team, size)
 
-  if (!flagUrl) return (
-    <div className={`bg-slate-200 rounded-full flex items-center justify-center text-xs font-bold text-slate-500 ${className}`}
+  if (!flagUrl || error) return (
+    <div className={`bg-slate-100 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-500 flex-shrink-0 ${className}`}
       style={{ width: size, height: size, minWidth: size }}>
-      {team?.substring(0, 2).toUpperCase()}
+      {team?.substring(0, 3).toUpperCase()}
     </div>
   )
 
@@ -22,7 +25,10 @@ export default function TeamFlag({ team, size = 40, className = '' }: Props) {
       <img
         src={flagUrl}
         alt={team}
+        width={size}
+        height={size}
         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        onError={() => setError(true)}
       />
     </div>
   )
