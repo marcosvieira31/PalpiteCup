@@ -25,7 +25,7 @@ export default async function MyGroupsPreview({ userId }: { userId: string }) {
         <Link key={m.group_id} href={`/group/${m.group_id}`}>
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex justify-between items-center">
             <div>
-              <p className="font-bold text-slate-800 text-sm">{(m.groups as any)?.name}</p>
+              <p className="font-bold text-slate-800 text-sm">{(m.groups as { name?: string })?.name}</p>
               <p className="text-xs text-slate-400 mt-0.5">Ver ranking →</p>
             </div>
             <div className="bg-green-50 rounded-xl px-3 py-2 text-center">

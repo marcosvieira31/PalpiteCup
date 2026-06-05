@@ -21,9 +21,9 @@ export default async function GroupsPage() {
             {myGroups.map(m => (
               <Link key={m.group_id} href={`/group/${m.group_id}`}>
                 <div className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center">
-                  <span className="font-bold text-slate-800">{(m.groups as any)?.name}</span>
+                  <span className="font-bold text-slate-800">{(m.groups as { name?: string })?.name}</span>
                   <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-lg font-mono">
-                    {(m.groups as any)?.invite_code}
+                    {(m.groups as { invite_code?: string })?.invite_code}
                   </span>
                 </div>
               </Link>
