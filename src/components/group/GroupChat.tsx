@@ -43,14 +43,17 @@ export default function GroupChat({ groupId }: { groupId: string }) {
         table: 'messages',
         filter: `group_id=eq.${groupId}`
       }, async (payload) => {
-        const { data: userData } = await supabase.from('users').select('username, avatar_url').eq('id', payload.new.user_id).single();
-        const newMessage = {
-          ...payload.new,
-          users: userData
-        } as Message;
-        setMessages(prev => [...prev, newMessage]);
+        // Busca a mensagem completa com o username
+        const { data } = await supabase
+          .from('messages')
+          .select('*, users(username)')
+          .eq('id', payload.new.id)
+          .single()
+        if (data) setMessages(prev => [...prev, data as unknown as Message])
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('REALTIME STATUS:', status)
+      });
 
     return () => { supabase.removeChannel(channel) };
   }, [groupId]);
