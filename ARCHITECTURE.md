@@ -1,7 +1,7 @@
 # Arquitetura
 
 ## Fluxo de dados
-Client → Supabase (cache) ← Cron Job → API-Football
+Client → Supabase (cache) ← Cron Job → WC2026 API
 
 ## Cron
 - /api/cron/sync-scores
@@ -20,7 +20,7 @@ NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
 CRON_SECRET
-API_FOOTBALL_KEY
+WC2026_API_KEY
 
 ## Execução Local / Deploy
 Cron executa a cada 60s via Vercel

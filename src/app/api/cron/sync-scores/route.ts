@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { fetchLiveGames, fetchTodayGames } from '@/lib/api-football/client'
+import { fetchAllMatches, fetchMatchesByStatus } from '@/lib/wc2026/client'
+import { translateTeam, translateRound } from '@/lib/wc2026/translations'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,40 +15,38 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Verifica se há jogos ao vivo
-    const liveData = await fetchLiveGames()
-    const hasLive = liveData.results > 0
+    const liveData = await fetchMatchesByStatus('live')
+    const hasLive = liveData.length > 0
 
-    // Busca jogos ao vivo ou do dia
-    const data = hasLive ? liveData : await fetchTodayGames()
-    const fixtures = data.response ?? []
+    const matches = hasLive ? liveData : await fetchAllMatches()
 
-    for (const fixture of fixtures) {
-      const { fixture: f, goals, teams } = fixture
-
-      const status = f.status.short === 'FT' ? 'finished'
-        : ['1H', '2H', 'HT', 'ET', 'P'].includes(f.status.short) ? 'live'
+    for (const m of matches) {
+      const status = m.status === 'finished' || m.phase === 'FT' || m.phase === 'FT_PEN'
+        ? 'finished'
+        : ['1H', 'HT', '2H', 'ET1', 'ET2', 'PEN'].includes(m.phase)
+        ? 'live'
         : 'scheduled'
 
       await supabase.from('games').upsert({
-        api_football_id: f.id,
-        home_team: teams.home.name,
-        away_team: teams.away.name,
-        home_score: goals.home,
-        away_score: goals.away,
-        kickoff_at: f.date,
-        status
+        api_football_id: m.id,
+        home_team: translateTeam(m.home_team),
+        away_team: translateTeam(m.away_team),
+        home_score: m.home_score ?? null,
+        away_score: m.away_score ?? null,
+        kickoff_at: m.kickoff_utc,
+        status,
+        group_stage: m.group_name ? `Grupo ${m.group_name}` : translateRound(m.round),
+        venue: m.stadium
       }, { onConflict: 'api_football_id' })
     }
 
     return NextResponse.json({
       ok: true,
-      mode: hasLive ? 'live' : 'daily',
-      synced: fixtures.length
+      mode: hasLive ? 'live' : 'all',
+      synced: matches.length
     })
 
   } catch (error) {
-    console.error("Cron sync error:", error)
-    return NextResponse.json({ error: 'Sync failed' }, { status: 500 })
+    return NextResponse.json({ error: 'Sync failed', details: String(error) }, { status: 500 })
   }
 }
