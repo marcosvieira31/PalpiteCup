@@ -315,6 +315,7 @@ export interface Game {
   away_score: number | null
   status: string
   api_football_id: number | null
+  round_number: number | null
   group_stage: string | null
   venue: string | null
 }

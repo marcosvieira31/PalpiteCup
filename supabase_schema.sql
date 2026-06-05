@@ -20,6 +20,7 @@ create table public.games (
   home_score integer default 0,
   away_score integer default 0,
   round_id integer default 1, -- to check joker usage per round
+  round_number integer,
   group_stage text,
   venue text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null

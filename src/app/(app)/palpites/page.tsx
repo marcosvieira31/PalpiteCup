@@ -5,23 +5,20 @@ export default async function PalpitarPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Busca a próxima rodada com jogos ainda não iniciados
-  // Agrupa por group_stage e pega o menor kickoff_at futuro
-  const { data: nextRoundGames } = await supabase
+  const { data: allGames } = await supabase
     .from('games')
     .select('*')
     .eq('status', 'scheduled')
     .not('home_team', 'is', null)
     .not('away_team', 'is', null)
+    .not('round_number', 'is', null)
     .order('kickoff_at')
 
-  // Identifica a próxima rodada (group_stage com kickoff mais próximo)
-  const nextRound = nextRoundGames?.[0]?.group_stage ?? null
+  // Pega o menor round_number disponível
+  const nextRoundNumber = allGames?.[0]?.round_number ?? 1
 
   // Filtra apenas jogos dessa rodada
-  const games = nextRound
-    ? (nextRoundGames ?? []).filter(g => g.group_stage === nextRound)
-    : []
+  const games = (allGames ?? []).filter(g => g.round_number === nextRoundNumber)
 
   // Busca palpites existentes do usuário para esses jogos
   const { data: bets } = games.length > 0
@@ -32,11 +29,15 @@ export default async function PalpitarPage() {
         .in('game_id', games.map(g => g.id))
     : { data: [] }
 
+  const roundName = games[0]?.round_number
+    ? `${games[0].round_number}ª Rodada — Fase de Grupos`
+    : games[0]?.group_stage ?? 'Próxima Fase'
+
   return (
     <PalpitarClient
       games={games ?? []}
       existingBets={bets ?? []}
-      roundName={nextRound ?? 'Próxima Rodada'}
+      roundName={roundName}
     />
   )
 }
