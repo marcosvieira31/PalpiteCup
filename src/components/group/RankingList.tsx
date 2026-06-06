@@ -20,13 +20,19 @@ interface RankingListProps {
 }
 
 export default function RankingList({ members, filterTeams = [], filterPhases = [] }: RankingListProps) {
-  const [displayMembers, setDisplayMembers] = useState<RankingMember[]>([...members].sort((a, b) => b.points_total - a.points_total));
+  const [displayMembers, setDisplayMembers] = useState<RankingMember[]>([...members].sort((a, b) => {
+    if (b.points_total !== a.points_total) return b.points_total - a.points_total
+    return (a.users?.username ?? '').localeCompare(b.users?.username ?? '')
+  }));
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const hasFilter = filterTeams.length > 0 || filterPhases.length > 0;
     if (!hasFilter) {
-      setDisplayMembers([...members].sort((a, b) => b.points_total - a.points_total));
+      setDisplayMembers([...members].sort((a, b) => {
+        if (b.points_total !== a.points_total) return b.points_total - a.points_total
+        return (a.users?.username ?? '').localeCompare(b.users?.username ?? '')
+      }));
       return;
     }
 
@@ -55,7 +61,10 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
 
         return { ...member, points_total: filteredPoints };
       }));
-      setDisplayMembers(updated.sort((a, b) => b.points_total - a.points_total));
+      setDisplayMembers(updated.sort((a, b) => {
+        if (b.points_total !== a.points_total) return b.points_total - a.points_total
+        return (a.users?.username ?? '').localeCompare(b.users?.username ?? '')
+      }));
       setLoading(false);
     };
 

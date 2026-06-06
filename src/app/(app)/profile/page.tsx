@@ -66,6 +66,15 @@ export default async function Perfil() {
           </div>
         </section>
 
+        <button
+          onClick={() => {
+            localStorage.removeItem('pwa-dismissed')
+            alert('Banner de instalação reativado!')
+          }}
+          className="text-xs text-blue-500 underline mt-2">
+          Reativar banner de instalação do app
+        </button>
+
         <div className="space-y-3">
           <Link href="/profile/edit" className="block">
             <div className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center">

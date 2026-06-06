@@ -9,8 +9,16 @@ interface BeforeInstallPromptEvent extends Event {
 export default function InstallPWA() {
   const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [show, setShow] = useState(false)
+  const [dismissed, setDismissed] = useState(false)
+
+  const handleDismiss = () => {
+    setDismissed(true)
+    localStorage.setItem('pwa-dismissed', 'true')
+    setShow(false)
+  }
 
   useEffect(() => {
+    if (localStorage.getItem('pwa-dismissed') === 'true') return
     const handler = (e: Event) => {
       e.preventDefault()
       setPrompt(e as BeforeInstallPromptEvent)
@@ -36,7 +44,7 @@ export default function InstallPWA() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => setShow(false)}
+            onClick={handleDismiss}
             className="text-blue-300 text-xs px-2 py-1"
           >
             Agora não

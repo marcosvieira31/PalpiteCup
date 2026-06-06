@@ -10,6 +10,7 @@ export default async function RankingPage() {
     .from('users')
     .select('id, username, points_total, avatar_url')
     .order('points_total', { ascending: false })
+    .order('username', { ascending: true })
     .limit(50)
 
   return (

@@ -46,6 +46,10 @@ export default function PublicGroupsList({ groups, myRequests, myMemberships }: 
     <div className="pb-24">
       <div className="bg-green-500 px-4 pt-6 pb-6"
         style={{ backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.12) 1.5px, transparent 1.5px)', backgroundSize: '12px 12px' }}>
+        <button onClick={() => router.back()}
+          className="text-white/80 text-sm mb-3 flex items-center gap-1">
+          ‹ Voltar
+        </button>
         <h1 className="font-bebas text-4xl text-yellow-400 tracking-widest"
           style={{ textShadow: '2px 2px 0 #1e3a8a' }}>
           GRUPOS PÚBLICOS
@@ -98,7 +102,7 @@ export default function PublicGroupsList({ groups, myRequests, myMemberships }: 
                   onClick={() => router.push(`/group/${group.id}`)}
                   className="w-full bg-green-500 text-white font-bebas tracking-wider rounded-xl py-2.5 text-sm"
                 >
-                  ✅ JÁ SOU MEMBRO — ENTRAR
+                  ✅ VER MEU GRUPO
                 </button>
               ) : request?.status === 'pending' ? (
                 <div className="w-full bg-yellow-50 border border-yellow-200 rounded-xl py-2.5 text-center">

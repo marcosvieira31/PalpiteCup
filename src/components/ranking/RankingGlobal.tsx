@@ -29,6 +29,7 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
           .from('users')
           .select('id, username, points_total, avatar_url')
           .order('points_total', { ascending: false })
+          .order('username', { ascending: true })
           .limit(50)
           .then(({ data }) => { if (data) setPlayers(data) })
       })
@@ -90,7 +91,8 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
                   <span className="absolute -top-3 text-2xl">👑</span>
                 )}
                 <p className={`font-bebas text-2xl ${textColors[idx]}`}>{realPos}</p>
-                <p className={`font-bold text-xs text-center truncate w-full text-center ${textColors[idx]}`}>
+                <p className={`font-bold text-xs text-center ${textColors[idx]}`}
+                  style={{ wordBreak: 'break-word', fontSize: '10px', lineHeight: '1.2' }}>
                   {player.username}
                 </p>
                 <p className={`font-bebas text-sm ${textColors[idx]}`}>

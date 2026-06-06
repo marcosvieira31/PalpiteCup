@@ -103,8 +103,8 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
       {settingsOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60"
           onClick={() => setSettingsOpen(false)}>
-          <div className="bg-white w-full max-w-[390px] rounded-t-3xl"
-            style={{ maxHeight: 'calc(100vh - 80px)', overflowY: 'auto', paddingBottom: '20px' }}
+          <div className="bg-white w-full max-w-[390px] rounded-t-3xl overflow-y-auto"
+            style={{ maxHeight: 'calc(100vh - 80px)', paddingBottom: '100px' }}
             onClick={e => e.stopPropagation()}>
             <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-2" />
             <div className="flex justify-between items-center px-4 py-2 border-b border-slate-100">
