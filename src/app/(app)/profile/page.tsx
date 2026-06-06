@@ -4,6 +4,7 @@ import { Settings, HelpCircle, ChevronRight } from "lucide-react";
 import LogoutButton from "@/components/profile/LogoutButton";
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
 export default async function Perfil() {
   const supabase = await createClient();
@@ -61,28 +62,41 @@ export default async function Perfil() {
           </div>
         </section>
 
-        <section>
-          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Configurações</h3>
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <button className="w-full flex items-center justify-between p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors">
+        <div className="space-y-3">
+          <Link href="/profile/edit" className="block">
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <Settings className="text-gray-400" size={20} />
-                <span className="font-medium text-gray-700 text-sm">Editar Perfil</span>
+                <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
+                  <span className="text-xl">✏️</span>
+                </div>
+                <div>
+                  <p className="font-bold text-slate-800 text-sm">Editar Perfil</p>
+                  <p className="text-xs text-slate-400">Nome de usuário e avatar</p>
+                </div>
               </div>
-              <ChevronRight className="text-gray-300" size={20} />
-            </button>
-            <button className="w-full flex items-center justify-between p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors">
+              <span className="text-slate-300 text-lg">›</span>
+            </div>
+          </Link>
+
+          <Link href="/profile/rules" className="block">
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <HelpCircle className="text-gray-400" size={20} />
-                <span className="font-medium text-gray-700 text-sm">Regras de Pontuação</span>
+                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                  <span className="text-xl">📋</span>
+                </div>
+                <div>
+                  <p className="font-bold text-slate-800 text-sm">Regras de Pontuação</p>
+                  <p className="text-xs text-slate-400">Como funcionam os pontos</p>
+                </div>
               </div>
-              <ChevronRight className="text-gray-300" size={20} />
-            </button>
-          <div className="p-4">
-            <LogoutButton />
-          </div>
+              <span className="text-slate-300 text-lg">›</span>
+            </div>
+          </Link>
         </div>
-        </section>
+
+        <div className="mt-6">
+          <LogoutButton />
+        </div>
 
       </div>
     </main>
