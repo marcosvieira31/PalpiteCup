@@ -19,6 +19,7 @@
 - Cards: bg-white rounded-2xl border border-slate-200 shadow-sm
 - Títulos de seção: font-black italic uppercase (Bebas Neue)
 - Nav inferior: fixa, branca, botão central azul-marinho com ícone amarelo elevado
+- Avatares: Figurinhas de jogadores com layout de card (borda, imagem aspect-[3/4] e selo de nome no rodapé).
 
 ## Estilo Geral
 - Mobile-first, max-width 390px centralizado

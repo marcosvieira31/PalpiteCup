@@ -9,11 +9,13 @@ Client → Supabase (cache) ← Cron Job → WC2026 API
 - 1x/dia fora de jogos
 - Protegido por CRON_SECRET no header
 
-## Segurança
+## Segurança e Regras
 - SUPABASE_SERVICE_ROLE_KEY apenas server-side
-- RLS ativo em todas as tabelas
-- Palpites bloqueados via Postgres Rule após kickoff_at
+- RLS ativo em todas as tabelas (incluindo bracket_predictions e users)
+- Palpites de jogos bloqueados logicamente e no banco após kickoff_at
+- Bracket (Mata-Mata) travado globalmente após início da 2ª rodada da fase de grupos
 - Pontuação calculada via Postgres Function (trigger)
+- Ranking Global servido em tempo real via Supabase Realtime (postgres_changes)
 
 ## Variáveis de Ambiente
 NEXT_PUBLIC_SUPABASE_URL

@@ -1,7 +1,7 @@
 # PalpiteCup
 
-Web app de palpites para jogos da Copa do Mundo.
-15–20 usuários, grupos privados, ranking em tempo real.
+Web app (PWA) de palpites para jogos da Copa do Mundo.
+15–20 usuários, grupos privados, ranking global em tempo real.
 
 ## Stack
 - Next.js 14 (App Router)
@@ -19,9 +19,11 @@ Web app de palpites para jogos da Copa do Mundo.
 ## Telas
 1. Dashboard (jogos do dia + palpites)
 2. Timeline da partida (ao vivo)
-3. Ranking do grupo
-4. Resenha (chat do grupo)
+3. Ranking Global e de Grupo
+4. Mata-Mata (Bracket)
+5. Resenha (chat do grupo)
+6. Perfil, Regras e Seleção de Figurinha
 
 ## Usuários
 - Autenticação via Supabase Auth (magic link ou Google)
-- Perfil com avatar e pontuação total
+- Perfil com figurinha de jogador (avatar) e pontuação total
