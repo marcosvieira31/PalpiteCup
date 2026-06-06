@@ -54,7 +54,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
             groupId={group.id}
             userId={user?.id ?? ''}
             label="⚙️ CONFIGURAR"
-            group={group as any}
+            group={group as unknown as import('@/types/database').Group}
             allTeams={allTeams}
           />
         )}
@@ -63,7 +63,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
       {/* Ranking é o foco principal */}
       <div className="px-4 mt-4">
         <RankingList
-          members={members as any}
+          members={members as unknown as import('@/components/group/RankingList').RankingMember[]}
           filterTeams={group.filter_teams ?? []}
           filterPhases={group.filter_phases ?? []}
         />
