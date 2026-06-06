@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import GroupsForm from '@/components/groups/GroupsForm'
+import GroupsActions from '@/components/groups/GroupsActions'
 
 export default async function GroupsPage() {
   const supabase = await createClient()
@@ -8,37 +8,61 @@ export default async function GroupsPage() {
 
   const { data: myGroups } = await supabase
     .from('group_members')
-    .select('group_id, groups(id, name, invite_code)')
+    .select('group_id, groups(id, name, invite_code, type)')
     .eq('user_id', user?.id ?? '')
 
   return (
-    <div className="max-w-[390px] mx-auto min-h-screen bg-slate-50 px-4 pt-8 pb-24">
-      <h1 className="font-bebas text-3xl tracking-widest text-slate-800 mb-6">Meus Grupos</h1>
-      
-      {myGroups && myGroups.length > 0 && (
-        <div className="mb-6">
-          <div className="space-y-2">
-            {myGroups.map(m => (
-              <Link key={m.group_id} href={`/group/${m.group_id}`}>
-                <div className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center">
-                  <span className="font-bold text-slate-800">{(m.groups as { name?: string })?.name}</span>
-                  <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-lg font-mono">
-                    {(m.groups as { invite_code?: string })?.invite_code}
-                  </span>
-                </div>
-              </Link>
-            ))}
+    <div className="pb-24">
+      {/* Header */}
+      <div className="bg-green-500 px-4 pt-6 pb-6"
+        style={{ backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.12) 1.5px, transparent 1.5px)', backgroundSize: '12px 12px' }}>
+        <h1 className="font-bebas text-4xl text-yellow-400 tracking-widest"
+          style={{ textShadow: '2px 2px 0 #1e3a8a' }}>
+          GRUPOS
+        </h1>
+        <p className="text-white text-sm mt-1">Seus bolões da Copa</p>
+      </div>
+
+      <div className="px-4 mt-4 space-y-3">
+        {/* Botões de ação */}
+        <GroupsActions />
+
+        {/* Meus grupos */}
+        {myGroups && myGroups.length > 0 ? (
+          <div className="space-y-3 mt-2">
+            <p className="font-bebas text-lg tracking-widest text-slate-600 uppercase">
+              Meus Grupos ({myGroups.length})
+            </p>
+            {myGroups.map(m => {
+              const group = m.groups as { id: number; name: string; invite_code: string; type: string } | null
+              if (!group) return null
+              const typeIcon = group.type === 'open' ? '🌐' : group.type === 'moderated' ? '👋' : '🔒'
+              return (
+                <Link key={m.group_id} href={`/group/${m.group_id}`}>
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex justify-between items-center active:scale-95 transition-transform">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-xl">
+                        {typeIcon}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-800 text-sm">{group.name}</p>
+                        <p className="text-xs text-slate-400 font-mono mt-0.5">{group.invite_code}</p>
+                      </div>
+                    </div>
+                    <span className="text-slate-300 text-xl">›</span>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
-        </div>
-      )}
-
-      <Link href="/groups/public"
-        className="block w-full bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 text-center mb-4">
-        <p className="font-bebas text-lg tracking-wider text-blue-700">🌐 VER GRUPOS PÚBLICOS</p>
-        <p className="text-xs text-blue-500 mt-0.5">Encontre e entre em grupos abertos</p>
-      </Link>
-
-      <GroupsForm />
+        ) : (
+          <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-6 text-center mt-2">
+            <p className="text-3xl mb-2">👥</p>
+            <p className="text-slate-500 text-sm font-medium">Você não está em nenhum grupo.</p>
+            <p className="text-slate-400 text-xs mt-1">Crie um ou entre em um grupo público!</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
