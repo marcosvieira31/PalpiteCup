@@ -1,14 +1,19 @@
 "use client"
 import { useEffect, useState } from 'react'
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
+
 export default function InstallPWA() {
-  const [prompt, setPrompt] = useState<any>(null)
+  const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [show, setShow] = useState(false)
 
   useEffect(() => {
-    const handler = (e: any) => {
+    const handler = (e: Event) => {
       e.preventDefault()
-      setPrompt(e)
+      setPrompt(e as BeforeInstallPromptEvent)
       setShow(true)
     }
     window.addEventListener('beforeinstallprompt', handler)
