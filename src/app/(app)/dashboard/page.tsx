@@ -1,110 +1,137 @@
 import { createClient } from '@/lib/supabase/server'
-import Header from '@/components/layout/Header'
 import NextMatchCard from '@/components/dashboard/NextMatchCard'
 import MyBetCard from '@/components/dashboard/MyBetCard'
-import GameList from '@/components/game/GameList'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import MyGroupsPreview from '@/components/dashboard/MyGroupsPreview'
-
-export const revalidate = 0; // Ensures fresh data load on request
+import Link from 'next/link'
 
 export default async function Dashboard() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
   const today = new Date().toISOString().split('T')[0]
 
-  const { data: games } = await supabase
+  // Próximo jogo
+  const { data: nextMatches } = await supabase
+    .from('games')
+    .select('*')
+    .eq('status', 'scheduled')
+    .not('home_team', 'is', null)
+    .order('kickoff_at')
+    .limit(1)
+  const nextMatch = nextMatches?.[0] ?? null
+
+  // Palpite do usuário para o próximo jogo
+  const { data: finalBets } = nextMatch ? await supabase
+    .from('bets')
+    .select('*')
+    .eq('user_id', user?.id ?? '')
+    .eq('game_id', nextMatch.id) : { data: [] }
+
+  const nextGameBet = finalBets?.[0] ?? null
+
+  // Jogos de hoje
+  const { data: todayGames } = await supabase
     .from('games')
     .select('*')
     .gte('kickoff_at', `${today}T00:00:00`)
     .lte('kickoff_at', `${today}T23:59:59`)
     .order('kickoff_at')
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  
-  if (authError || !user) {
-    redirect('/login')
-  }
-  const { data: nextMatches } = await supabase
-    .from('games')
-    .select('*')
-    .gte('kickoff_at', new Date().toISOString())
-    .order('kickoff_at')
-    .limit(1)
-
-  const nextMatch = nextMatches?.[0] || null
-
-  const gameIdsToFetch = new Set((games ?? []).map(g => g.id))
-  if (nextMatch) gameIdsToFetch.add(nextMatch.id)
-
-  const numericGameIds = Array.from(gameIdsToFetch).filter(id => typeof id === 'number')
-
-  const { data: bets } = numericGameIds.length > 0
-    ? await supabase
-        .from('bets')
-        .select('*')
-        .eq('user_id', user?.id || '')
-        .in('game_id', numericGameIds)
-    : { data: [] }
-
-  const finalGames = games || []
-  const finalBets = bets || []
-
-  const nextGameBet = nextMatch
-    ? (finalBets ?? []).find(b => b.game_id === nextMatch.id) ?? null
-    : null
-
   return (
     <div className="pb-24">
-      <Header>
+      {/* Header com próximo jogo */}
+      <div className="bg-green-500 px-4 pt-6 pb-0"
+        style={{ backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.12) 1.5px, transparent 1.5px)', backgroundSize: '12px 12px' }}>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="font-bebas text-3xl text-yellow-400 tracking-widest"
+            style={{ textShadow: '2px 2px 0 #1e3a8a' }}>
+            PALPITECUP
+          </h1>
+          <div className="flex gap-2">
+            <button className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white">
+              🔍
+            </button>
+            <button className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white">
+              🔔
+            </button>
+          </div>
+        </div>
+
         {nextMatch && (
-          <>
-            <NextMatchCard game={nextMatch} />
-            <MyBetCard game={nextMatch} bet={nextGameBet} />
-          </>
+          <NextMatchCard game={nextMatch} />
         )}
-      </Header>
-      
-      <div className="px-4 mt-8 space-y-6">
-        <div className="flex justify-between items-end">
-          <h2 className="font-barlow font-black text-2xl leading-none text-slate-800 whitespace-nowrap">
-            Jogos de Hoje
-          </h2>
-          <button className="text-sm font-bold text-primary flex items-center gap-1 hover:text-green-700 transition-colors">
-            Ver todos <span className="text-xs">❯</span>
-          </button>
+      </div>
+
+      {/* Card do meu palpite */}
+      {nextMatch && (
+        <MyBetCard game={nextMatch} bet={nextGameBet} />
+      )}
+
+      {/* MEUS GRUPOS — posição principal */}
+      <div className="px-4 mt-6">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="font-bebas text-xl tracking-widest text-slate-800">MEUS GRUPOS</h2>
+          <Link href="/groups" className="text-xs text-green-600 font-bold">
+            Ver todos →
+          </Link>
         </div>
-        
-        {/* Filters */}
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <div className="w-14 h-14 rounded-full bg-white border-2 border-green-200 flex items-center justify-center shadow-sm">🏆</div>
-            <span className="text-[10px] font-medium text-slate-500">Copa</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <div className="w-14 h-14 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">🌍</div>
-            <span className="text-[10px] font-medium text-slate-500">Grupos</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <div className="w-14 h-14 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">⚔️</div>
-            <span className="text-[10px] font-medium text-slate-500">Oitavas</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <div className="w-14 h-14 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">🔥</div>
-            <span className="text-[10px] font-medium text-slate-500">Quartas</span>
-          </div>
+        <MyGroupsPreview userId={user?.id ?? ''} />
+      </div>
+
+      {/* JOGOS DE HOJE — abaixo dos grupos */}
+      <div className="px-4 mt-6">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="font-bebas text-xl tracking-widest text-slate-800">JOGOS DE HOJE</h2>
+          <Link href="/jogos" className="text-xs text-green-600 font-bold">
+            Ver todos →
+          </Link>
         </div>
 
-        {/* Dynamic Game List */}
-        <GameList games={finalGames} bets={finalBets} />
-
-        <div className="mt-6">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="font-bebas text-xl tracking-widest text-slate-800">MEUS GRUPOS</h2>
-            <Link href="/groups" className="text-xs text-green-600 font-bold">Ver todos →</Link>
+        {!todayGames || todayGames.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center">
+            <p className="text-2xl mb-2">⚽</p>
+            <p className="text-slate-500 text-sm font-medium">Nenhum jogo hoje.</p>
+            <p className="text-slate-400 text-xs mt-1">A Copa começa em 11 de junho!</p>
           </div>
-          <MyGroupsPreview userId={user?.id ?? ''} />
-        </div>
+        ) : (
+          <div className="space-y-3">
+            {todayGames.map(game => (
+              <Link key={game.id} href={`/game/${game.id}`}>
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
+                      {game.group_stage ?? 'Copa do Mundo'}
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      game.status === 'live'
+                        ? 'bg-red-100 text-red-600'
+                        : game.status === 'finished'
+                        ? 'bg-slate-100 text-slate-500'
+                        : 'bg-green-100 text-green-700'
+                    }`}>
+                      {game.status === 'live' ? '🔴 AO VIVO'
+                        : game.status === 'finished' ? 'ENCERRADO'
+                        : new Date(game.kickoff_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-800 text-sm flex-1">
+                      {game.home_team ?? 'A definir'}
+                    </span>
+                    <span className="font-bebas text-xl text-slate-800 px-3">
+                      {game.status !== 'scheduled'
+                        ? `${game.home_score ?? 0} × ${game.away_score ?? 0}`
+                        : 'VS'}
+                    </span>
+                    <span className="font-bold text-slate-800 text-sm flex-1 text-right">
+                      {game.away_team ?? 'A definir'}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
