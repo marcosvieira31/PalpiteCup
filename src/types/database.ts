@@ -76,6 +76,9 @@ export interface Database {
           name: string
           invite_code: string
           owner_id: string
+          filter_teams: string[]
+          filter_phases: string[]
+          filter_locked: boolean
           created_at: string
         }
         Insert: {
@@ -83,6 +86,9 @@ export interface Database {
           name: string
           invite_code: string
           owner_id: string
+          filter_teams?: string[]
+          filter_phases?: string[]
+          filter_locked?: boolean
           created_at?: string
         }
         Update: {
@@ -90,6 +96,9 @@ export interface Database {
           name?: string
           invite_code?: string
           owner_id?: string
+          filter_teams?: string[]
+          filter_phases?: string[]
+          filter_locked?: boolean
           created_at?: string
         }
       }

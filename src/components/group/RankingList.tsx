@@ -1,7 +1,8 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import clsx from "clsx";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
 export interface RankingMember {
   user_id: string;
@@ -14,10 +15,54 @@ export interface RankingMember {
 
 interface RankingListProps {
   members: RankingMember[];
+  filterTeams?: string[];
+  filterPhases?: string[];
 }
 
-export default function RankingList({ members }: RankingListProps) {
-  const sortedMembers = [...members].sort((a, b) => b.points_total - a.points_total);
+export default function RankingList({ members, filterTeams = [], filterPhases = [] }: RankingListProps) {
+  const [displayMembers, setDisplayMembers] = useState<RankingMember[]>([...members].sort((a, b) => b.points_total - a.points_total));
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const hasFilter = filterTeams.length > 0 || filterPhases.length > 0;
+    if (!hasFilter) {
+      setDisplayMembers([...members].sort((a, b) => b.points_total - a.points_total));
+      return;
+    }
+
+    const fetchFiltered = async () => {
+      setLoading(true);
+      const updated = await Promise.all(members.map(async (member) => {
+        const { data: bets } = await supabase
+          .from('bets')
+          .select('points_earned, games!inner(home_team, away_team, group_stage)')
+          .eq('user_id', member.user_id);
+
+        const filteredPoints = (bets ?? []).reduce((sum, bet) => {
+          const game = bet.games as any;
+          if (!game) return sum;
+
+          const teamMatch = filterTeams.length === 0 ||
+            filterTeams.includes(game.home_team) ||
+            filterTeams.includes(game.away_team);
+
+          const phaseMatch = filterPhases.length === 0 ||
+            filterPhases.includes(game.group_stage);
+
+          if (teamMatch && phaseMatch) return sum + (bet.points_earned ?? 0);
+          return sum;
+        }, 0);
+
+        return { ...member, points_total: filteredPoints };
+      }));
+      setDisplayMembers(updated.sort((a, b) => b.points_total - a.points_total));
+      setLoading(false);
+    };
+
+    fetchFiltered();
+  }, [members, filterTeams, filterPhases]);
+
+  const hasFilter = filterTeams.length > 0 || filterPhases.length > 0;
 
   return (
     <div className="px-4 pt-6">
@@ -28,8 +73,24 @@ export default function RankingList({ members }: RankingListProps) {
         </span>
       </h2>
 
-      <div className="flex flex-col gap-3">
-        {sortedMembers.map((member, index) => {
+      {hasFilter && (
+        <div className="bg-blue-50 rounded-xl p-3 mb-3 text-center">
+          <p className="text-blue-700 text-xs font-bold">
+            🎯 Pontuação filtrada —{' '}
+            {filterTeams.length > 0 && `${filterTeams.join(', ')}`}
+            {filterTeams.length > 0 && filterPhases.length > 0 && ' + '}
+            {filterPhases.length > 0 && filterPhases.join(', ')}
+          </p>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="text-center text-slate-400 py-4 text-sm">
+          Calculando pontuação...
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {displayMembers.map((member, index) => {
           const isTop1 = index === 0;
           const isTop2 = index === 1;
           const isTop3 = index === 2;
@@ -76,12 +137,13 @@ export default function RankingList({ members }: RankingListProps) {
             </div>
           );
         })}
-        {sortedMembers.length === 0 && (
+        {displayMembers.length === 0 && (
           <div className="text-center text-slate-400 py-4 text-sm">
             Nenhum membro encontrado.
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

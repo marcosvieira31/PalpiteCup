@@ -32,6 +32,9 @@ create table public.groups (
   name text not null,
   invite_code text unique,
   owner_id uuid references public.users(id) on delete cascade not null,
+  filter_teams text[] default '{}',
+  filter_phases text[] default '{}',
+  filter_locked boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -380,6 +383,37 @@ create trigger trigger_recalculate_standings
 after update of status on games
 for each row
 execute function recalculate_group_standings();
+
+-- TRIGGER TO LOCK GROUP FILTERS
+create or replace function lock_group_filter()
+returns trigger as $func$
+begin
+  if NEW.status = 'live' and OLD.status = 'scheduled' then
+    update groups g
+    set filter_locked = true
+    where filter_locked = false
+      and (
+        array_length(g.filter_teams, 1) > 0
+        or array_length(g.filter_phases, 1) > 0
+      )
+      and exists (
+        select 1 from games
+        where id = NEW.id
+          and (
+            NEW.home_team = any(g.filter_teams)
+            or NEW.away_team = any(g.filter_teams)
+            or NEW.group_stage = any(g.filter_phases)
+          )
+      );
+  end if;
+  return NEW;
+end;
+$func$ language plpgsql;
+
+drop trigger if exists trigger_lock_group_filter on games;
+create trigger trigger_lock_group_filter
+after update of status on games
+for each row execute function lock_group_filter();
 
 -- Insere todos os 48 times do banco de games com posição inicial
 insert into group_standings (group_name, team, position, updated_at)
