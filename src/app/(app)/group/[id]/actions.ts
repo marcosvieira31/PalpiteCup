@@ -3,17 +3,21 @@ import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
 const filterSchema = z.object({
-  groupId: z.string().uuid(),
+  groupId: z.number().int().positive(),
   filterTeams: z.array(z.string()).max(48),
   filterPhases: z.array(z.string()).max(10),
 })
 
 export async function saveGroupFilter(
-  groupId: string,
+  groupId: number | string,
   filterTeams: string[],
   filterPhases: string[]
 ) {
-  const parsed = filterSchema.safeParse({ groupId, filterTeams, filterPhases })
+  const parsed = filterSchema.safeParse({
+    groupId: Number(groupId),
+    filterTeams,
+    filterPhases
+  })
   if (!parsed.success) throw new Error('Dados inválidos.')
 
   const supabase = await createClient()

@@ -23,7 +23,7 @@ const PHASES = [
 ]
 
 interface Props {
-  groupId: string
+  groupId: number | string
   initialTeams: string[]
   initialPhases: string[]
   locked: boolean

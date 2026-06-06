@@ -53,7 +53,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
       {isOwner && (
         <div className="px-4 mt-4">
           <GroupFilterConfig
-            groupId={group.id}
+            groupId={Number(params.id)}
             initialTeams={group.filter_teams ?? []}
             initialPhases={group.filter_phases ?? []}
             locked={group.filter_locked ?? false}
