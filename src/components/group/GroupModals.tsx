@@ -65,7 +65,7 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
               <p className="font-bebas text-xl tracking-wider">💬 RESENHA</p>
               <button onClick={() => setChatOpen(false)} className="text-slate-400 text-2xl">×</button>
             </div>
-            <div className="flex-1 overflow-hidden px-4 pb-4 pt-2">
+            <div className="flex-1 px-4 pb-4 pt-2" style={{ minHeight: 0 }}>
               <GroupChat
                 groupId={groupId}
                 currentUserId={userId}
