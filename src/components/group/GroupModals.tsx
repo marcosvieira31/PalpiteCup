@@ -17,15 +17,17 @@ interface Props {
 export default function GroupModals({ type, groupId, userId, label, group, allTeams }: Props) {
   const [open, setOpen] = useState(false)
   const [savingChat, setSavingChat] = useState(false)
+  const [chatEnabled, setChatEnabled] = useState(group?.chat_enabled ?? true)
 
   const handleToggleChat = async (enabled: boolean) => {
     setSavingChat(true)
-    await supabase
+    setChatEnabled(enabled) // atualiza UI imediatamente
+    const { error } = await supabase
       .from('groups')
       .update({ chat_enabled: enabled })
       .eq('id', String(groupId))
+    if (error) setChatEnabled(!enabled) // reverte se der erro
     setSavingChat(false)
-    window.location.reload()
   }
 
   return (
@@ -72,18 +74,18 @@ export default function GroupModals({ type, groupId, userId, label, group, allTe
                       <div>
                         <p className="font-bold text-slate-800 text-sm">💬 Resenha do Grupo</p>
                         <p className="text-xs text-slate-400 mt-0.5">
-                          {group.chat_enabled ? 'Chat ativado' : 'Chat desativado'}
+                          {chatEnabled ? 'Chat ativado' : 'Chat desativado'}
                         </p>
                       </div>
                       <button
-                        onClick={() => handleToggleChat(!group.chat_enabled)}
+                        onClick={() => handleToggleChat(!chatEnabled)}
                         disabled={savingChat}
                         className={`w-12 h-6 rounded-full transition-colors relative ${
-                          group.chat_enabled ? 'bg-green-500' : 'bg-slate-300'
+                          chatEnabled ? 'bg-green-500' : 'bg-slate-300'
                         }`}
                       >
                         <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${
-                          group.chat_enabled ? 'left-6' : 'left-0.5'
+                          chatEnabled ? 'left-6' : 'left-0.5'
                         }`} />
                       </button>
                     </div>
