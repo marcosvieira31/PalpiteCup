@@ -15,8 +15,7 @@ export default function TeamFlag({ team, size = 40, className = '' }: Props) {
   useEffect(() => {
     setMounted(true)
     setImgError(false)
-    console.log('FLAG URL:', getFlagUrl(team, size))
-  }, [team, size])
+  }, [team])
 
   const flagUrl = getFlagUrl(team, size)
 

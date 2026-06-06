@@ -84,5 +84,6 @@ export const TEAM_FLAGS: Record<string, string> = {
 export function getFlagUrl(teamName: string, size: number = 40): string {
   const code = TEAM_FLAGS[teamName]
   if (!code) return ''
-  return `https://flagcdn.com/w${size}/${code}.png`
+  // Usa country-flags.com como CDN alternativa
+  return `https://hatscripts.github.io/circle-flags/flags/${code}.svg`
 }
