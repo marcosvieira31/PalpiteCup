@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Header from '@/components/layout/Header'
-import FeaturedMatch from '@/components/game/FeaturedMatch'
+import NextMatchCard from '@/components/dashboard/NextMatchCard'
+import MyBetCard from '@/components/dashboard/MyBetCard'
 import GameList from '@/components/game/GameList'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -49,14 +50,18 @@ export default async function Dashboard() {
   const finalGames = games || []
   const finalBets = bets || []
 
+  const nextGameBet = nextMatch
+    ? (finalBets ?? []).find(b => b.game_id === nextMatch.id) ?? null
+    : null
+
   return (
     <div className="pb-24">
       <Header>
         {nextMatch && (
-          <FeaturedMatch
-            game={nextMatch}
-            bet={finalBets.find(b => b.game_id === nextMatch.id) ?? null}
-          />
+          <>
+            <NextMatchCard game={nextMatch} />
+            <MyBetCard game={nextMatch} bet={nextGameBet} />
+          </>
         )}
       </Header>
       
