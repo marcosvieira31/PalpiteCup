@@ -10,12 +10,17 @@ Client → Supabase (cache) ← Cron Job → WC2026 API
 - Protegido por CRON_SECRET no header
 
 ## Segurança e Regras
-- SUPABASE_SERVICE_ROLE_KEY apenas server-side
-- RLS ativo em todas as tabelas (incluindo bracket_predictions e users)
-- Palpites de jogos bloqueados logicamente e no banco após kickoff_at
-- Bracket (Mata-Mata) travado globalmente após início da 2ª rodada da fase de grupos
-- Pontuação calculada via Postgres Function (trigger)
-- Ranking Global servido em tempo real via Supabase Realtime (postgres_changes)
+- Criptografia de senhas nativa (bcrypt) pelo Supabase Auth.
+- Rate Limiting via Middleware (100 req/min/IP para rotas `/api/`).
+- Validação server-side robusta com Zod nas Server Actions (`betSchema`, etc).
+- Proteção anti-spam no chat do Supabase via função PL/pgSQL (max 3 msgs/5s).
+- CSP (Content Security Policy) estrito via headers HTTP customizados.
+- SUPABASE_SERVICE_ROLE_KEY apenas server-side.
+- RLS ativo em todas as tabelas (incluindo bracket_predictions e users).
+- Palpites de jogos bloqueados logicamente e no banco após kickoff_at.
+- Bracket (Mata-Mata) travado globalmente após início da 2ª rodada da fase de grupos.
+- Pontuação calculada via Postgres Function (trigger).
+- Ranking Global servido em tempo real via Supabase Realtime (postgres_changes).
 
 ## Variáveis de Ambiente
 NEXT_PUBLIC_SUPABASE_URL
