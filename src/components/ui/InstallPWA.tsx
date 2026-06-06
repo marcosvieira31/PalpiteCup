@@ -6,6 +6,12 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
+declare global {
+  interface Window {
+    deferredPrompt: BeforeInstallPromptEvent | null
+  }
+}
+
 export default function InstallPWA() {
   const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [show, setShow] = useState(false)
@@ -19,7 +25,7 @@ export default function InstallPWA() {
     const handler = (e: Event) => {
       e.preventDefault()
       // Store prompt globally for the profile button
-      ;(window as any).deferredPrompt = e
+      window.deferredPrompt = e as BeforeInstallPromptEvent
 
       if (localStorage.getItem('pwa-dismissed') === 'true') return
 

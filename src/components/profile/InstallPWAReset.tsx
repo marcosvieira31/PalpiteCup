@@ -1,8 +1,19 @@
 "use client"
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
+
+declare global {
+  interface Window {
+    deferredPrompt: BeforeInstallPromptEvent | null
+  }
+}
+
 export default function InstallPWAReset() {
   const handleInstall = async () => {
-    const promptEvent = (window as any).deferredPrompt;
+    const promptEvent = window.deferredPrompt;
     if (!promptEvent) {
       alert('Seu navegador não suporta a instalação direta ou o app já está instalado/sendo usado.');
       return;
@@ -11,7 +22,7 @@ export default function InstallPWAReset() {
     promptEvent.prompt();
     const { outcome } = await promptEvent.userChoice;
     if (outcome === 'accepted') {
-      (window as any).deferredPrompt = null;
+      window.deferredPrompt = null;
     }
   }
 
