@@ -56,9 +56,10 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
       {/* Modal Chat */}
       {chatOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60"
+          style={{ paddingBottom: '80px' }}
           onClick={() => setChatOpen(false)}>
           <div className="bg-white w-full max-w-[390px] rounded-t-3xl flex flex-col"
-            style={{ height: '75vh' }}
+            style={{ height: '70vh' }}
             onClick={e => e.stopPropagation()}>
             <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-2 flex-shrink-0" />
             <div className="flex justify-between items-center px-4 py-2 border-b border-slate-100 flex-shrink-0">
