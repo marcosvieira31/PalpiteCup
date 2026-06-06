@@ -170,7 +170,8 @@ export default function MataMataTab() {
       {selecting && !locked && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end"
           onClick={() => { setSelecting(null); setSearch('') }}>
-          <div className="bg-white w-full max-w-[390px] mx-auto rounded-t-3xl p-4 max-h-[70vh] overflow-y-auto"
+          <div className="bg-white w-full max-w-[390px] mx-auto rounded-t-3xl p-4"
+            style={{ maxHeight: 'calc(100vh - 80px)', overflowY: 'auto', paddingBottom: '20px' }}
             onClick={e => e.stopPropagation()}>
             <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-4" />
             <p className="font-bebas text-xl tracking-wider text-slate-800 mb-3">ESCOLHA O TIME</p>
