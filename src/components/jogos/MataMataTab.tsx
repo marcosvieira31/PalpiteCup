@@ -38,7 +38,7 @@ export default function MataMataTab() {
           if (g.home_team) allTeams.add(g.home_team)
           if (g.away_team) allTeams.add(g.away_team)
         })
-        setTeams([...allTeams].sort())
+        setTeams(Array.from(allTeams).sort())
       })
 
     // Busca palpites existentes
