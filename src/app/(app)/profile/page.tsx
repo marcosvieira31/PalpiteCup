@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 import Header from "@/components/layout/Header";
-import { Settings, HelpCircle, ChevronRight } from "lucide-react";
 import LogoutButton from "@/components/profile/LogoutButton";
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
