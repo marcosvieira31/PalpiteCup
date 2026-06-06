@@ -80,6 +80,7 @@ export interface Database {
           filter_phases: string[]
           filter_locked: boolean
           chat_enabled: boolean
+          chat_filter_enabled: boolean
           created_at: string
         }
         Insert: {
@@ -91,6 +92,7 @@ export interface Database {
           filter_phases?: string[]
           filter_locked?: boolean
           chat_enabled?: boolean
+          chat_filter_enabled?: boolean
           created_at?: string
         }
         Update: {
@@ -102,6 +104,7 @@ export interface Database {
           filter_phases?: string[]
           filter_locked?: boolean
           chat_enabled?: boolean
+          chat_filter_enabled?: boolean
           created_at?: string
         }
       }

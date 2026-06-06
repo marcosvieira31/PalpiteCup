@@ -46,6 +46,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
           userId={user?.id ?? ''}
           label="💬 RESENHA"
           chatEnabled={group.chat_enabled ?? true}
+          filterEnabled={group.chat_filter_enabled ?? true}
         />
         {isOwner && (
           <GroupModals

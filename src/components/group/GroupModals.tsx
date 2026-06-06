@@ -13,12 +13,14 @@ interface Props {
   group?: Group
   allTeams?: string[]
   chatEnabled?: boolean
+  filterEnabled?: boolean
 }
 
-export default function GroupModals({ type, groupId, userId, label, group, allTeams, chatEnabled: initialChatEnabled }: Props) {
+export default function GroupModals({ type, groupId, userId, label, group, allTeams, chatEnabled: initialChatEnabled, filterEnabled: initialFilterEnabled }: Props) {
   const [open, setOpen] = useState(false)
   const [savingChat, setSavingChat] = useState(false)
   const [chatEnabled, setChatEnabled] = useState(group?.chat_enabled ?? initialChatEnabled ?? true)
+  const [filterEnabled, setFilterEnabled] = useState(group?.chat_filter_enabled ?? initialFilterEnabled ?? true)
 
   const handleToggleChat = async (enabled: boolean) => {
     setSavingChat(true)
@@ -27,8 +29,15 @@ export default function GroupModals({ type, groupId, userId, label, group, allTe
       .from('groups')
       .update({ chat_enabled: enabled })
       .eq('id', String(groupId))
-    if (error) setChatEnabled(!enabled) // reverte se der erro
+    if (error) {
+      setChatEnabled(!enabled) // reverte se der erro
+    }
     setSavingChat(false)
+  }
+
+  const handleToggleFilter = async (enabled: boolean) => {
+    setFilterEnabled(enabled)
+    await supabase.from('groups').update({ chat_filter_enabled: enabled }).eq('id', String(groupId))
   }
 
   return (
@@ -75,7 +84,12 @@ export default function GroupModals({ type, groupId, userId, label, group, allTe
 
             <div className="p-4">
               {type === 'chat' && (
-                <GroupChat groupId={groupId} currentUserId={userId} />
+                <GroupChat 
+                  groupId={groupId} 
+                  currentUserId={userId} 
+                  chatEnabled={chatEnabled}
+                  filterEnabled={filterEnabled}
+                />
               )}
 
               {type === 'settings' && group && (
@@ -98,6 +112,28 @@ export default function GroupModals({ type, groupId, userId, label, group, allTe
                       >
                         <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${
                           chatEnabled ? 'left-6' : 'left-0.5'
+                        }`} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Filtro de Palavras */}
+                  <div className="bg-white rounded-2xl border border-slate-200 p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-bold text-slate-800 text-sm">🚫 Filtro de Palavras</p>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          {filterEnabled ? 'Palavras ofensivas são censuradas' : 'Sem filtro de palavras'}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleToggleFilter(!filterEnabled)}
+                        className={`w-12 h-6 rounded-full transition-colors relative ${
+                          filterEnabled ? 'bg-green-500' : 'bg-slate-300'
+                        }`}
+                      >
+                        <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${
+                          filterEnabled ? 'left-6' : 'left-0.5'
                         }`} />
                       </button>
                     </div>

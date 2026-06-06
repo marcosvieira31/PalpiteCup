@@ -36,6 +36,7 @@ create table public.groups (
   filter_phases text[] default '{}',
   filter_locked boolean default false,
   chat_enabled boolean default true,
+  chat_filter_enabled boolean default true,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
