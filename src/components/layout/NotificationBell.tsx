@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 export default function NotificationBell({ userId }: { userId: string }) {
   const [count, setCount] = useState(0)
   const [open, setOpen] = useState(false)
-  const [notifications, setNotifications] = useState<any[]>([])
+  const [notifications, setNotifications] = useState<Record<string, unknown>[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
   }
 
-  const handleNotification = async (n: any) => {
+  const handleNotification = async (n: Record<string, unknown>) => {
     if (!n.read) {
       await supabase.from('notifications').update({ read: true }).eq('id', n.id)
       setCount(prev => Math.max(0, prev - 1))
@@ -76,10 +76,10 @@ export default function NotificationBell({ userId }: { userId: string }) {
           ) : (
             <div className="max-h-80 overflow-y-auto">
               {notifications.map(n => (
-                <button key={n.id} onClick={() => handleNotification(n)}
+                <button key={String(n.id)} onClick={() => handleNotification(n)}
                   className={`w-full text-left p-3 border-b border-slate-50 hover:bg-slate-50 transition-colors ${!n.read ? 'bg-blue-50' : ''}`}>
-                  <p className="font-bold text-slate-800 text-sm">{n.title}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{n.body}</p>
+                  <p className="font-bold text-slate-800 text-sm">{String(n.title)}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{String(n.body)}</p>
                 </button>
               ))}
             </div>

@@ -57,7 +57,12 @@ export default function PendingRequests({ groupId }: { groupId: string | number 
           <div key={req.id} className="flex items-center gap-3 bg-white rounded-xl p-3">
             <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 overflow-hidden flex-shrink-0">
               {req.users?.avatar_url
-                ? <img src={req.users.avatar_url} alt="" className="w-full h-full object-cover" />
+                ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={req.users.avatar_url} alt="" className="w-full h-full object-cover" />
+                  </>
+                )
                 : req.users?.username?.substring(0, 2).toUpperCase()}
             </div>
             <p className="font-bold text-slate-800 text-sm flex-1">{req.users?.username}</p>

@@ -56,6 +56,7 @@ export default function GroupChat({ groupId, currentUserId, chatEnabled, filterE
 
   useEffect(() => {
     onMount?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const sendMessage = async () => {
@@ -86,7 +87,12 @@ export default function GroupChat({ groupId, currentUserId, chatEnabled, filterE
             <div key={msg.id} style={{ display: 'flex', gap: 8, marginBottom: 12, flexDirection: isMe ? 'row-reverse' : 'row' }}>
               <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#64748b', flexShrink: 0, overflow: 'hidden' }}>
                 {msg.users?.avatar_url
-                  ? <img src={msg.users.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={msg.users.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </>
+                  )
                   : msg.users?.username?.substring(0, 2).toUpperCase()}
               </div>
               <div style={{ maxWidth: '75%', display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 2 }}>

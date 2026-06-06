@@ -58,6 +58,7 @@ export function useUnreadCount(groupId: number | string, userId: string) {
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupId, userId])
 
   return { unreadCount, markAsRead }

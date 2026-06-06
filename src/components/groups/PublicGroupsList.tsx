@@ -18,7 +18,7 @@ interface Props {
   userId: string
 }
 
-export default function PublicGroupsList({ groups, myRequests, myMemberships, userId }: Props) {
+export default function PublicGroupsList({ groups, myRequests, myMemberships }: Props) {
   const [loading, setLoading] = useState<string | number | null>(null)
   const [feedback, setFeedback] = useState<Record<string | number, string>>({})
   const router = useRouter()
