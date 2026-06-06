@@ -26,7 +26,7 @@ export default async function MyGroupsPreview({ userId }: { userId: string }) {
         const group = m.groups as unknown as { id: string; name: string; invite_code: string } | null
         if (!group) return null
         return (
-          <Link key={m.group_id} href={`/group/${m.group_id}`}>
+          <Link key={m.group_id} href={`/group/${m.group_id}`} className="block">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex justify-between items-center active:scale-95 transition-transform">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
