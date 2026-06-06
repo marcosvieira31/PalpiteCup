@@ -14,9 +14,11 @@ interface Props {
   allTeams?: string[]
   chatEnabled?: boolean
   filterEnabled?: boolean
+  onChatToggle?: (enabled: boolean) => void
+  onFilterToggle?: (enabled: boolean) => void
 }
 
-export default function GroupModals({ type, groupId, userId, label, group, allTeams, chatEnabled: initialChatEnabled, filterEnabled: initialFilterEnabled }: Props) {
+export default function GroupModals({ type, groupId, userId, label, group, allTeams, chatEnabled: initialChatEnabled, filterEnabled: initialFilterEnabled, onChatToggle, onFilterToggle }: Props) {
   const [open, setOpen] = useState(false)
   const [savingChat, setSavingChat] = useState(false)
   const [chatEnabled, setChatEnabled] = useState(group?.chat_enabled ?? initialChatEnabled ?? true)
@@ -25,18 +27,21 @@ export default function GroupModals({ type, groupId, userId, label, group, allTe
   const handleToggleChat = async (enabled: boolean) => {
     setSavingChat(true)
     setChatEnabled(enabled) // atualiza UI imediatamente
+    onChatToggle?.(enabled) // propaga para o pai
     const { error } = await supabase
       .from('groups')
       .update({ chat_enabled: enabled })
       .eq('id', String(groupId))
     if (error) {
       setChatEnabled(!enabled) // reverte se der erro
+      onChatToggle?.(!enabled)
     }
     setSavingChat(false)
   }
 
   const handleToggleFilter = async (enabled: boolean) => {
     setFilterEnabled(enabled)
+    onFilterToggle?.(enabled) // propaga para o pai
     await supabase.from('groups').update({ chat_filter_enabled: enabled }).eq('id', String(groupId))
   }
 
@@ -70,7 +75,8 @@ export default function GroupModals({ type, groupId, userId, label, group, allTe
           onClick={() => setOpen(false)}
         >
           <div
-            className="bg-white w-full max-w-[390px] rounded-t-3xl max-h-[85vh] overflow-y-auto"
+            className="bg-white w-full max-w-[390px] rounded-t-3xl overflow-hidden"
+            style={{ height: '80vh' }}
             onClick={e => e.stopPropagation()}
           >
             {/* Handle */}
@@ -82,7 +88,7 @@ export default function GroupModals({ type, groupId, userId, label, group, allTe
               <button onClick={() => setOpen(false)} className="text-slate-400 text-2xl leading-none">×</button>
             </div>
 
-            <div className="p-4">
+            <div className="p-4 flex flex-col overflow-y-auto" style={{ height: 'calc(80vh - 80px)' }}>
               {type === 'chat' && (
                 <GroupChat 
                   groupId={groupId} 

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import GroupHeader from '@/components/group/GroupHeader'
 import RankingList from '@/components/group/RankingList'
-import GroupModals from '@/components/group/GroupModals'
+import GroupActions from '@/components/group/GroupActions'
 
 export default async function GroupPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -39,25 +39,14 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
       <GroupHeader group={group} />
 
       {/* Botões de ação */}
-      <div className="px-4 mt-4 flex gap-2">
-        <GroupModals
-          type="chat"
+      <div className="px-4 mt-4">
+        <GroupActions
           groupId={group.id}
           userId={user?.id ?? ''}
-          label="💬 RESENHA"
-          chatEnabled={group.chat_enabled ?? true}
-          filterEnabled={group.chat_filter_enabled ?? true}
+          isOwner={isOwner}
+          group={group as unknown as import('@/types/database').Group}
+          allTeams={allTeams}
         />
-        {isOwner && (
-          <GroupModals
-            type="settings"
-            groupId={group.id}
-            userId={user?.id ?? ''}
-            label="⚙️ CONFIGURAR"
-            group={group as unknown as import('@/types/database').Group}
-            allTeams={allTeams}
-          />
-        )}
       </div>
 
       {/* Ranking é o foco principal */}
