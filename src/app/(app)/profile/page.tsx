@@ -1,9 +1,9 @@
-/* eslint-disable @next/next/no-img-element */
 import Header from "@/components/layout/Header";
 import LogoutButton from "@/components/profile/LogoutButton";
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import InstallPWAReset from '@/components/profile/InstallPWAReset';
 
 export default async function Perfil() {
   const supabase = await createClient();
@@ -66,14 +66,7 @@ export default async function Perfil() {
           </div>
         </section>
 
-        <button
-          onClick={() => {
-            localStorage.removeItem('pwa-dismissed')
-            alert('Banner de instalação reativado!')
-          }}
-          className="text-xs text-blue-500 underline mt-2">
-          Reativar banner de instalação do app
-        </button>
+        <InstallPWAReset />
 
         <div className="space-y-3">
           <Link href="/profile/edit" className="block">
