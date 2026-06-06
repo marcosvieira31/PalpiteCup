@@ -8,7 +8,7 @@ export default async function RankingPage() {
 
   const { data: players } = await supabase
     .from('users')
-    .select('id, username, points_total')
+    .select('id, username, points_total, avatar_url')
     .order('points_total', { ascending: false })
     .limit(50)
 

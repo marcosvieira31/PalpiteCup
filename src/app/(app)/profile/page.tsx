@@ -36,8 +36,13 @@ export default async function Perfil() {
       <div className="container mx-auto px-4 py-6 space-y-6">
         
         <div className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white font-bebas text-3xl shadow-sm overflow-hidden">
-            {dbUser?.avatar_url ? <img src={dbUser.avatar_url} alt="Avatar" className="w-full h-full object-cover" /> : (dbUser?.username || "V").substring(0, 1).toUpperCase()}
+          <div className="w-24 rounded-2xl overflow-hidden border-4 border-white shadow-lg mx-auto">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={dbUser?.avatar_url ?? '/avatars/vini-jr.png'}
+              alt={dbUser?.username}
+              className="w-full aspect-[3/4] object-cover"
+            />
           </div>
           <div>
             <h2 className="font-bold text-lg text-gray-800">{dbUser?.username || "Você"}</h2>

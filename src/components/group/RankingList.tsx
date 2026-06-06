@@ -54,12 +54,13 @@ export default function RankingList({ members }: RankingListProps) {
                 )}
               </div>
 
-              <div className="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center font-bold text-slate-400">
-                {member.users?.avatar_url ? (
-                  <img src={member.users.avatar_url} alt={member.users.username} className="w-full h-full object-cover" />
-                ) : (
-                  (member.users?.username || "U").substring(0,2).toUpperCase()
-                )}
+              <div className="w-10 rounded-xl overflow-hidden flex-shrink-0 border border-slate-200">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={member.users?.avatar_url ?? '/avatars/vini-jr.png'}
+                  alt={member.users?.username ?? "Usuário"}
+                  className="w-full aspect-[3/4] object-cover"
+                />
               </div>
 
               <div className="flex-1 flex flex-col">
