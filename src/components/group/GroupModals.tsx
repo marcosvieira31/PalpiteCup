@@ -69,12 +69,15 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
 
       {/* Modal Chat */}
       {chatOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60"
+        <div className="fixed inset-0 z-50 bg-black/60"
           onClick={() => setChatOpen(false)}>
           <div
             onClick={e => e.stopPropagation()}
-            className="bg-white w-full max-w-[390px] rounded-t-3xl flex flex-col"
-            style={{ height: '70vh' }}>
+            className="bg-white w-full max-w-[390px] rounded-t-3xl flex flex-col absolute left-1/2 -translate-x-1/2"
+            style={{
+              bottom: '80px',
+              top: '60px'
+            }}>
             {/* Handle */}
             <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-2 flex-shrink-0" />
             {/* Header */}
@@ -82,8 +85,8 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
               <p className="font-bebas text-xl tracking-wider">💬 RESENHA</p>
               <button onClick={() => setChatOpen(false)} className="text-slate-400 text-2xl">×</button>
             </div>
-            {/* Chat — ocupa o restante, com padding inferior para o input não colar na borda */}
-            <div className="flex-1 px-4 pt-2 pb-4" style={{ minHeight: 0 }}>
+            {/* Chat */}
+            <div className="flex-1 px-4 pb-4 pt-2" style={{ minHeight: 0 }}>
               <GroupChat
                 groupId={groupId}
                 currentUserId={userId}
