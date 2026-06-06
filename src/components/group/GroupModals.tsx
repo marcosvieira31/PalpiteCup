@@ -69,7 +69,8 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
 
       {/* Modal Chat */}
       {chatOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60"
+        <div className="fixed z-50 bg-black/60"
+          style={{ top: 0, left: 0, right: 0, bottom: '80px' }}
           onClick={() => setChatOpen(false)}>
           <div
             onClick={e => e.stopPropagation()}
