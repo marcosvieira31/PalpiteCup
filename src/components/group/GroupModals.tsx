@@ -12,12 +12,13 @@ interface Props {
   label: string
   group?: Group
   allTeams?: string[]
+  chatEnabled?: boolean
 }
 
-export default function GroupModals({ type, groupId, userId, label, group, allTeams }: Props) {
+export default function GroupModals({ type, groupId, userId, label, group, allTeams, chatEnabled: initialChatEnabled }: Props) {
   const [open, setOpen] = useState(false)
   const [savingChat, setSavingChat] = useState(false)
-  const [chatEnabled, setChatEnabled] = useState(group?.chat_enabled ?? true)
+  const [chatEnabled, setChatEnabled] = useState(group?.chat_enabled ?? initialChatEnabled ?? true)
 
   const handleToggleChat = async (enabled: boolean) => {
     setSavingChat(true)
@@ -32,16 +33,27 @@ export default function GroupModals({ type, groupId, userId, label, group, allTe
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className={`flex-1 py-2.5 rounded-2xl font-bebas tracking-wider text-sm transition-all active:scale-95 ${
-          type === 'chat'
-            ? 'bg-white border-2 border-slate-200 text-slate-700'
-            : 'bg-blue-900 text-yellow-400'
-        }`}
-      >
-        {label}
-      </button>
+      {type === 'chat' && (
+        <button
+          onClick={() => chatEnabled ? setOpen(true) : null}
+          className={`flex-1 py-2.5 rounded-2xl font-bebas tracking-wider text-sm transition-all ${
+            chatEnabled
+              ? 'bg-white border-2 border-slate-200 text-slate-700 active:scale-95'
+              : 'bg-slate-100 border-2 border-slate-200 text-slate-300 cursor-not-allowed'
+          }`}
+        >
+          {chatEnabled ? '💬 RESENHA' : '💬 RESENHA (desativada)'}
+        </button>
+      )}
+
+      {type === 'settings' && (
+        <button
+          onClick={() => setOpen(true)}
+          className="flex-1 py-2.5 rounded-2xl font-bebas tracking-wider text-sm transition-all active:scale-95 bg-blue-900 text-yellow-400"
+        >
+          {label}
+        </button>
+      )}
 
       {open && (
         <div

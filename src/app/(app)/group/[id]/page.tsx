@@ -40,14 +40,13 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
 
       {/* Botões de ação */}
       <div className="px-4 mt-4 flex gap-2">
-        {group.chat_enabled && (
-          <GroupModals
-            type="chat"
-            groupId={group.id}
-            userId={user?.id ?? ''}
-            label="💬 RESENHA"
-          />
-        )}
+        <GroupModals
+          type="chat"
+          groupId={group.id}
+          userId={user?.id ?? ''}
+          label="💬 RESENHA"
+          chatEnabled={group.chat_enabled ?? true}
+        />
         {isOwner && (
           <GroupModals
             type="settings"
