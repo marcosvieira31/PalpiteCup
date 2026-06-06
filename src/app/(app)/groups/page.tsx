@@ -32,6 +32,12 @@ export default async function GroupsPage() {
         </div>
       )}
 
+      <Link href="/groups/public"
+        className="block w-full bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 text-center mb-4">
+        <p className="font-bebas text-lg tracking-wider text-blue-700">🌐 VER GRUPOS PÚBLICOS</p>
+        <p className="text-xs text-blue-500 mt-0.5">Encontre e entre em grupos abertos</p>
+      </Link>
+
       <GroupsForm />
     </div>
   )

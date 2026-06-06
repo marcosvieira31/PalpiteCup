@@ -463,3 +463,74 @@ create policy "Usuário gerencia próprio status"
   with check (auth.uid() = user_id);
 
 grant all on public.chat_read_status to authenticated;
+
+-- Tipo do grupo e configurações
+alter table groups add column if not exists type text default 'private' check (type in ('private', 'open', 'moderated'));
+alter table groups add column if not exists max_members integer default null;
+alter table groups add column if not exists description text default null;
+
+-- Solicitações de entrada
+create table if not exists group_requests (
+  id serial primary key,
+  group_id uuid references groups(id) on delete cascade,
+  user_id uuid references users(id) on delete cascade,
+  status text default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique(group_id, user_id)
+);
+
+alter table group_requests enable row level security;
+
+create policy "Usuário vê próprias solicitações"
+  on group_requests for select using (auth.uid() = user_id);
+
+create policy "Líder vê solicitações do grupo"
+  on group_requests for select using (
+    exists (
+      select 1 from groups
+      where id = group_requests.group_id
+      and owner_id = auth.uid()
+    )
+  );
+
+create policy "Usuário cria solicitação"
+  on group_requests for insert with check (auth.uid() = user_id);
+
+create policy "Líder atualiza solicitações"
+  on group_requests for update using (
+    exists (
+      select 1 from groups
+      where id = group_requests.group_id
+      and owner_id = auth.uid()
+    )
+  );
+
+grant all on public.group_requests to authenticated;
+grant usage, select, update on sequence group_requests_id_seq to authenticated;
+
+-- Notificações
+create table if not exists notifications (
+  id serial primary key,
+  user_id uuid references users(id) on delete cascade,
+  type text not null,
+  title text not null,
+  body text not null,
+  data jsonb default '{}',
+  read boolean default false,
+  created_at timestamptz default now()
+);
+
+alter table notifications enable row level security;
+
+create policy "Usuário gerencia próprias notificações"
+  on notifications for all using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+grant all on public.notifications to authenticated;
+grant usage, select, update on sequence notifications_id_seq to authenticated;
+
+-- Realtime
+alter publication supabase_realtime add table group_requests;
+alter publication supabase_realtime add table notifications;
+

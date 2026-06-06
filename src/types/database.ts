@@ -81,6 +81,9 @@ export interface Database {
           filter_locked: boolean
           chat_enabled: boolean
           chat_filter_enabled: boolean
+          type: 'private' | 'open' | 'moderated'
+          max_members: number | null
+          description: string | null
           created_at: string
         }
         Insert: {
@@ -93,6 +96,9 @@ export interface Database {
           filter_locked?: boolean
           chat_enabled?: boolean
           chat_filter_enabled?: boolean
+          type?: 'private' | 'open' | 'moderated'
+          max_members?: number | null
+          description?: string | null
           created_at?: string
         }
         Update: {
@@ -105,6 +111,9 @@ export interface Database {
           filter_locked?: boolean
           chat_enabled?: boolean
           chat_filter_enabled?: boolean
+          type?: 'private' | 'open' | 'moderated'
+          max_members?: number | null
+          description?: string | null
           created_at?: string
         }
       }
@@ -404,4 +413,40 @@ export interface BracketPrediction {
   locked: boolean
   created_at: string
   updated_at: string
+}
+
+export interface GroupRequest {
+  id: number
+  group_id: string | number
+  user_id: string
+  status: 'pending' | 'approved' | 'rejected'
+  created_at: string
+  updated_at: string
+}
+
+export interface Notification {
+  id: number
+  user_id: string
+  type: string
+  title: string
+  body: string
+  data: Record<string, unknown>
+  read: boolean
+  created_at: string
+}
+
+export interface Group {
+  id: string | number
+  name: string
+  invite_code: string
+  owner_id: string
+  type: 'private' | 'open' | 'moderated'
+  description: string | null
+  max_members: number | null
+  filter_teams: string[]
+  filter_phases: string[]
+  filter_locked: boolean
+  chat_enabled: boolean
+  chat_filter_enabled: boolean
+  created_at: string
 }

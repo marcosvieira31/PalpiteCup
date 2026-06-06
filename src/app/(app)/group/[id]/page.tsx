@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import GroupHeader from '@/components/group/GroupHeader'
 import RankingList from '@/components/group/RankingList'
 import GroupActions from '@/components/group/GroupModals'
+import PendingRequests from '@/components/group/PendingRequests'
 
 export default async function GroupPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -48,6 +49,12 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
           allTeams={allTeams}
         />
       </div>
+
+      {isOwner && group.type === 'moderated' && (
+        <div className="px-4 mt-4">
+          <PendingRequests groupId={params.id} />
+        </div>
+      )}
 
       {/* Ranking é o foco principal */}
       <div className="px-4 mt-4">

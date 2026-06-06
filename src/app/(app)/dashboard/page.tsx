@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import NextMatchCard from '@/components/dashboard/NextMatchCard'
 import MyBetCard from '@/components/dashboard/MyBetCard'
 import MyGroupsPreview from '@/components/dashboard/MyGroupsPreview'
+import NotificationBell from '@/components/layout/NotificationBell'
 import Link from 'next/link'
 
 export default async function Dashboard() {
@@ -51,9 +52,7 @@ export default async function Dashboard() {
             <button className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white">
               🔍
             </button>
-            <button className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white">
-              🔔
-            </button>
+            {user && <NotificationBell userId={user.id} />}
           </div>
         </div>
 
