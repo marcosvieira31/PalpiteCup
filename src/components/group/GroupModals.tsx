@@ -73,22 +73,17 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
           onClick={() => setChatOpen(false)}>
           <div
             onClick={e => e.stopPropagation()}
-            className="bg-white w-full max-w-[390px] rounded-t-3xl"
-            style={{
-              display: 'grid',
-              gridTemplateRows: 'auto auto 1fr',
-              height: '65vh',
-              marginBottom: '0px'
-            }}>
+            className="bg-white w-full max-w-[390px] rounded-t-3xl flex flex-col"
+            style={{ height: 'calc(100vh - 80px)', maxHeight: 'calc(100vh - 80px)' }}>
             {/* Handle */}
-            <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-2" />
+            <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-2 flex-shrink-0" />
             {/* Header */}
-            <div className="flex justify-between items-center px-4 py-2 border-b border-slate-100">
+            <div className="flex justify-between items-center px-4 py-2 border-b border-slate-100 flex-shrink-0">
               <p className="font-bebas text-xl tracking-wider">💬 RESENHA</p>
               <button onClick={() => setChatOpen(false)} className="text-slate-400 text-2xl">×</button>
             </div>
-            {/* Chat — ocupa o restante */}
-            <div style={{ overflow: 'hidden', padding: '12px 16px 16px' }}>
+            {/* Chat */}
+            <div className="flex-1 px-4 pb-4 pt-2" style={{ minHeight: 0 }}>
               <GroupChat
                 groupId={groupId}
                 currentUserId={userId}
