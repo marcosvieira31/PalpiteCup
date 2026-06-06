@@ -81,7 +81,7 @@ export const TEAM_FLAGS: Record<string, string> = {
   'Coreia do Norte': 'kp',
 }
 
-export function getFlagUrl(teamName: string, size: number = 40): string {
+export function getFlagUrl(teamName: string): string {
   const code = TEAM_FLAGS[teamName]
   if (!code) return ''
   // Usa country-flags.com como CDN alternativa

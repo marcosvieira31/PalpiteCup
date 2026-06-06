@@ -17,7 +17,7 @@ export default function TeamFlag({ team, size = 40, className = '' }: Props) {
     setImgError(false)
   }, [team])
 
-  const flagUrl = getFlagUrl(team, size)
+  const flagUrl = getFlagUrl(team)
 
   const Fallback = () => (
     <div
@@ -34,6 +34,7 @@ export default function TeamFlag({ team, size = 40, className = '' }: Props) {
       className={`rounded-full overflow-hidden border border-slate-200 flex-shrink-0 ${className}`}
       style={{ width: size, height: size, minWidth: size }}
       suppressHydrationWarning>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={flagUrl}
         alt={team}
