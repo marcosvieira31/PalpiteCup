@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import TeamFlag from '@/components/ui/TeamFlag'
 import { Game } from '@/types/database'
 
