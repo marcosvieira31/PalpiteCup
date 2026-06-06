@@ -1,14 +1,14 @@
 "use client"
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Tv2, Zap, Users, User } from 'lucide-react'
+import { Home, Tv2, Zap, Trophy, User } from 'lucide-react'
 import clsx from 'clsx'
 
 const tabs = [
   { href: '/dashboard', label: 'HOME', icon: Home },
   { href: '/jogos', label: 'JOGOS', icon: Tv2 },
   { href: '/palpites', label: 'PALPITAR', icon: Zap, highlight: true },
-  { href: '/groups', label: 'GRUPOS', icon: Users },
+  { href: '/ranking', label: 'RANKING', icon: Trophy },
   { href: '/profile', label: 'PERFIL', icon: User },
 ]
 
