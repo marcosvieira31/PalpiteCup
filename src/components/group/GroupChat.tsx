@@ -34,18 +34,14 @@ export default function GroupChat({ groupId, currentUserId, chatEnabled, filterE
       .then(({ data }) => setMessages((data as Message[]) ?? []))
 
     const channel = supabase
-      .channel(`chat-${groupId}`)
+      .channel(`chat-${groupId}-${Date.now()}`)
       .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
+        event: 'INSERT', schema: 'public', table: 'messages',
         filter: `group_id=eq.${groupId}`
       }, async (payload) => {
         const { data } = await supabase
-          .from('messages')
-          .select('*, users(username, avatar_url)')
-          .eq('id', payload.new.id)
-          .single()
+          .from('messages').select('*, users(username, avatar_url)')
+          .eq('id', payload.new.id).single()
         if (data) setMessages(prev => [...prev, data as Message])
       })
       .subscribe()
@@ -58,69 +54,39 @@ export default function GroupChat({ groupId, currentUserId, chatEnabled, filterE
   }, [messages])
 
   const sendMessage = async () => {
-    if (!input.trim() || !chatEnabled) return
+    if (!input.trim() || sending) return
     setSending(true)
     setError('')
-
     const { error } = await supabase.from('messages').insert({
-      group_id: String(groupId),
-      user_id: currentUserId,
-      content: input.trim()
+      group_id: String(groupId), user_id: currentUserId, content: input.trim()
     })
-
-    if (error) {
-      setError(error.message.includes('Muitas mensagens')
-        ? 'Aguarde alguns segundos antes de enviar outra mensagem.'
-        : 'Erro ao enviar mensagem.')
-    } else {
-      setInput('')
-    }
+    if (error) setError('Erro ao enviar.')
+    else setInput('')
     setSending(false)
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Status do chat */}
-      {!chatEnabled && (
-        <div className="bg-slate-100 rounded-xl p-3 mb-3 text-center flex-shrink-0">
-          <p className="text-slate-400 text-xs font-medium">
-            💬 Resenha desativada pelo líder do grupo
-          </p>
-        </div>
-      )}
-
-      {/* Lista de mensagens */}
-      <div style={{ flex: 1, overflowY: 'auto', marginBottom: '12px' }} className="space-y-3 pr-1">
+      {/* Mensagens */}
+      <div style={{ flex: 1, overflowY: 'auto', paddingRight: 4 }}>
         {messages.length === 0 && (
-          <p className="text-center text-slate-400 text-sm py-8">
-            {chatEnabled ? 'Seja o primeiro a mandar a resenha! 💬' : 'Nenhuma mensagem ainda.'}
+          <p style={{ textAlign: 'center', color: '#94a3b8', padding: '32px 0', fontSize: 14 }}>
+            Seja o primeiro a mandar a resenha! 💬
           </p>
         )}
-
         {messages.map(msg => {
           const isMe = msg.user_id === currentUserId
           const content = filterMessage(msg.content, filterEnabled)
-
           return (
-            <div key={msg.id} className={`flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-              <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-slate-500 overflow-hidden">
-                {msg.users?.avatar_url ? (
-                  <img src={msg.users.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                ) : (
-                  msg.users?.username?.substring(0, 2).toUpperCase()
-                )}
+            <div key={msg.id} style={{ display: 'flex', gap: 8, marginBottom: 12, flexDirection: isMe ? 'row-reverse' : 'row' }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#64748b', flexShrink: 0, overflow: 'hidden' }}>
+                {msg.users?.avatar_url
+                  ? <img src={msg.users.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : msg.users?.username?.substring(0, 2).toUpperCase()}
               </div>
-              <div className={`max-w-[75%] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-0.5`}>
-                {!isMe && (
-                  <p className="text-[10px] text-slate-400 px-1">{msg.users?.username}</p>
-                )}
-                <div className={`px-3 py-2 rounded-2xl text-sm ${
-                  !chatEnabled
-                    ? 'bg-slate-100 text-slate-400'
-                    : isMe
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-slate-100 text-slate-700'
-                }`}>
+              <div style={{ maxWidth: '75%', display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 2 }}>
+                {!isMe && <p style={{ fontSize: 10, color: '#94a3b8', paddingLeft: 4 }}>{msg.users?.username}</p>}
+                <div style={{ padding: '8px 12px', borderRadius: 16, fontSize: 14, background: !chatEnabled ? '#f1f5f9' : isMe ? '#dcfce7' : '#f1f5f9', color: !chatEnabled ? '#94a3b8' : isMe ? '#166534' : '#374151' }}>
                   {content}
                 </div>
               </div>
@@ -130,32 +96,34 @@ export default function GroupChat({ groupId, currentUserId, chatEnabled, filterE
         <div ref={bottomRef} />
       </div>
 
-      {/* Input — só aparece se chat habilitado */}
+      {/* Input */}
       {chatEnabled && (
-        <div style={{ flexShrink: 0 }} className="flex gap-2 border-t border-slate-100 pt-3">
+        <div style={{ display: 'flex', gap: 8, paddingTop: 12, borderTop: '1px solid #f1f5f9', flexShrink: 0 }}>
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && !sending && sendMessage()}
+            onKeyDown={e => e.key === 'Enter' && sendMessage()}
             placeholder="Manda a resenha..."
             maxLength={500}
-            className="flex-1 rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-green-500"
+            style={{ flex: 1, borderRadius: 20, border: '1px solid #e2e8f0', padding: '10px 16px', fontSize: 14, outline: 'none' }}
           />
           <button
             onClick={sendMessage}
             disabled={sending || !input.trim()}
-            className="bg-blue-900 text-yellow-400 rounded-2xl px-4 font-bebas tracking-wider text-sm disabled:opacity-50"
+            style={{ background: '#1e3a8a', color: '#facc15', borderRadius: 16, padding: '0 16px', fontFamily: 'inherit', fontWeight: 700, fontSize: 14, cursor: sending || !input.trim() ? 'not-allowed' : 'pointer', opacity: sending || !input.trim() ? 0.5 : 1 }}
           >
-            {sending ? '...' : 'ENVIAR'}
+            ENVIAR
           </button>
         </div>
       )}
 
-      {error && (
-        <p style={{ flexShrink: 0 }} className="text-red-500 text-xs mt-2 text-center">
-          {error}
-        </p>
+      {!chatEnabled && (
+        <div style={{ padding: '12px', background: '#f8fafc', borderRadius: 12, textAlign: 'center', flexShrink: 0 }}>
+          <p style={{ fontSize: 12, color: '#94a3b8' }}>💬 Resenha desativada pelo líder</p>
+        </div>
       )}
+
+      {error && <p style={{ color: '#ef4444', fontSize: 12, textAlign: 'center', marginTop: 8 }}>{error}</p>}
     </div>
   )
 }

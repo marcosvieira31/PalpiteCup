@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import GroupHeader from '@/components/group/GroupHeader'
 import RankingList from '@/components/group/RankingList'
-import GroupActions from '@/components/group/GroupActions'
+import GroupActions from '@/components/group/GroupModals'
 
 export default async function GroupPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
