@@ -72,14 +72,14 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60"
           onClick={() => setChatOpen(false)}>
           <div className="bg-white w-full max-w-[390px] rounded-t-3xl flex flex-col"
-            style={{ height: 'calc(100vh - 140px)' }}
+            style={{ height: '65vh' }}
             onClick={e => e.stopPropagation()}>
             <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-2 flex-shrink-0" />
             <div className="flex justify-between items-center px-4 py-2 border-b border-slate-100 flex-shrink-0">
               <p className="font-bebas text-xl tracking-wider">💬 RESENHA</p>
               <button onClick={() => setChatOpen(false)} className="text-slate-400 text-2xl">×</button>
             </div>
-            <div className="flex-1 px-4 pb-4 pt-2" style={{ minHeight: 0 }}>
+            <div className="flex-1 px-4 pb-4 pt-2" style={{ minHeight: 0, overflow: 'hidden' }}>
               <GroupChat
                 groupId={groupId}
                 currentUserId={userId}
