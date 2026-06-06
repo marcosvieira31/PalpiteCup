@@ -66,9 +66,9 @@ export default async function Perfil() {
           </div>
         </section>
 
-        <InstallPWAReset />
+        <div className="space-y-3 mt-6">
+          <InstallPWAReset />
 
-        <div className="space-y-3">
           <Link href="/profile/edit" className="block">
             <div className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center">
               <div className="flex items-center gap-3">

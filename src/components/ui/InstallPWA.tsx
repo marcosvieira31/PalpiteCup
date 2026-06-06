@@ -16,9 +16,13 @@ export default function InstallPWA() {
   }
 
   useEffect(() => {
-    if (localStorage.getItem('pwa-dismissed') === 'true') return
     const handler = (e: Event) => {
       e.preventDefault()
+      // Store prompt globally for the profile button
+      ;(window as any).deferredPrompt = e
+
+      if (localStorage.getItem('pwa-dismissed') === 'true') return
+
       setPrompt(e as BeforeInstallPromptEvent)
       setShow(true)
     }
