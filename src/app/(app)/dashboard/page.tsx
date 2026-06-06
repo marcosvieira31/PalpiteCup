@@ -45,10 +45,20 @@ export default async function Dashboard() {
       <div className="bg-green-500 px-4 pt-6 pb-0"
         style={{ backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.12) 1.5px, transparent 1.5px)', backgroundSize: '12px 12px' }}>
         <div className="flex justify-between items-center mb-4">
-          <h1 className="font-bebas text-3xl text-yellow-400 tracking-widest"
-            style={{ textShadow: '2px 2px 0 #1e3a8a' }}>
-            PALPITECUP
-          </h1>
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icons/logo.png" alt="PalpiteCup Logo" className="h-11 w-auto object-contain drop-shadow-md" />
+            <div className="flex flex-col">
+              <h1 className="font-bebas text-[26px] text-yellow-400 tracking-widest leading-[0.85]"
+                style={{ textShadow: '2px 2px 0 #1e3a8a' }}>
+                PALPITE
+              </h1>
+              <h1 className="font-bebas text-[26px] text-white tracking-widest leading-[0.85]"
+                style={{ textShadow: '2px 2px 0 #1e3a8a' }}>
+                CUP
+              </h1>
+            </div>
+          </div>
           <div className="flex gap-2">
             <button className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-white backdrop-blur-md hover:bg-white/30 transition">
               <Search size={18} />
