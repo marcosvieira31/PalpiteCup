@@ -79,10 +79,10 @@ export default function GroupChat({ groupId, currentUserId, chatEnabled, filterE
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Status do chat */}
       {!chatEnabled && (
-        <div className="bg-slate-100 rounded-xl p-3 mb-3 text-center">
+        <div className="bg-slate-100 rounded-xl p-3 mb-3 text-center flex-shrink-0">
           <p className="text-slate-400 text-xs font-medium">
             💬 Resenha desativada pelo líder do grupo
           </p>
@@ -90,7 +90,7 @@ export default function GroupChat({ groupId, currentUserId, chatEnabled, filterE
       )}
 
       {/* Lista de mensagens */}
-      <div className="flex-1 overflow-y-auto space-y-3 mb-3 pr-1">
+      <div style={{ flex: 1, overflowY: 'auto', marginBottom: '12px' }} className="space-y-3 pr-1">
         {messages.length === 0 && (
           <p className="text-center text-slate-400 text-sm py-8">
             {chatEnabled ? 'Seja o primeiro a mandar a resenha! 💬' : 'Nenhuma mensagem ainda.'}
@@ -132,7 +132,7 @@ export default function GroupChat({ groupId, currentUserId, chatEnabled, filterE
 
       {/* Input — só aparece se chat habilitado */}
       {chatEnabled && (
-        <div className="flex gap-2 border-t border-slate-100 pt-3 flex-shrink-0">
+        <div style={{ flexShrink: 0 }} className="flex gap-2 border-t border-slate-100 pt-3">
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -151,7 +151,11 @@ export default function GroupChat({ groupId, currentUserId, chatEnabled, filterE
         </div>
       )}
 
-      {error && <p className="text-red-500 text-xs mt-2 text-center">{error}</p>}
+      {error && (
+        <p style={{ flexShrink: 0 }} className="text-red-500 text-xs mt-2 text-center">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

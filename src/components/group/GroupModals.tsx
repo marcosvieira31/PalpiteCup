@@ -88,7 +88,7 @@ export default function GroupModals({ type, groupId, userId, label, group, allTe
               <button onClick={() => setOpen(false)} className="text-slate-400 text-2xl leading-none">×</button>
             </div>
 
-            <div className="p-4 flex flex-col overflow-y-auto" style={{ height: 'calc(80vh - 80px)' }}>
+            <div className="p-4 flex flex-col" style={{ height: 'calc(80vh - 80px)' }}>
               {type === 'chat' && (
                 <GroupChat 
                   groupId={groupId} 
@@ -99,7 +99,7 @@ export default function GroupModals({ type, groupId, userId, label, group, allTe
               )}
 
               {type === 'settings' && group && (
-                <div className="space-y-4">
+                <div className="space-y-4 overflow-y-auto pr-1">
                   {/* Toggle Resenha */}
                   <div className="bg-white rounded-2xl border border-slate-200 p-4">
                     <div className="flex justify-between items-center">
