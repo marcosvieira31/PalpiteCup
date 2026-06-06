@@ -39,7 +39,7 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
           .eq('user_id', member.user_id);
 
         const filteredPoints = (bets ?? []).reduce((sum, bet) => {
-          const game = bet.games as any;
+          const game = bet.games as unknown as { home_team: string; away_team: string; group_stage: string };
           if (!game) return sum;
 
           const teamMatch = filterTeams.length === 0 ||
