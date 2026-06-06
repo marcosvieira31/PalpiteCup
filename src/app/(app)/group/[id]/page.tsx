@@ -2,35 +2,26 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import GroupHeader from '@/components/group/GroupHeader'
 import RankingList from '@/components/group/RankingList'
-import GroupChat from '@/components/group/GroupChat'
-import GroupFilterConfig from '@/components/group/GroupFilterConfig'
+import GroupModals from '@/components/group/GroupModals'
 
 export default async function GroupPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: group } = await supabase
     .from('groups')
-    .select('*, group_members(*, users(username, avatar_url, points_total))')
+    .select(`
+      *,
+      group_members(
+        *,
+        users(id, username, points_total, avatar_url)
+      )
+    `)
     .eq('id', params.id)
     .single()
 
   if (!group) notFound()
 
-  type MemberType = {
-    user_id: string;
-    points_total?: number;
-    users: { username: string; avatar_url: string | null; points_total?: number };
-  };
-
-  const formattedMembers = group.group_members.map((gm: MemberType) => ({
-    user_id: gm.user_id,
-    points_total: gm.users?.points_total || 0,
-    users: gm.users
-  }));
-
-  // Busca todos os times para o filtro
   const { data: teams } = await supabase
     .from('games')
     .select('home_team, away_team')
@@ -41,27 +32,42 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
   )].sort() as string[]
 
   const isOwner = user?.id === group.owner_id
+  const members = group.group_members ?? []
 
   return (
     <div className="pb-24">
       <GroupHeader group={group} />
-      <RankingList 
-        members={formattedMembers} 
-        filterTeams={group.filter_teams ?? []}
-        filterPhases={group.filter_phases ?? []}
-      />
-      {isOwner && (
-        <div className="px-4 mt-4">
-          <GroupFilterConfig
-            groupId={Number(params.id)}
-            initialTeams={group.filter_teams ?? []}
-            initialPhases={group.filter_phases ?? []}
-            locked={group.filter_locked ?? false}
+
+      {/* Botões de ação */}
+      <div className="px-4 mt-4 flex gap-2">
+        {group.chat_enabled && (
+          <GroupModals
+            type="chat"
+            groupId={group.id}
+            userId={user?.id ?? ''}
+            label="💬 RESENHA"
+          />
+        )}
+        {isOwner && (
+          <GroupModals
+            type="settings"
+            groupId={group.id}
+            userId={user?.id ?? ''}
+            label="⚙️ CONFIGURAR"
+            group={group as any}
             allTeams={allTeams}
           />
-        </div>
-      )}
-      <GroupChat groupId={group.id} />
+        )}
+      </div>
+
+      {/* Ranking é o foco principal */}
+      <div className="px-4 mt-4">
+        <RankingList
+          members={members as any}
+          filterTeams={group.filter_teams ?? []}
+          filterPhases={group.filter_phases ?? []}
+        />
+      </div>
     </div>
   )
 }

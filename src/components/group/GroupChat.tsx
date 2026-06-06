@@ -15,16 +15,12 @@ interface Message {
   } | null;
 }
 
-export default function GroupChat({ groupId }: { groupId: string }) {
+export default function GroupChat({ groupId, currentUserId }: { groupId: string | number, currentUserId: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setCurrentUserId(data.user?.id || null);
-    });
 
     if (!groupId) return;
 

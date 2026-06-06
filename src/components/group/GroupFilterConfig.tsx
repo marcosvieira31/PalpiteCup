@@ -28,10 +28,11 @@ interface Props {
   initialPhases: string[]
   locked: boolean
   allTeams: string[]
+  onSaved?: () => void
 }
 
 export default function GroupFilterConfig({
-  groupId, initialTeams, initialPhases, locked, allTeams
+  groupId, initialTeams, initialPhases, locked, allTeams, onSaved
 }: Props) {
   const [filterTeams, setFilterTeams] = useState<string[]>(initialTeams)
   const [filterPhases, setFilterPhases] = useState<string[]>(initialPhases)
@@ -59,6 +60,7 @@ export default function GroupFilterConfig({
     try {
       await saveGroupFilter(groupId, filterTeams, filterPhases)
       setSaved(true)
+      onSaved?.()
       setTimeout(() => setSaved(false), 2000)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erro ao salvar.')

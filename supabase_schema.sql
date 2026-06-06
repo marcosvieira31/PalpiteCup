@@ -35,6 +35,7 @@ create table public.groups (
   filter_teams text[] default '{}',
   filter_phases text[] default '{}',
   filter_locked boolean default false,
+  chat_enabled boolean default true,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -116,6 +117,9 @@ for select using (
   exists (select 1 from public.group_members where group_id = id and user_id = auth.uid())
 );
 create policy "Users can create groups" on public.groups for insert with check (auth.uid() = owner_id);
+
+grant update on public.groups to authenticated;
+create policy "Owner atualiza próprio grupo" on public.groups for update using (auth.uid() = owner_id);
 
 -- GROUP MEMBERS: viewable only by members of the same group
 alter table public.group_members enable row level security;
