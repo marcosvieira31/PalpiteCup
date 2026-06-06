@@ -78,15 +78,15 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
 
       {/* Top 3 */}
       {players.length >= 3 && (
-        <div className="mx-4 mt-4 grid grid-cols-3 gap-2">
+        <div className="mx-4 mt-4 grid grid-cols-3 gap-2 items-end">
           {[players[1], players[0], players[2]].map((player, idx) => {
             const realPos = idx === 0 ? 2 : idx === 1 ? 1 : 3
-            const sizes = ['h-20', 'h-28', 'h-20']
+            const sizes = ['h-24', 'h-32', 'h-24']
             const colors = ['bg-slate-100', 'bg-yellow-400', 'bg-orange-100']
             const textColors = ['text-slate-600', 'text-blue-900', 'text-orange-700']
             return (
               <div key={player.id}
-                className={`${colors[idx]} rounded-2xl flex flex-col items-center justify-end pb-3 pt-2 px-2 ${sizes[idx]} relative`}>
+                className={`${colors[idx]} rounded-2xl flex flex-col items-center justify-center p-2 ${sizes[idx]} relative`}>
                 {realPos === 1 && (
                   <span className="absolute -top-3 text-2xl">👑</span>
                 )}
