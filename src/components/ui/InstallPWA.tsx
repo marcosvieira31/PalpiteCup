@@ -9,10 +9,8 @@ interface BeforeInstallPromptEvent extends Event {
 export default function InstallPWA() {
   const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [show, setShow] = useState(false)
-  const [dismissed, setDismissed] = useState(false)
 
   const handleDismiss = () => {
-    setDismissed(true)
     localStorage.setItem('pwa-dismissed', 'true')
     setShow(false)
   }
