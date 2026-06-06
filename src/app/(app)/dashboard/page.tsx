@@ -4,6 +4,7 @@ import MyBetCard from '@/components/dashboard/MyBetCard'
 import MyGroupsPreview from '@/components/dashboard/MyGroupsPreview'
 import NotificationBell from '@/components/layout/NotificationBell'
 import Link from 'next/link'
+import { Search } from 'lucide-react'
 
 export default async function Dashboard() {
   const supabase = await createClient()
@@ -49,8 +50,8 @@ export default async function Dashboard() {
             PALPITECUP
           </h1>
           <div className="flex gap-2">
-            <button className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white">
-              🔍
+            <button className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-white backdrop-blur-md hover:bg-white/30 transition">
+              <Search size={18} />
             </button>
             {user && <NotificationBell userId={user.id} />}
           </div>

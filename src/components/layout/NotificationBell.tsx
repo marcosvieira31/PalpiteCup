@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { Bell } from 'lucide-react'
 
 export default function NotificationBell({ userId }: { userId: string }) {
   const [count, setCount] = useState(0)
@@ -55,9 +56,9 @@ export default function NotificationBell({ userId }: { userId: string }) {
     <div className="relative z-50">
       <button
         onClick={() => { setOpen(!open); if (!open) markAllRead() }}
-        className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white relative"
+        className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-white backdrop-blur-md hover:bg-white/30 transition relative"
       >
-        🔔
+        <Bell size={18} />
         {count > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
             {count > 9 ? '9+' : count}
