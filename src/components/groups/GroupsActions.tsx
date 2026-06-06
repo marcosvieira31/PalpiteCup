@@ -92,6 +92,7 @@ export default function GroupsActions() {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-end justify-center"
           onClick={reset}>
           <div className="bg-white w-full max-w-[390px] rounded-t-3xl p-5 space-y-4"
+            style={{ paddingBottom: '100px' }}
             onClick={e => e.stopPropagation()}>
             <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto" />
             <p className="font-bebas text-2xl tracking-wider text-slate-800">➕ CRIAR GRUPO</p>
@@ -151,6 +152,7 @@ export default function GroupsActions() {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-end justify-center"
           onClick={reset}>
           <div className="bg-white w-full max-w-[390px] rounded-t-3xl p-5 space-y-4"
+            style={{ paddingBottom: '100px' }}
             onClick={e => e.stopPropagation()}>
             <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto" />
             <p className="font-bebas text-2xl tracking-wider text-slate-800">🔑 ENTRAR COM CÓDIGO</p>
