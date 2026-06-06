@@ -447,3 +447,19 @@ grant select, insert, update, delete on public.group_standings to service_role;
 grant select, insert, update, delete on public.bracket_predictions to service_role;
 
 grant usage, select on all sequences in schema public to service_role;
+
+create table if not exists chat_read_status (
+  user_id uuid references users(id) on delete cascade,
+  group_id uuid references groups(id) on delete cascade,
+  last_read_at timestamptz default now(),
+  primary key (user_id, group_id)
+);
+
+alter table chat_read_status enable row level security;
+
+create policy "Usuário gerencia próprio status"
+  on chat_read_status for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+grant all on public.chat_read_status to authenticated;

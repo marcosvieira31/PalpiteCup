@@ -4,6 +4,7 @@ import GroupChat from './GroupChat'
 import GroupFilterConfig from './GroupFilterConfig'
 import { supabase } from '@/lib/supabase/client'
 import { Group } from '@/types/database'
+import { useUnreadCount } from '@/hooks/useUnreadCount'
 
 interface Props {
   groupId: number | string
@@ -18,6 +19,8 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [chatEnabled, setChatEnabled] = useState(group.chat_enabled ?? true)
   const [filterEnabled, setFilterEnabled] = useState(group.chat_filter_enabled ?? true)
+
+  const { unreadCount, markAsRead } = useUnreadCount(groupId, userId)
 
   const toggleChat = async (val: boolean) => {
     setChatEnabled(val)
@@ -34,14 +37,25 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
       {/* Botões */}
       <div className="flex gap-2">
         <button
-          onClick={() => chatEnabled && setChatOpen(true)}
-          className={`flex-1 py-2.5 rounded-2xl font-bebas tracking-wider text-sm ${
+          onClick={() => {
+            if (!chatEnabled) return
+            markAsRead()
+            setChatOpen(true)
+          }}
+          className={`flex-1 py-2.5 rounded-2xl font-bebas tracking-wider text-sm relative ${
             chatEnabled
               ? 'bg-white border-2 border-slate-200 text-slate-700'
               : 'bg-slate-100 border-2 border-slate-200 text-slate-300 cursor-not-allowed'
           }`}
         >
           {chatEnabled ? '💬 RESENHA' : '💬 RESENHA (desativada)'}
+
+          {/* Badge de notificação */}
+          {chatEnabled && unreadCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </button>
         {isOwner && (
           <button
@@ -71,6 +85,7 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
                 currentUserId={userId}
                 chatEnabled={chatEnabled}
                 filterEnabled={filterEnabled}
+                onMount={markAsRead}
               />
             </div>
           </div>

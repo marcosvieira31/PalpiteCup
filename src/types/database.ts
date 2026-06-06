@@ -108,6 +108,23 @@ export interface Database {
           created_at?: string
         }
       }
+      chat_read_status: {
+        Row: {
+          user_id: string
+          group_id: string
+          last_read_at: string
+        }
+        Insert: {
+          user_id: string
+          group_id: string
+          last_read_at?: string
+        }
+        Update: {
+          user_id?: string
+          group_id?: string
+          last_read_at?: string
+        }
+      }
       group_members: {
         Row: {
           group_id: string

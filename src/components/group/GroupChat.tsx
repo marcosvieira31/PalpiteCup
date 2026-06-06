@@ -16,9 +16,10 @@ interface Props {
   currentUserId: string
   chatEnabled: boolean
   filterEnabled: boolean
+  onMount?: () => void
 }
 
-export default function GroupChat({ groupId, currentUserId, chatEnabled, filterEnabled }: Props) {
+export default function GroupChat({ groupId, currentUserId, chatEnabled, filterEnabled, onMount }: Props) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
@@ -52,6 +53,10 @@ export default function GroupChat({ groupId, currentUserId, chatEnabled, filterE
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    onMount?.()
+  }, [])
 
   const sendMessage = async () => {
     if (!input.trim() || sending) return
