@@ -24,6 +24,9 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
   )
   const [saving, setSaving] = useState<Record<string, boolean>>({})
   const [saved, setSaved] = useState<Record<string, boolean>>({})
+  const [savedGames, setSavedGames] = useState<Set<string | number>>(
+    new Set(existingBets.map(b => b.game_id))
+  )
   const [sharing, setSharing] = useState<string | number | null>(null)
   const jokerUsed = Object.values(bets).some(b => b.joker)
 
@@ -51,6 +54,7 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
     try {
       await submitBet(gameId as number, bet.home, bet.away, bet.joker)
       setSaved(prev => ({ ...prev, [gameId]: true }))
+      setSavedGames(prev => new Set([...prev, gameId]))
       setTimeout(() => setSaved(prev => ({ ...prev, [gameId]: false })), 2000)
     } finally {
       setSaving(prev => ({ ...prev, [gameId]: false }))
@@ -105,7 +109,7 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
                 const bet = bets[String(game.id)] ?? { home: 0, away: 0, joker: false }
                 const isSaving = saving[String(game.id)]
                 const isSaved = saved[String(game.id)]
-                const hasExisting = existingBets.find(b => b.game_id === game.id)
+                const hasExisting = savedGames.has(game.id)
                 const kickoff = new Date(game.kickoff_at)
                 const diffHours = (kickoff.getTime() - Date.now()) / 1000 / 60 / 60
                 const isUrgent = diffHours < 2
