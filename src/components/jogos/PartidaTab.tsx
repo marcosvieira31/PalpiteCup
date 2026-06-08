@@ -72,7 +72,7 @@ export default function PartidaTab() {
 
       <div className="space-y-3">
         {games.map(game => (
-          <Link key={game.id} href={`/game/${game.id}`}>
+          <Link key={game.id} href={`/game/${game.id}`} className="block">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
