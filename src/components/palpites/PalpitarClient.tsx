@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { Game, Bet } from '@/types/database'
 import { submitBet } from '@/app/(app)/dashboard/actions'
 import TeamFlag from '@/components/ui/TeamFlag'
+import { shareBet } from '@/lib/share'
+import ShareButtons from '@/components/ui/ShareButtons'
 
 interface Props {
   games: Game[]
@@ -22,6 +24,7 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
   )
   const [saving, setSaving] = useState<Record<string, boolean>>({})
   const [saved, setSaved] = useState<Record<string, boolean>>({})
+  const [sharing, setSharing] = useState<string | number | null>(null)
   const jokerUsed = Object.values(bets).some(b => b.joker)
 
   const updateBet = (gameId: string | number, field: 'home' | 'away', value: number) => {
@@ -181,6 +184,32 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
                           {isSaving ? 'SALVANDO...' : isSaved ? '✅ SALVO!' : hasExisting ? '✏️ EDITAR' : 'PALPITAR'}
                         </button>
                       </div>
+
+                      {(isSaved || hasExisting) && (
+                        <div className="mt-4 border-t border-slate-100 pt-3">
+                          <button
+                            onClick={() => setSharing(sharing === game.id ? null : game.id)}
+                            className="w-full text-xs text-green-600 font-bold py-1 flex items-center justify-center gap-1"
+                          >
+                            🔗 {sharing === game.id ? 'Fechar' : 'Compartilhar palpite'}
+                          </button>
+
+                          {sharing === game.id && (
+                            <div className="mt-3">
+                              <ShareButtons
+                                {...shareBet(
+                                  game.home_team ?? '',
+                                  game.away_team ?? '',
+                                  bet.home,
+                                  bet.away,
+                                  'você'
+                                )}
+                                label="Compartilhar via"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )

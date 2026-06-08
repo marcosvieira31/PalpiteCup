@@ -3,11 +3,15 @@ import { ChevronLeft, Copy, Check } from "lucide-react";
 import Link from "next/link";
 import { Database } from "@/types/database";
 import { useState } from "react";
+import { shareGroup } from '@/lib/share';
+import ShareButtons from '@/components/ui/ShareButtons';
 
 type Group = Database["public"]["Tables"]["groups"]["Row"];
 
 export default function GroupHeader({ group }: { group: Group }) {
   const [copied, setCopied] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const share = shareGroup(group.name, group.invite_code);
 
   const copyCode = () => {
     navigator.clipboard.writeText(group.invite_code);
@@ -22,9 +26,18 @@ export default function GroupHeader({ group }: { group: Group }) {
           <ChevronLeft size={24} className="text-white" />
         </Link>
       </div>
+      <div className="absolute top-4 right-4">
+        <button
+          onClick={() => setShowShare(!showShare)}
+          className="w-10 h-10 bg-white/20 border border-white/30 backdrop-blur-sm rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+          🔗
+        </button>
+      </div>
 
-      <div className="flex flex-col items-center gap-2 mt-4 text-center">
-        <span className="text-white/80 font-bold uppercase tracking-widest text-[10px]">GRUPO PRIVADO</span>
+      <div className="flex flex-col items-center gap-2 mt-4 text-center w-full">
+        <span className="text-white/80 font-bold uppercase tracking-widest text-[10px]">
+          {group.type === 'open' ? '🌐 Grupo Aberto' : group.type === 'moderated' ? '👋 Grupo Moderado' : '🔒 Grupo Privado'}
+        </span>
         <h1 className="font-bebas text-5xl text-yellow-400 tracking-wider leading-none drop-shadow-md">
           {group.name}
         </h1>
@@ -39,6 +52,18 @@ export default function GroupHeader({ group }: { group: Group }) {
           </button>
         </div>
       </div>
+
+      {showShare && (
+        <div className="mt-6 bg-white rounded-2xl p-4 w-full max-w-[390px] shadow-lg animate-in slide-in-from-top-2">
+          <ShareButtons
+            whatsapp={share.whatsapp}
+            telegram={share.telegram}
+            twitter={share.twitter}
+            text={share.text}
+            label="Compartilhar convite"
+          />
+        </div>
+      )}
     </div>
   );
 }
