@@ -185,8 +185,8 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
                         </button>
                       </div>
 
-                      {(isSaved || hasExisting) && (
-                        <div className="mt-4 border-t border-slate-100 pt-3">
+                      {hasExisting && (
+                        <div className="mt-2">
                           <button
                             onClick={() => setSharing(sharing === game.id ? null : game.id)}
                             className="w-full text-xs text-green-600 font-bold py-1 flex items-center justify-center gap-1"
@@ -195,7 +195,7 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
                           </button>
 
                           {sharing === game.id && (
-                            <div className="mt-3">
+                            <div className="mt-2">
                               <ShareButtons
                                 {...shareBet(
                                   game.home_team ?? '',
