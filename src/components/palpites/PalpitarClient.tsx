@@ -61,7 +61,7 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
     }
   }
 
-  const pending = games.filter(g => !existingBets.find(b => b.game_id === g.id))
+  const pending = games.filter(g => !savedGames.has(g.id))
 
   const gamesByDate = games.reduce((acc, game) => {
     const date = new Date(game.kickoff_at).toLocaleDateString('pt-BR', {
