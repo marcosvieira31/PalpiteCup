@@ -39,28 +39,40 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
     const fetchFiltered = async () => {
       setLoading(true);
       const updated = await Promise.all(members.map(async (member) => {
+        // Query 1: busca os palpites com pontos
         const { data: bets } = await supabase
           .from('bets')
-          .select('points_earned, games!inner(home_team, away_team, group_stage)')
-          .eq('user_id', member.user_id);
+          .select('game_id, points_earned')
+          .eq('user_id', member.user_id)
+          .gt('points_earned', 0)
 
-        const filteredPoints = (bets ?? []).reduce((sum, bet) => {
-          const game = bet.games as unknown as { home_team: string; away_team: string; group_stage: string };
-          if (!game) return sum;
+        if (!bets || bets.length === 0) return { ...member, points_total: 0 }
+
+        // Query 2: busca os jogos correspondentes
+        const gameIds = bets.map(b => b.game_id)
+        const { data: games } = await supabase
+          .from('games')
+          .select('id, home_team, away_team, group_stage')
+          .in('id', gameIds)
+
+        const filteredPoints = bets.reduce((sum, bet) => {
+          const game = games?.find(g => g.id === bet.game_id)
+          if (!game) return sum
 
           const teamMatch = filterTeams.length === 0 ||
             filterTeams.includes(game.home_team) ||
-            filterTeams.includes(game.away_team);
+            filterTeams.includes(game.away_team)
 
           const phaseMatch = filterPhases.length === 0 ||
-            filterPhases.includes(game.group_stage);
+            filterPhases.includes(game.group_stage)
 
-          if (teamMatch && phaseMatch) return sum + (bet.points_earned ?? 0);
-          return sum;
-        }, 0);
+          if (teamMatch && phaseMatch) return sum + (bet.points_earned ?? 0)
+          return sum
+        }, 0)
 
-        return { ...member, points_total: filteredPoints };
+        return { ...member, points_total: filteredPoints }
       }));
+
       setDisplayMembers(updated.sort((a, b) => {
         if (b.points_total !== a.points_total) return b.points_total - a.points_total
         return (a.users?.username ?? '').localeCompare(b.users?.username ?? '')
