@@ -1,8 +1,6 @@
 "use client";
 
 import clsx from "clsx";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase/client";
 
 export interface RankingMember {
   user_id: string;
@@ -20,80 +18,12 @@ interface RankingListProps {
 }
 
 export default function RankingList({ members, filterTeams = [], filterPhases = [] }: RankingListProps) {
-  const [displayMembers, setDisplayMembers] = useState<RankingMember[]>([...members].sort((a, b) => {
+  const sorted = [...members].sort((a, b) => {
     if (b.points_total !== a.points_total) return b.points_total - a.points_total
     return (a.users?.username ?? '').localeCompare(b.users?.username ?? '')
-  }));
-  const [loading, setLoading] = useState(false);
+  })
 
-  useEffect(() => {
-    const hasFilter = filterTeams.length > 0 || filterPhases.length > 0;
-    if (!hasFilter) {
-      setDisplayMembers([...members].sort((a, b) => {
-        if (b.points_total !== a.points_total) return b.points_total - a.points_total
-        return (a.users?.username ?? '').localeCompare(b.users?.username ?? '')
-      }));
-      return;
-    }
-
-    const fetchFiltered = async () => {
-      setLoading(true);
-      const updated = await Promise.all(members.map(async (member) => {
-        // Query 1: busca os palpites com pontos
-        const { data: bets } = await supabase
-          .from('bets')
-          .select('game_id, points_earned')
-          .eq('user_id', member.user_id)
-          .gt('points_earned', 0)
-
-        console.log(`BETS para ${member.users?.username}:`, JSON.stringify(bets))
-
-        if (!bets || bets.length === 0) {
-          console.log(`SEM BETS para ${member.users?.username}`)
-          return { ...member, points_total: 0 }
-        }
-
-        // Query 2: busca os jogos correspondentes
-        const gameIds = bets.map(b => b.game_id)
-        console.log(`GAME IDS para ${member.users?.username}:`, gameIds)
-
-        const { data: games } = await supabase
-          .from('games')
-          .select('id, home_team, away_team, group_stage')
-          .in('id', gameIds)
-
-        console.log(`GAMES para ${member.users?.username}:`, JSON.stringify(games))
-        console.log(`FILTER TEAMS:`, filterTeams)
-
-        const filteredPoints = bets.reduce((sum, bet) => {
-          const game = games?.find(g => g.id === bet.game_id)
-          if (!game) return sum
-
-          const teamMatch = filterTeams.length === 0 ||
-            filterTeams.includes(game.home_team) ||
-            filterTeams.includes(game.away_team)
-
-          const phaseMatch = filterPhases.length === 0 ||
-            filterPhases.includes(game.group_stage)
-
-          if (teamMatch && phaseMatch) return sum + (bet.points_earned ?? 0)
-          return sum
-        }, 0)
-
-        return { ...member, points_total: filteredPoints }
-      }));
-
-      setDisplayMembers(updated.sort((a, b) => {
-        if (b.points_total !== a.points_total) return b.points_total - a.points_total
-        return (a.users?.username ?? '').localeCompare(b.users?.username ?? '')
-      }));
-      setLoading(false);
-    };
-
-    fetchFiltered();
-  }, [members, filterTeams, filterPhases]);
-
-  const hasFilter = filterTeams.length > 0 || filterPhases.length > 0;
+  const hasFilter = filterTeams.length > 0 || filterPhases.length > 0
 
   return (
     <div className="px-4 pt-6">
@@ -115,13 +45,8 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
         </div>
       )}
 
-      {loading ? (
-        <div className="text-center text-slate-400 py-4 text-sm">
-          Calculando pontuação...
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {displayMembers.map((member, index) => {
+      <div className="flex flex-col gap-3">
+        {sorted.map((member, index) => {
           const isTop1 = index === 0;
           const isTop2 = index === 1;
           const isTop3 = index === 2;
@@ -168,13 +93,12 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
             </div>
           );
         })}
-        {displayMembers.length === 0 && (
+        {sorted.length === 0 && (
           <div className="text-center text-slate-400 py-4 text-sm">
             Nenhum membro encontrado.
           </div>
         )}
       </div>
-      )}
     </div>
   );
 }
