@@ -16,12 +16,10 @@ export async function getFilteredPoints(
   if (!members) return []
 
   const results = await Promise.all(members.map(async (member) => {
-    let query = supabase
+    const { data: bets } = await supabase
       .from('bets')
       .select('points_earned, games(home_team, away_team, group_stage)')
       .eq('user_id', member.user_id)
-
-    const { data: bets } = await query
 
     const filteredPoints = (bets ?? []).reduce((sum, bet) => {
       const game = bet.games as { home_team: string; away_team: string; group_stage: string } | null

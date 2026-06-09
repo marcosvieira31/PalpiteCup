@@ -42,7 +42,10 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
         group.filter_teams ?? [],
         group.filter_phases ?? []
       )
-    : (group.group_members ?? []).map((m: any) => ({
+    : (group.group_members ?? []).map((m: {
+        user_id: string
+        users: { username: string; avatar_url: string | null; points_total: number } | null
+      }) => ({
         user_id: m.user_id,
         points_total: m.users?.points_total ?? 0,
         users: m.users
