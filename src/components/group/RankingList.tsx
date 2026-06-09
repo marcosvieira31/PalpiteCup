@@ -46,14 +46,24 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
           .eq('user_id', member.user_id)
           .gt('points_earned', 0)
 
-        if (!bets || bets.length === 0) return { ...member, points_total: 0 }
+        console.log(`BETS para ${member.users?.username}:`, JSON.stringify(bets))
+
+        if (!bets || bets.length === 0) {
+          console.log(`SEM BETS para ${member.users?.username}`)
+          return { ...member, points_total: 0 }
+        }
 
         // Query 2: busca os jogos correspondentes
         const gameIds = bets.map(b => b.game_id)
+        console.log(`GAME IDS para ${member.users?.username}:`, gameIds)
+
         const { data: games } = await supabase
           .from('games')
           .select('id, home_team, away_team, group_stage')
           .in('id', gameIds)
+
+        console.log(`GAMES para ${member.users?.username}:`, JSON.stringify(games))
+        console.log(`FILTER TEAMS:`, filterTeams)
 
         const filteredPoints = bets.reduce((sum, bet) => {
           const game = games?.find(g => g.id === bet.game_id)
