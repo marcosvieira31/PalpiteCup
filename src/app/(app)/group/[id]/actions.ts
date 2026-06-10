@@ -55,7 +55,7 @@ export async function getGroupPoints(groupId: number) {
   // Busca configurações do grupo com a key normal ou admin, mas admin não quebra
   const { data: group } = await supabaseAdmin
     .from('groups')
-    .select('filter_teams, filter_phases, scoring_bets, scoring_groups, scoring_bracket, scoring_journey')
+    .select('filter_teams, filter_phases, scoring_bets, scoring_groups, scoring_bracket, scoring_journey, scoring_groups_filter, scoring_journey_filter')
     .eq('id', groupId)
     .single()
 
@@ -101,10 +101,15 @@ export async function getGroupPoints(groupId: number) {
     if (group.scoring_groups) {
       const { data: groupPreds } = await supabaseAdmin
         .from('group_predictions')
-        .select('points_earned')
+        .select('points_earned, group_name')
         .eq('user_id', member.user_id)
 
-      totalPoints += (groupPreds ?? []).reduce((sum, p) => sum + (p.points_earned ?? 0), 0)
+      const hasGroupFilter = (group.scoring_groups_filter?.length ?? 0) > 0
+
+      totalPoints += (groupPreds ?? []).reduce((sum, p) => {
+        if (hasGroupFilter && !group.scoring_groups_filter!.includes(p.group_name)) return sum
+        return sum + (p.points_earned ?? 0)
+      }, 0)
     }
 
     // 3. Pontos de bracket
@@ -121,10 +126,15 @@ export async function getGroupPoints(groupId: number) {
     if (group.scoring_journey) {
       const { data: journeyPreds } = await supabaseAdmin
         .from('team_journey_predictions')
-        .select('points_earned')
+        .select('points_earned, team')
         .eq('user_id', member.user_id)
 
-      totalPoints += (journeyPreds ?? []).reduce((sum, p) => sum + (p.points_earned ?? 0), 0)
+      const hasJourneyFilter = (group.scoring_journey_filter?.length ?? 0) > 0
+
+      totalPoints += (journeyPreds ?? []).reduce((sum, p) => {
+        if (hasJourneyFilter && !group.scoring_journey_filter!.includes(p.team)) return sum
+        return sum + (p.points_earned ?? 0)
+      }, 0)
     }
 
     return {

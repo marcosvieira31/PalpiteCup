@@ -37,6 +37,12 @@ create table public.groups (
   filter_locked boolean default false,
   chat_enabled boolean default true,
   chat_filter_enabled boolean default true,
+  scoring_bets boolean default true,
+  scoring_groups boolean default false,
+  scoring_bracket boolean default false,
+  scoring_journey boolean default false,
+  scoring_groups_filter text[] default '{}',
+  scoring_journey_filter text[] default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

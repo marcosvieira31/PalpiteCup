@@ -88,6 +88,8 @@ export interface Database {
           scoring_groups: boolean
           scoring_bracket: boolean
           scoring_journey: boolean
+          scoring_groups_filter: string[] | null
+          scoring_journey_filter: string[] | null
           created_at: string
         }
         Insert: {
@@ -107,6 +109,8 @@ export interface Database {
           scoring_groups?: boolean
           scoring_bracket?: boolean
           scoring_journey?: boolean
+          scoring_groups_filter?: string[] | null
+          scoring_journey_filter?: string[] | null
           created_at?: string
         }
         Update: {
@@ -126,6 +130,8 @@ export interface Database {
           scoring_groups?: boolean
           scoring_bracket?: boolean
           scoring_journey?: boolean
+          scoring_groups_filter?: string[] | null
+          scoring_journey_filter?: string[] | null
           created_at?: string
         }
       }
