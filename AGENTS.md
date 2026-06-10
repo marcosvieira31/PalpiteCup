@@ -8,3 +8,7 @@ Leia obrigatoriamente antes de qualquer ação:
 
 Nunca tome decisões de stack, design ou segurança que contradigam esses arquivos.
 Mantenha os três arquivos atualizados conforme o projeto evolui.
+
+## Regra obrigatória de modais
+Todo componente modal que usa `rounded-t-3xl` DEVE ter `style={{ paddingBottom: '100px' }}`
+para não ser coberto pelo BottomNav fixo de 80px.

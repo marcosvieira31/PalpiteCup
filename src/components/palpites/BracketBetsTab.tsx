@@ -149,7 +149,7 @@ export default function BracketBetsTab({ allTeams, existingPicks, userId }: Prop
           onClick={() => { setSelecting(null); setSearch('') }}>
           <div
             className="bg-white w-full max-w-[390px] rounded-t-3xl"
-            style={{ maxHeight: '70vh', paddingBottom: '20px' }}
+            style={{ maxHeight: '70vh', paddingBottom: '100px' }}
             onClick={e => e.stopPropagation()}
           >
             <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-3" />
