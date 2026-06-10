@@ -2,9 +2,9 @@
 import { useState } from 'react'
 import PartidaTab from '@/components/jogos/PartidaTab'
 import GruposTab from '@/components/jogos/GruposTab'
-import MataMataTab from '@/components/jogos/MataMataTab'
+import BracketTab from '@/components/jogos/BracketTab'
 
-type Tab = 'partidas' | 'grupos' | 'mata-mata'
+type Tab = 'partidas' | 'grupos' | 'bracket'
 
 export default function JogosPage() {
   const [activeTab, setActiveTab] = useState<Tab>('partidas')
@@ -12,7 +12,7 @@ export default function JogosPage() {
   const tabs: { id: Tab; label: string }[] = [
     { id: 'partidas', label: '⚽ PARTIDAS' },
     { id: 'grupos', label: '📊 GRUPOS' },
-    { id: 'mata-mata', label: '⚔️ MATA-MATA' },
+    { id: 'bracket', label: '⚔️ BRACKET' },
   ]
 
   return (
@@ -40,10 +40,10 @@ export default function JogosPage() {
         </div>
       </div>
 
-      <div className="px-4 mt-4">
+      <div className={activeTab === 'bracket' ? '' : 'px-4 mt-4'}>
         {activeTab === 'partidas' && <PartidaTab />}
         {activeTab === 'grupos' && <GruposTab />}
-        {activeTab === 'mata-mata' && <MataMataTab />}
+        {activeTab === 'bracket' && <BracketTab />}
       </div>
     </div>
   )
