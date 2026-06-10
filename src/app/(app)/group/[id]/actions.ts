@@ -1,14 +1,17 @@
 "use server"
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
+
+const supabaseAdmin = createServiceClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function getFilteredPoints(
   groupId: number,
   filterTeams: string[],
   filterPhases: string[]
 ) {
-  const supabase = await createClient()
-
-  const { data: members } = await supabase
+  const { data: members } = await supabaseAdmin
     .from('group_members')
     .select('user_id, users(username, avatar_url)')
     .eq('group_id', groupId)
@@ -16,7 +19,7 @@ export async function getFilteredPoints(
   if (!members) return []
 
   const results = await Promise.all(members.map(async (member) => {
-    const { data: bets } = await supabase
+    const { data: bets } = await supabaseAdmin
       .from('bets')
       .select('points_earned, games(home_team, away_team, group_stage)')
       .eq('user_id', member.user_id)
