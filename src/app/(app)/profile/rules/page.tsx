@@ -36,11 +36,7 @@ const rules = [
   },
 ]
 
-const bracketRules = [
-  { icon: '🏅', round: 'Semifinalista', points: 10 },
-  { icon: '🥈', round: 'Finalista', points: 20 },
-  { icon: '🏆', round: 'Campeão', points: 50 },
-]
+
 
 export default function RulesPage() {
   return (
@@ -108,28 +104,84 @@ export default function RulesPage() {
           </div>
         </section>
 
-        {/* Bracket */}
+        {/* Palpites de Grupos */}
         <section>
           <h2 className="font-bebas text-2xl tracking-widest text-slate-700 mb-3">
-            🏆 PALPITE DE BRACKET
+            📊 PALPITES DE GRUPOS
           </h2>
           <div className="space-y-3">
-            {bracketRules.map(rule => (
-              <div key={rule.round} className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center">
+            {[
+              { icon: '🥇', title: '1º Colocado Exato', points: 5, desc: 'Acertou o 1º do grupo' },
+              { icon: '🎯', title: 'Posição Exata', points: 3, desc: 'Acertou a posição exata de um time' },
+              { icon: '✅', title: 'Classificado (Top 2)', points: 1, desc: 'Acertou se o time se classificou' },
+            ].map(rule => (
+              <div key={rule.title} className="bg-blue-50 rounded-2xl border border-blue-100 p-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{rule.icon}</span>
-                  <p className="font-bold text-slate-800 text-sm">{rule.round}</p>
+                  <div>
+                    <p className="font-bold text-sm text-blue-800">{rule.title}</p>
+                    <p className="text-xs text-slate-500">{rule.desc}</p>
+                  </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bebas text-2xl text-blue-900">+{rule.points}</p>
+                  <p className="font-bebas text-2xl text-blue-700">+{rule.points}</p>
                   <p className="text-[10px] text-slate-400">pontos</p>
                 </div>
               </div>
             ))}
           </div>
-          <p className="text-xs text-slate-400 mt-3 text-center">
-            Bracket trava antes da 2ª rodada da fase de grupos
-          </p>
+        </section>
+
+        {/* Bracket */}
+        <section>
+          <h2 className="font-bebas text-2xl tracking-widest text-slate-700 mb-3">
+            ⚔️ BRACKET MATA-MATA
+          </h2>
+          <div className="space-y-2">
+            {[
+              { round: 'Fase de 32', points: 2 },
+              { round: 'Oitavas de Final', points: 3 },
+              { round: 'Quartas de Final', points: 5 },
+              { round: 'Semifinal', points: 8 },
+              { round: 'Finalista', points: 15 },
+              { round: 'Campeão', points: 30 },
+            ].map(rule => (
+              <div key={rule.round} className="bg-white rounded-2xl border border-slate-200 p-3 flex justify-between items-center">
+                <p className="font-bold text-slate-800 text-sm">{rule.round}</p>
+                <div className="text-right">
+                  <p className="font-bebas text-xl text-blue-900">+{rule.points}</p>
+                  <p className="text-[10px] text-slate-400">pontos</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Até onde vai */}
+        <section>
+          <h2 className="font-bebas text-2xl tracking-widest text-slate-700 mb-3">
+            🗺️ ATÉ ONDE VAI
+          </h2>
+          <div className="space-y-3">
+            {[
+              { icon: '🎯', title: 'Fase Exata', points: 5, desc: 'Acertou exatamente até onde a seleção foi' },
+              { icon: '✅', title: 'Passou da Fase de Grupos', points: 2, desc: 'Acertou se a seleção se classificou' },
+            ].map(rule => (
+              <div key={rule.title} className="bg-green-50 rounded-2xl border border-green-100 p-4 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{rule.icon}</span>
+                  <div>
+                    <p className="font-bold text-sm text-green-800">{rule.title}</p>
+                    <p className="text-xs text-slate-500">{rule.desc}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bebas text-2xl text-green-700">+{rule.points}</p>
+                  <p className="text-[10px] text-slate-400">pontos</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* Desempate */}
