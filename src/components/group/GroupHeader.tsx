@@ -53,18 +53,64 @@ export default function GroupHeader({ group }: { group: Group }) {
         </div>
 
         {/* Modalidades ativas */}
-        <div className="flex gap-1 flex-wrap mt-3">
+        <div className="mt-3 space-y-1 w-full max-w-[300px] text-left">
+          {/* Palpites de Partidas com filtro */}
           {group.scoring_bets && (
-            <span className="bg-white/20 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">⚽ PARTIDAS</span>
+            <div className="bg-white/15 rounded-xl px-3 py-2">
+              <p className="text-white text-[10px] font-bold">⚽ PARTIDAS</p>
+              {(group.filter_teams?.length ?? 0) > 0 && (
+                <p className="text-white/70 text-[9px] mt-0.5">
+                  Times: {group.filter_teams!.join(', ')}
+                </p>
+              )}
+              {(group.filter_phases?.length ?? 0) > 0 && (
+                <p className="text-white/70 text-[9px]">
+                  Fases: {group.filter_phases!.join(', ')}
+                </p>
+              )}
+              {(group.filter_teams?.length ?? 0) === 0 && (group.filter_phases?.length ?? 0) === 0 && (
+                <p className="text-white/70 text-[9px] mt-0.5">Todos os jogos</p>
+              )}
+            </div>
           )}
+
+          {/* Classificação dos Grupos */}
           {group.scoring_groups && (
-            <span className="bg-white/20 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">📊 GRUPOS</span>
+            <div className="bg-white/15 rounded-xl px-3 py-2">
+              <p className="text-white text-[10px] font-bold">📊 CLASSIFICAÇÃO DOS GRUPOS</p>
+              <p className="text-white/70 text-[9px] mt-0.5">
+                {(group.scoring_groups_filter?.length ?? 0) === 0
+                  ? 'Todos os grupos'
+                  : group.scoring_groups_filter!.join(', ')}
+              </p>
+            </div>
           )}
+
+          {/* Bracket */}
           {group.scoring_bracket && (
-            <span className="bg-white/20 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">⚔️ BRACKET</span>
+            <div className="bg-white/15 rounded-xl px-3 py-2">
+              <p className="text-white text-[10px] font-bold">⚔️ BRACKET MATA-MATA</p>
+              <p className="text-white/70 text-[9px] mt-0.5">Fase de 32 até a Final</p>
+            </div>
           )}
+
+          {/* Até onde vai */}
           {group.scoring_journey && (
-            <span className="bg-white/20 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">🗺️ JORNADA</span>
+            <div className="bg-white/15 rounded-xl px-3 py-2">
+              <p className="text-white text-[10px] font-bold">🗺️ ATÉ ONDE VAI</p>
+              <p className="text-white/70 text-[9px] mt-0.5">
+                {(group.scoring_journey_filter?.length ?? 0) === 0
+                  ? 'Todas as seleções'
+                  : `${group.scoring_journey_filter!.length} seleção(ões): ${group.scoring_journey_filter!.slice(0, 3).join(', ')}${group.scoring_journey_filter!.length > 3 ? '...' : ''}`}
+              </p>
+            </div>
+          )}
+
+          {/* Nenhuma modalidade ativa */}
+          {!group.scoring_bets && !group.scoring_groups && !group.scoring_bracket && !group.scoring_journey && (
+            <div className="bg-white/15 rounded-xl px-3 py-2">
+              <p className="text-white/70 text-[9px]">Nenhuma modalidade ativa</p>
+            </div>
           )}
         </div>
       </div>
