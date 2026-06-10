@@ -1,5 +1,5 @@
 "use client";
-
+import { useState } from 'react';
 import clsx from "clsx";
 
 export interface RankingMember {
@@ -15,9 +15,11 @@ interface RankingListProps {
   members: RankingMember[];
   filterTeams?: string[];
   filterPhases?: string[];
+  group?: import('@/types/database').Database["public"]["Tables"]["groups"]["Row"];
 }
 
-export default function RankingList({ members, filterTeams = [], filterPhases = [] }: RankingListProps) {
+export default function RankingList({ members, filterTeams = [], filterPhases = [], group }: RankingListProps) {
+  const [showFilters, setShowFilters] = useState(false);
   const sorted = [...members].sort((a, b) => {
     if (b.points_total !== a.points_total) return b.points_total - a.points_total
     return (a.users?.username ?? '').localeCompare(b.users?.username ?? '')
@@ -34,14 +36,61 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
         </span>
       </h2>
 
-      {hasFilter && (
-        <div className="bg-blue-50 rounded-xl p-3 mb-3 text-center">
-          <p className="text-blue-700 text-xs font-bold">
-            🎯 Pontuação filtrada —{' '}
-            {filterTeams.length > 0 && `${filterTeams.join(', ')}`}
-            {filterTeams.length > 0 && filterPhases.length > 0 && ' + '}
-            {filterPhases.length > 0 && filterPhases.join(', ')}
-          </p>
+      {hasFilter && group && (
+        <div className="mb-3">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="w-full bg-blue-50 rounded-xl p-3 flex justify-between items-center"
+          >
+            <p className="text-blue-700 text-xs font-bold">
+              🎯 Pontuação filtrada — toque para ver detalhes
+            </p>
+            <span className="text-blue-500 text-sm">{showFilters ? '▲' : '▼'}</span>
+          </button>
+
+          {showFilters && (
+            <div className="bg-blue-50 rounded-b-xl px-4 pb-3 space-y-2 -mt-1 border-t border-blue-100 text-left">
+              {group.scoring_bets && (
+                <div>
+                  <p className="text-blue-700 text-[10px] font-bold mt-2">⚽ PARTIDAS</p>
+                  <p className="text-blue-500 text-[10px]">
+                    {(group.filter_teams?.length ?? 0) === 0 && (group.filter_phases?.length ?? 0) === 0
+                      ? 'Todos os jogos'
+                      : [
+                          ...(group.filter_teams?.length ? [`Times: ${group.filter_teams.join(', ')}`] : []),
+                          ...(group.filter_phases?.length ? [`Fases: ${group.filter_phases.join(', ')}`] : [])
+                        ].join(' • ')}
+                  </p>
+                </div>
+              )}
+              {group.scoring_groups && (
+                <div>
+                  <p className="text-blue-700 text-[10px] font-bold">📊 CLASSIFICAÇÃO DOS GRUPOS</p>
+                  <p className="text-blue-500 text-[10px]">
+                    {(group.scoring_groups_filter?.length ?? 0) === 0
+                      ? 'Todos os grupos'
+                      : group.scoring_groups_filter!.join(', ')}
+                  </p>
+                </div>
+              )}
+              {group.scoring_bracket && (
+                <div>
+                  <p className="text-blue-700 text-[10px] font-bold">⚔️ BRACKET MATA-MATA</p>
+                  <p className="text-blue-500 text-[10px]">Fase de 32 até a Final</p>
+                </div>
+              )}
+              {group.scoring_journey && (
+                <div>
+                  <p className="text-blue-700 text-[10px] font-bold">🗺️ ATÉ ONDE VAI</p>
+                  <p className="text-blue-500 text-[10px]">
+                    {(group.scoring_journey_filter?.length ?? 0) === 0
+                      ? 'Todas as seleções'
+                      : `${group.scoring_journey_filter!.slice(0, 5).join(', ')}${group.scoring_journey_filter!.length > 5 ? ` +${group.scoring_journey_filter!.length - 5}` : ''}`}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

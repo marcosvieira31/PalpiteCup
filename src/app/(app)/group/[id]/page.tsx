@@ -64,6 +64,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
           members={computedMembers as unknown as import('@/components/group/RankingList').RankingMember[]}
           filterTeams={group.filter_teams ?? []}
           filterPhases={group.filter_phases ?? []}
+          group={group}
         />
       </div>
     </div>
