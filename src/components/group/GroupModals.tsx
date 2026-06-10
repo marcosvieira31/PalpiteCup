@@ -19,8 +19,27 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [chatEnabled, setChatEnabled] = useState(group.chat_enabled ?? true)
   const [filterEnabled, setFilterEnabled] = useState(group.chat_filter_enabled ?? true)
+  
+  const [scoringBets, setScoringBets] = useState(group?.scoring_bets ?? true)
+  const [scoringGroups, setScoringGroups] = useState(group?.scoring_groups ?? false)
+  const [scoringBracket, setScoringBracket] = useState(group?.scoring_bracket ?? false)
+  const [scoringJourney, setScoringJourney] = useState(group?.scoring_journey ?? false)
 
   const { unreadCount, markAsRead } = useUnreadCount(groupId, userId)
+
+  const handleToggleScoring = async (
+    field: 'scoring_bets' | 'scoring_groups' | 'scoring_bracket' | 'scoring_journey',
+    value: boolean
+  ) => {
+    const setters = {
+      scoring_bets: setScoringBets,
+      scoring_groups: setScoringGroups,
+      scoring_bracket: setScoringBracket,
+      scoring_journey: setScoringJourney,
+    }
+    setters[field](value)
+    await supabase.from('groups').update({ [field]: value }).eq('id', String(groupId))
+  }
 
   const toggleChat = async (val: boolean) => {
     setChatEnabled(val)
@@ -138,6 +157,36 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
                 >
                   <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${filterEnabled ? 'left-6' : 'left-0.5'}`} />
                 </button>
+              </div>
+
+              {/* Modalidades */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-4">
+                <p className="font-bold text-slate-800 text-sm mb-3">🏆 Modalidades que pontuam</p>
+                <p className="text-xs text-slate-400 mb-3">Escolha quais palpites contam no ranking deste grupo</p>
+
+                {[
+                  { field: 'scoring_bets' as const, label: '⚽ Palpites de Partidas', desc: 'Placares dos jogos', value: scoringBets, setter: setScoringBets },
+                  { field: 'scoring_groups' as const, label: '📊 Classificação dos Grupos', desc: 'Ordem de cada grupo', value: scoringGroups, setter: setScoringGroups },
+                  { field: 'scoring_bracket' as const, label: '⚔️ Bracket Mata-Mata', desc: 'Fase de 32 até a Final', value: scoringBracket, setter: setScoringBracket },
+                  { field: 'scoring_journey' as const, label: '🗺️ Até onde vai', desc: 'Jornada de cada seleção', value: scoringJourney, setter: setScoringJourney },
+                ].map(item => (
+                  <div key={item.field} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">{item.label}</p>
+                      <p className="text-xs text-slate-400">{item.desc}</p>
+                    </div>
+                    <button
+                      onClick={() => handleToggleScoring(item.field, !item.value)}
+                      className={`w-12 h-6 rounded-full relative transition-colors flex-shrink-0 ml-3 ${
+                        item.value ? 'bg-green-500' : 'bg-slate-300'
+                      }`}
+                    >
+                      <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${
+                        item.value ? 'left-6' : 'left-0.5'
+                      }`} />
+                    </button>
+                  </div>
+                ))}
               </div>
 
               {/* Filtro de jogos */}

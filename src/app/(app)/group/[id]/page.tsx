@@ -4,7 +4,7 @@ import GroupHeader from '@/components/group/GroupHeader'
 import RankingList from '@/components/group/RankingList'
 import GroupActions from '@/components/group/GroupModals'
 import PendingRequests from '@/components/group/PendingRequests'
-import { getFilteredPoints } from './actions'
+import { getGroupPoints } from './actions'
 
 export default async function GroupPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -34,22 +34,8 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
   )].sort() as string[]
 
   const isOwner = user?.id === group.owner_id
-  const hasFilter = (group.filter_teams?.length ?? 0) > 0 || (group.filter_phases?.length ?? 0) > 0
 
-  const computedMembers = hasFilter
-    ? await getFilteredPoints(
-        Number(params.id),
-        group.filter_teams ?? [],
-        group.filter_phases ?? []
-      )
-    : (group.group_members ?? []).map((m: {
-        user_id: string
-        users: { username: string; avatar_url: string | null; points_total: number } | null
-      }) => ({
-        user_id: m.user_id,
-        points_total: m.users?.points_total ?? 0,
-        users: m.users
-      }))
+  const computedMembers = await getGroupPoints(Number(params.id))
 
   return (
     <div className="pb-24">

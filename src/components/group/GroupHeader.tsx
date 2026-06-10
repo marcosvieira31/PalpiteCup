@@ -51,6 +51,22 @@ export default function GroupHeader({ group }: { group: Group }) {
             {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
           </button>
         </div>
+
+        {/* Modalidades ativas */}
+        <div className="flex gap-1 flex-wrap mt-3">
+          {group.scoring_bets && (
+            <span className="bg-white/20 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">⚽ PARTIDAS</span>
+          )}
+          {group.scoring_groups && (
+            <span className="bg-white/20 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">📊 GRUPOS</span>
+          )}
+          {group.scoring_bracket && (
+            <span className="bg-white/20 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">⚔️ BRACKET</span>
+          )}
+          {group.scoring_journey && (
+            <span className="bg-white/20 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">🗺️ JORNADA</span>
+          )}
+        </div>
       </div>
 
       {showShare && (

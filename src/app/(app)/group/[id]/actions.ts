@@ -51,11 +51,16 @@ const supabaseAdmin = createServiceClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function getFilteredPoints(
-  groupId: number,
-  filterTeams: string[],
-  filterPhases: string[]
-) {
+export async function getGroupPoints(groupId: number) {
+  // Busca configurações do grupo com a key normal ou admin, mas admin não quebra
+  const { data: group } = await supabaseAdmin
+    .from('groups')
+    .select('filter_teams, filter_phases, scoring_bets, scoring_groups, scoring_bracket, scoring_journey')
+    .eq('id', groupId)
+    .single()
+
+  if (!group) return []
+
   const { data: members } = await supabaseAdmin
     .from('group_members')
     .select('user_id, users(username, avatar_url)')
@@ -64,29 +69,67 @@ export async function getFilteredPoints(
   if (!members) return []
 
   const results = await Promise.all(members.map(async (member) => {
-    const { data: bets } = await supabaseAdmin
-      .from('bets')
-      .select('points_earned, games(home_team, away_team, group_stage)')
-      .eq('user_id', member.user_id)
+    let totalPoints = 0
 
-    const filteredPoints = (bets ?? []).reduce((sum, bet) => {
-      const game = bet.games as { home_team: string; away_team: string; group_stage: string } | null
-      if (!game) return sum
+    // 1. Pontos de partidas (com filtro de times/fases)
+    if (group.scoring_bets !== false) { // defaulting to true for older groups
+      const { data: bets } = await supabaseAdmin
+        .from('bets')
+        .select('points_earned, games(home_team, away_team, group_stage)')
+        .eq('user_id', member.user_id)
 
-      const teamMatch = filterTeams.length === 0 ||
-        filterTeams.includes(game.home_team) ||
-        filterTeams.includes(game.away_team)
+      totalPoints += (bets ?? []).reduce((sum, bet) => {
+        const game = bet.games as { home_team: string; away_team: string; group_stage: string } | null
+        if (!game) return sum
 
-      const phaseMatch = filterPhases.length === 0 ||
-        filterPhases.includes(game.group_stage)
+        const hasTeamFilter = (group.filter_teams?.length ?? 0) > 0
+        const hasPhaseFilter = (group.filter_phases?.length ?? 0) > 0
 
-      if (teamMatch && phaseMatch) return sum + (bet.points_earned ?? 0)
-      return sum
-    }, 0)
+        const teamMatch = !hasTeamFilter ||
+          group.filter_teams!.includes(game.home_team) ||
+          group.filter_teams!.includes(game.away_team)
+
+        const phaseMatch = !hasPhaseFilter ||
+          group.filter_phases!.includes(game.group_stage)
+
+        if (teamMatch && phaseMatch) return sum + (bet.points_earned ?? 0)
+        return sum
+      }, 0)
+    }
+
+    // 2. Pontos de classificação dos grupos
+    if (group.scoring_groups) {
+      const { data: groupPreds } = await supabaseAdmin
+        .from('group_predictions')
+        .select('points_earned')
+        .eq('user_id', member.user_id)
+
+      totalPoints += (groupPreds ?? []).reduce((sum, p) => sum + (p.points_earned ?? 0), 0)
+    }
+
+    // 3. Pontos de bracket
+    if (group.scoring_bracket) {
+      const { data: bracketPicks } = await supabaseAdmin
+        .from('bracket_picks')
+        .select('points_earned')
+        .eq('user_id', member.user_id)
+
+      totalPoints += (bracketPicks ?? []).reduce((sum, p) => sum + (p.points_earned ?? 0), 0)
+    }
+
+    // 4. Pontos de jornada
+    if (group.scoring_journey) {
+      const { data: journeyPreds } = await supabaseAdmin
+        .from('team_journey_predictions')
+        .select('points_earned')
+        .eq('user_id', member.user_id)
+
+      totalPoints += (journeyPreds ?? []).reduce((sum, p) => sum + (p.points_earned ?? 0), 0)
+    }
 
     return {
       user_id: member.user_id,
-      points_total: filteredPoints,
+      points_total: totalPoints,
       users: member.users
     }
   }))
