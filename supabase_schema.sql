@@ -534,3 +534,112 @@ grant usage, select, update on sequence notifications_id_seq to authenticated;
 alter publication supabase_realtime add table group_requests;
 alter publication supabase_realtime add table notifications;
 
+-- Palpites de classificação dos grupos
+create table if not exists group_predictions (
+  id serial primary key,
+  user_id uuid references users(id) on delete cascade,
+  group_name text not null,
+  position integer not null check (position between 1 and 4),
+  predicted_team text not null,
+  points_earned integer default 0,
+  locked boolean default false,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique(user_id, group_name, position)
+);
+
+-- Palpites do bracket completo (fase de 32 até final)
+create table if not exists bracket_picks (
+  id serial primary key,
+  user_id uuid references users(id) on delete cascade,
+  round text not null check (round in (
+    'phase_of_32', 'round_of_16', 'quarter_final',
+    'semi_final', 'third_place', 'final', 'champion'
+  )),
+  match_number integer not null,
+  predicted_team text not null,
+  points_earned integer default 0,
+  locked boolean default false,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique(user_id, round, match_number)
+);
+
+-- Palpites de até onde vai cada seleção
+create table if not exists team_journey_predictions (
+  id serial primary key,
+  user_id uuid references users(id) on delete cascade,
+  team text not null,
+  predicted_phase text not null check (predicted_phase in (
+    'group_stage', 'phase_of_32', 'round_of_16',
+    'quarter_final', 'semi_final', 'third_place',
+    'runner_up', 'champion'
+  )),
+  points_earned integer default 0,
+  locked boolean default false,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique(user_id, team)
+);
+
+-- RLS
+alter table group_predictions enable row level security;
+alter table bracket_picks enable row level security;
+alter table team_journey_predictions enable row level security;
+
+-- Policies
+create policy "Usuário gerencia próprios palpites de grupo"
+  on group_predictions for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Palpites de grupo visíveis para autenticados após travamento"
+  on group_predictions for select
+  using (
+    auth.uid() = user_id or locked = true
+  );
+
+create policy "Usuário gerencia próprio bracket"
+  on bracket_picks for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Bracket visível para autenticados após travamento"
+  on bracket_picks for select
+  using (
+    auth.uid() = user_id or locked = true
+  );
+
+create policy "Usuário gerencia próprios palpites de jornada"
+  on team_journey_predictions for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Jornada visível para autenticados após travamento"
+  on team_journey_predictions for select
+  using (
+    auth.uid() = user_id or locked = true
+  );
+
+-- Grants
+grant all on public.group_predictions to authenticated;
+grant all on public.bracket_picks to authenticated;
+grant all on public.team_journey_predictions to authenticated;
+grant usage, select, update on sequence group_predictions_id_seq to authenticated;
+grant usage, select, update on sequence bracket_picks_id_seq to authenticated;
+grant usage, select, update on sequence team_journey_predictions_id_seq to authenticated;
+
+-- Realtime
+alter publication supabase_realtime add table group_predictions;
+alter publication supabase_realtime add table bracket_picks;
+alter publication supabase_realtime add table team_journey_predictions;
+
+NOTIFY pgrst, 'reload schema';
+
+-- Quais modalidades o líder ativa para o grupo
+alter table groups add column if not exists scoring_bets boolean default true;
+alter table groups add column if not exists scoring_groups boolean default false;
+alter table groups add column if not exists scoring_bracket boolean default false;
+alter table groups add column if not exists scoring_journey boolean default false;
+
+NOTIFY pgrst, 'reload schema';

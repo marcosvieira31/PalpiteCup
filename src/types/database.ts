@@ -84,6 +84,10 @@ export interface Database {
           type: 'private' | 'open' | 'moderated'
           max_members: number | null
           description: string | null
+          scoring_bets: boolean
+          scoring_groups: boolean
+          scoring_bracket: boolean
+          scoring_journey: boolean
           created_at: string
         }
         Insert: {
@@ -99,6 +103,10 @@ export interface Database {
           type?: 'private' | 'open' | 'moderated'
           max_members?: number | null
           description?: string | null
+          scoring_bets?: boolean
+          scoring_groups?: boolean
+          scoring_bracket?: boolean
+          scoring_journey?: boolean
           created_at?: string
         }
         Update: {
@@ -114,6 +122,10 @@ export interface Database {
           type?: 'private' | 'open' | 'moderated'
           max_members?: number | null
           description?: string | null
+          scoring_bets?: boolean
+          scoring_groups?: boolean
+          scoring_bracket?: boolean
+          scoring_journey?: boolean
           created_at?: string
         }
       }
@@ -449,4 +461,39 @@ export interface Group {
   chat_enabled: boolean
   chat_filter_enabled: boolean
   created_at: string
+}
+
+export interface GroupPrediction {
+  id: number
+  user_id: string
+  group_name: string
+  position: number
+  predicted_team: string
+  points_earned: number
+  locked: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface BracketPick {
+  id: number
+  user_id: string
+  round: 'phase_of_32' | 'round_of_16' | 'quarter_final' | 'semi_final' | 'third_place' | 'final' | 'champion'
+  match_number: number
+  predicted_team: string
+  points_earned: number
+  locked: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface TeamJourneyPrediction {
+  id: number
+  user_id: string
+  team: string
+  predicted_phase: 'group_stage' | 'phase_of_32' | 'round_of_16' | 'quarter_final' | 'semi_final' | 'third_place' | 'runner_up' | 'champion'
+  points_earned: number
+  locked: boolean
+  created_at: string
+  updated_at: string
 }
