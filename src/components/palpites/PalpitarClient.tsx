@@ -9,10 +9,9 @@ import ShareButtons from '@/components/ui/ShareButtons'
 interface Props {
   games: Game[]
   existingBets: Bet[]
-  roundName: string
 }
 
-export default function PalpitarClient({ games, existingBets, roundName }: Props) {
+export default function PalpitarClient({ games, existingBets }: Props) {
   const [bets, setBets] = useState<Record<string, { home: number; away: number; joker: boolean }>>(
     Object.fromEntries(
       existingBets.map(b => [b.game_id, {
@@ -73,17 +72,9 @@ export default function PalpitarClient({ games, existingBets, roundName }: Props
   }, {} as Record<string, Game[]>)
 
   return (
-    <div className="pb-24">
-      <div className="bg-blue-900 px-4 pt-6 pb-6 sticky top-0 z-10"
-        style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1.5px, transparent 1.5px)', backgroundSize: '12px 12px' }}>
-        <h1 className="font-bebas text-4xl text-yellow-400 tracking-widest"
-          style={{ textShadow: '2px 2px 0 rgba(0,0,0,0.3)' }}>
-          PALPITAR
-        </h1>
-        <p className="text-yellow-200 text-xs font-bold tracking-widest uppercase mt-1">
-          {roundName}
-        </p>
-        <p className="text-blue-200 text-sm mt-1">
+    <div className="pb-4">
+      <div className="bg-blue-50 rounded-2xl border border-blue-100 p-3 mt-4 mx-4 text-center">
+        <p className="text-blue-700 text-xs font-bold">
           {pending.length > 0
             ? `⚡ ${pending.length} jogo${pending.length > 1 ? 's' : ''} aguardando seu palpite`
             : '✅ Todos os palpites feitos!'}
