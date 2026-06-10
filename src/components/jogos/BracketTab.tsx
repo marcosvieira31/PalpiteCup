@@ -1,7 +1,6 @@
 "use client"
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
-import { Game } from '@/types/database'
 import TeamFlag from '@/components/ui/TeamFlag'
 
 const ROUNDS = [
