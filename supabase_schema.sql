@@ -167,6 +167,14 @@ returns trigger as $$
 declare
   match_time timestamp with time zone;
 begin
+  if TG_OP = 'UPDATE' then
+    if NEW.home IS NOT DISTINCT FROM OLD.home 
+       AND NEW.away IS NOT DISTINCT FROM OLD.away 
+       AND NEW.joker IS NOT DISTINCT FROM OLD.joker then
+      return NEW;
+    end if;
+  end if;
+
   select kickoff_at into match_time from public.games where id = new.game_id;
   if now() >= match_time then
     raise exception 'Prazo de palpite encerrado. A partida já começou.';
