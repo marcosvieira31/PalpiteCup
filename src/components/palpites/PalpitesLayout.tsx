@@ -1,5 +1,6 @@
 "use client"
 import { useState } from 'react'
+import Link from 'next/link'
 import PalpitarClient from './PalpitarClient'
 import GroupBetsTab from './GroupBetsTab'
 import BracketBetsTab from './BracketBetsTab'
@@ -38,10 +39,16 @@ export default function PalpitesLayout({
       {/* Header */}
       <div className="bg-blue-900 px-4 pt-6 pb-0 sticky top-0 z-10"
         style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1.5px, transparent 1.5px)', backgroundSize: '12px 12px' }}>
-        <h1 className="font-bebas text-4xl text-yellow-400 tracking-widest mb-4"
-          style={{ textShadow: '2px 2px 0 rgba(0,0,0,0.3)' }}>
-          PALPITES
-        </h1>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="font-bebas text-4xl text-yellow-400 tracking-widest m-0"
+            style={{ textShadow: '2px 2px 0 rgba(0,0,0,0.3)' }}>
+            PALPITES
+          </h1>
+          <Link href="/palpites/resultados"
+            className="bg-white/20 text-white font-bebas tracking-wider text-xs px-3 py-2 rounded-xl">
+            📊 RESULTADOS
+          </Link>
+        </div>
         <div className="flex gap-1">
           {tabs.map(tab => (
             <button
