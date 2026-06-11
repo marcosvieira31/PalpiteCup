@@ -21,11 +21,12 @@ export async function GET(req: NextRequest) {
     const matches = hasLive ? liveData : await fetchAllMatches()
 
     for (const m of matches) {
-      const status = m.status === 'finished' || m.status === 'FT' || m.status === 'FT_PEN'
-        ? 'finished'
-        : ['1H', 'HT', '2H', 'ET1', 'ET2', 'PEN', 'in_play', 'live'].includes(m.status)
-        ? 'live'
-        : 'scheduled'
+      const status =
+        m.status === 'completed' || m.phase === 'FT' || m.phase === 'FT_PEN'
+          ? 'finished'
+          : ['1H', 'HT', '2H', 'ET1', 'ET2', 'PEN'].includes(m.phase)
+          ? 'live'
+          : 'scheduled'
 
       const { error } = await supabase.from('games').upsert({
         api_football_id: m.id,
