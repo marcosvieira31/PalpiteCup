@@ -17,8 +17,8 @@ Client → Supabase (cache) ← Cron Job → WC2026 API
 - CSP (Content Security Policy) estrito via headers HTTP customizados.
 - SUPABASE_SERVICE_ROLE_KEY apenas server-side.
 - RLS ativo em todas as tabelas (incluindo bracket_predictions e users).
-- Palpites de jogos bloqueados logicamente e no banco após kickoff_at.
-- Bracket (Mata-Mata) travado globalmente após início da 2ª rodada da fase de grupos.
+- Prazos rígidos de palpites implementados na lógica de tela via utilitário central `src/lib/deadlines.ts` e bloqueados visualmente no frontend no fuso `America/Sao_Paulo`.
+- Palpites de jogos (partidas avulsas) travam automaticamente de acordo com o timestamp de `kickoff_at` utilizando `isBeforeKickoff()`.
 - Pontuação calculada via Postgres Function (trigger).
 - Ranking Global servido em tempo real via Supabase Realtime (postgres_changes).
 

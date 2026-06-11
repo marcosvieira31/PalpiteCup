@@ -22,6 +22,11 @@ Web app (PWA) de palpites para jogos da Copa do Mundo.
 - **Mata-Mata (Bracket)**: Palpite da árvore completa, de 32avos até o campeão.
 - **Jornada das Seleções**: Palpite isolado de até que fase uma seleção específica conseguirá chegar.
 
+## Fuso Horário e Prazos
+- Todo o sistema (front e back) utiliza estritamente o fuso horário de **Brasília (UTC-3)** (`America/Sao_Paulo`).
+- Palpites de Partidas fecham no exato instante do *kickoff*.
+- Palpites de modalidades extras possuem prazos rígidos gerenciados via código (`src/lib/deadlines.ts`).
+
 ## Telas
 1. Dashboard (jogos do dia + palpites)
 2. Timeline da partida (ao vivo)
