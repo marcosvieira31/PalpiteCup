@@ -41,7 +41,10 @@ export async function GET(req: NextRequest) {
           status,
           group_stage: m.group_name ? `Grupo ${m.group_name}` : translateRound(m.round),
           venue: m.venue || m.stadium
-        }, { onConflict: 'api_football_id' })
+        }, { 
+          onConflict: 'api_football_id',
+          ignoreDuplicates: false
+        })
 
         if (error) {
           console.error(`ERRO no jogo ${m.id} (${m.home_team} x ${m.away_team}):`, JSON.stringify(error))
