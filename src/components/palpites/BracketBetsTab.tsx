@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import TeamFlag from '@/components/ui/TeamFlag'
 import { BracketPick } from '@/types/database'
+import { getCurrentBracketDeadline, getTimeLeft } from '@/lib/deadlines'
 
 const ROUNDS = [
   { key: 'phase_of_32', label: 'FASE DE 32', slots: 32, points: 2 },
@@ -37,8 +38,11 @@ export default function BracketBetsTab({ allTeams, existingPicks, userId }: Prop
   const [search, setSearch] = useState('')
   const [saving, setSaving] = useState<string | null>(null)
 
+  const bracketDeadline = getTimeLeft(getCurrentBracketDeadline().deadline)
+  const isLocked = bracketDeadline.expired
+
   const handleSelect = async (team: string) => {
-    if (!selecting) return
+    if (isLocked || !selecting) return
     const { round, slot } = selecting
 
     setPicks(prev => ({
@@ -117,9 +121,14 @@ export default function BracketBetsTab({ allTeams, existingPicks, userId }: Prop
             return (
               <button
                 key={idx}
-                onClick={() => setSelecting({ round: activeRound, slot: idx + 1 })}
+                onClick={() => !isLocked && setSelecting({ round: activeRound, slot: idx + 1 })}
+                disabled={isLocked}
                 className={`flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all ${
-                  team
+                  isLocked && !team
+                    ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-50'
+                  : isLocked && team
+                    ? 'border-green-200 bg-green-50/50 cursor-not-allowed opacity-70'
+                  : team
                     ? 'border-green-300 bg-green-50'
                     : 'border-dashed border-slate-300 bg-slate-50'
                 }`}

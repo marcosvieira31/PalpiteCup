@@ -1,5 +1,5 @@
 export const DEADLINES = {
-  journey: new Date('2026-06-11T00:00:00-03:00'),
+  journey: new Date('2026-06-13T19:00:00-03:00'),
   groups: new Date('2026-06-18T00:00:00-03:00'),
   phase_of_32: new Date('2026-06-29T00:00:00-03:00'),
   round_of_16: new Date('2026-07-04T00:00:00-03:00'),

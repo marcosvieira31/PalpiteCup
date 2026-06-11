@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import TeamFlag from '@/components/ui/TeamFlag'
 import { TeamJourneyPrediction } from '@/types/database'
+import { DEADLINES, getTimeLeft } from '@/lib/deadlines'
 
 const PHASES = [
   { key: 'group_stage', label: 'Fase de Grupos', short: 'Grupos' },
@@ -30,7 +31,11 @@ export default function JourneyBetsTab({ allTeams, existingPredictions, userId }
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<'all' | 'filled' | 'empty'>('all')
 
+  const journeyDeadline = getTimeLeft(DEADLINES.journey)
+  const isLocked = journeyDeadline.expired
+
   const handleSelect = async (team: string, phase: string) => {
+    if (isLocked) return
     setPredictions(prev => ({ ...prev, [team]: phase }))
     setSaving(team)
 
@@ -109,9 +114,12 @@ export default function JourneyBetsTab({ allTeams, existingPredictions, userId }
                 {PHASES.map(phase => (
                   <button
                     key={phase.key}
-                    onClick={() => handleSelect(team, phase.key)}
+                    onClick={() => !isLocked && handleSelect(team, phase.key)}
+                    disabled={isLocked}
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors ${
-                      selectedPhase === phase.key
+                      isLocked
+                        ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                        : selectedPhase === phase.key
                         ? 'bg-blue-900 text-yellow-400'
                         : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                     }`}

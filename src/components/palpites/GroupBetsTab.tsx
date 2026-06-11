@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import TeamFlag from '@/components/ui/TeamFlag'
 import { GroupPrediction } from '@/types/database'
+import { DEADLINES, getTimeLeft } from '@/lib/deadlines'
 
 const COPA_GROUPS: Record<string, string[]> = {
   'A': ['México', 'África do Sul', 'Coreia do Sul', 'República Tcheca'],
@@ -45,9 +46,11 @@ export default function GroupBetsTab({ existingPredictions, userId }: Props) {
   const [saved, setSaved] = useState<string | null>(null)
   const [search, setSearch] = useState('')
 
+  const groupsDeadline = getTimeLeft(DEADLINES.groups)
+  const isLocked = groupsDeadline.expired
 
   const handleSelect = async (team: string) => {
-    if (!selecting) return
+    if (isLocked || !selecting) return
     const { group, position } = selecting
 
     const updated = [...(predictions[group] ?? ['', '', '', ''])]
@@ -101,9 +104,14 @@ export default function GroupBetsTab({ existingPredictions, userId }: Props) {
               return (
                 <button
                   key={position}
-                  onClick={() => setSelecting({ group, position })}
+                  onClick={() => !isLocked && setSelecting({ group, position })}
+                  disabled={isLocked}
                   className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                    selectedTeam
+                    isLocked && !selectedTeam
+                      ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-50'
+                      : isLocked && selectedTeam
+                      ? 'border-green-200 bg-green-50/50 cursor-not-allowed opacity-70'
+                      : selectedTeam
                       ? 'border-green-300 bg-green-50'
                       : 'border-dashed border-slate-300 bg-slate-50'
                   }`}
