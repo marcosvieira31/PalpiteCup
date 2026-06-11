@@ -29,6 +29,8 @@ export async function GET(req: NextRequest) {
             ? 'live'
             : 'scheduled'
 
+        console.log(`Jogo ${m.id}: status=${m.status} phase=${m.phase} → mapeado para: ${status}`)
+
         const { error } = await supabase.from('games').upsert({
           api_football_id: m.id,
           home_team: translateTeam(m.home_team) || null,
