@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import NextMatchCard from '@/components/dashboard/NextMatchCard'
 import MyBetCard from '@/components/dashboard/MyBetCard'
 import MyGroupsPreview from '@/components/dashboard/MyGroupsPreview'
+import CountdownDashboard from '@/components/dashboard/CountdownDashboard'
 import NotificationBell from '@/components/layout/NotificationBell'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
@@ -76,6 +77,9 @@ export default async function Dashboard() {
       {nextMatch && (
         <MyBetCard game={nextMatch} bet={nextGameBet} />
       )}
+
+      {/* Contadores */}
+      <CountdownDashboard />
 
       {/* MEUS GRUPOS — posição principal */}
       <div className="px-4 mt-6">

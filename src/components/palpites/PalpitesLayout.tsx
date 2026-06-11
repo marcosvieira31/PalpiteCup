@@ -4,6 +4,8 @@ import PalpitarClient from './PalpitarClient'
 import GroupBetsTab from './GroupBetsTab'
 import BracketBetsTab from './BracketBetsTab'
 import JourneyBetsTab from './JourneyBetsTab'
+import Countdown from '@/components/ui/Countdown'
+import { DEADLINES, getCurrentBracketDeadline } from '@/lib/deadlines'
 import { Game, Bet, GroupPrediction, BracketPick, TeamJourneyPrediction } from '@/types/database'
 
 type Tab = 'partidas' | 'grupos' | 'mata-mata' | 'jornada'
@@ -67,24 +69,54 @@ export default function PalpitesLayout({
           </div>
         )}
         {activeTab === 'grupos' && (
-          <GroupBetsTab
-            existingPredictions={groupPredictions}
-            userId={userId}
-          />
+          <div>
+            <Countdown
+              deadline={DEADLINES.groups}
+              label="Palpites de Classificação fecham em"
+              variant="banner"
+            />
+            <div className="px-4 mt-4">
+              <GroupBetsTab
+                existingPredictions={groupPredictions}
+                userId={userId}
+              />
+            </div>
+          </div>
         )}
         {activeTab === 'mata-mata' && (
-          <BracketBetsTab
-            allTeams={allTeams}
-            existingPicks={bracketPicks}
-            userId={userId}
-          />
+          <div>
+            {(() => {
+              const { key, deadline } = getCurrentBracketDeadline()
+              return (
+                <Countdown
+                  deadline={deadline}
+                  label={`Bracket ${key === 'phase_of_32' ? '— Fase de 32' : key === 'round_of_16' ? '— Oitavas' : key === 'quarter_final' ? '— Quartas' : key === 'semi_final' ? '— Semis' : '— Final'} fecha em`}
+                  variant="banner"
+                />
+              )
+            })()}
+            <BracketBetsTab
+              allTeams={allTeams}
+              existingPicks={bracketPicks}
+              userId={userId}
+            />
+          </div>
         )}
         {activeTab === 'jornada' && (
-          <JourneyBetsTab
-            allTeams={allTeams}
-            existingPredictions={journeyPredictions}
-            userId={userId}
-          />
+          <div>
+            <Countdown
+              deadline={DEADLINES.journey}
+              label="Palpites de Jornada fecham em"
+              variant="banner"
+            />
+            <div className="px-4 mt-4">
+              <JourneyBetsTab
+                allTeams={allTeams}
+                existingPredictions={journeyPredictions}
+                userId={userId}
+              />
+            </div>
+          </div>
         )}
       </div>
     </div>
