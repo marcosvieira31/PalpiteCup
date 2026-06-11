@@ -12,7 +12,18 @@ export default async function Dashboard() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const today = new Date().toISOString().split('T')[0]
+  // Calcula início e fim do dia em Brasília
+  const now = new Date()
+  const brasiliaOffset = -3 * 60
+  const brasiliaTime = new Date(now.getTime() + (brasiliaOffset - now.getTimezoneOffset()) * 60000)
+
+  const todayStart = new Date(brasiliaTime)
+  todayStart.setHours(0, 0, 0, 0)
+  const startUTC = new Date(todayStart.getTime() - (brasiliaOffset - now.getTimezoneOffset()) * 60000)
+
+  const todayEnd = new Date(brasiliaTime)
+  todayEnd.setHours(23, 59, 59, 999)
+  const endUTC = new Date(todayEnd.getTime() - (brasiliaOffset - now.getTimezoneOffset()) * 60000)
 
   // Próximo jogo
   const { data: nextMatches } = await supabase
@@ -33,12 +44,11 @@ export default async function Dashboard() {
 
   const nextGameBet = finalBets?.[0] ?? null
 
-  // Jogos de hoje
   const { data: todayGames } = await supabase
     .from('games')
     .select('*')
-    .gte('kickoff_at', `${today}T00:00:00`)
-    .lte('kickoff_at', `${today}T23:59:59`)
+    .gte('kickoff_at', startUTC.toISOString())
+    .lte('kickoff_at', endUTC.toISOString())
     .order('kickoff_at')
 
   return (

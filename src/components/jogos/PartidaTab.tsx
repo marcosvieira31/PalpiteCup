@@ -16,16 +16,30 @@ export default function PartidaTab() {
   useEffect(() => {
     const fetchGames = async () => {
       setLoading(true)
-      const today = new Date().toISOString().split('T')[0]
+
+      // Calcula início e fim do dia em Brasília (UTC-3)
+      const now = new Date()
+      const brasiliaOffset = -3 * 60 // minutos
+      const brasiliaTime = new Date(now.getTime() + (brasiliaOffset - now.getTimezoneOffset()) * 60000)
+
+      const todayStart = new Date(brasiliaTime)
+      todayStart.setHours(0, 0, 0, 0)
+      // Converte de volta para UTC
+      const startUTC = new Date(todayStart.getTime() - (brasiliaOffset - now.getTimezoneOffset()) * 60000)
+
+      const todayEnd = new Date(brasiliaTime)
+      todayEnd.setHours(23, 59, 59, 999)
+      const endUTC = new Date(todayEnd.getTime() - (brasiliaOffset - now.getTimezoneOffset()) * 60000)
+
       let query = supabase.from('games').select('*').order('kickoff_at')
 
       if (filter === 'hoje') {
         query = query
-          .gte('kickoff_at', `${today}T00:00:00`)
-          .lte('kickoff_at', `${today}T23:59:59`)
+          .gte('kickoff_at', startUTC.toISOString())
+          .lte('kickoff_at', endUTC.toISOString())
       } else if (filter === 'proximos') {
         query = query
-          .gt('kickoff_at', `${today}T23:59:59`)
+          .gt('kickoff_at', new Date().toISOString())
           .eq('status', 'scheduled')
           .limit(20)
       } else {
