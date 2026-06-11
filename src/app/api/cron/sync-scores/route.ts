@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { fetchAllMatches, fetchMatchesByStatus } from '@/lib/wc2026/client'
-import { translateTeam, translatePhase } from '@/lib/wc2026/translations'
+import { translateTeam, translateRound } from '@/lib/wc2026/translations'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,28 +21,31 @@ export async function GET(req: NextRequest) {
     const matches = hasLive ? liveData : await fetchAllMatches()
 
     for (const m of matches) {
-      const status =
-        m.status === 'completed' || m.phase === 'FT' || m.phase === 'FT_PEN'
-          ? 'finished'
-          : ['1H', 'HT', '2H', 'ET1', 'ET2', 'PEN'].includes(m.phase)
-          ? 'live'
-          : 'scheduled'
+      try {
+        const status =
+          m.status === 'completed' || m.phase === 'FT' || m.phase === 'FT_PEN'
+            ? 'finished'
+            : ['1H', 'HT', '2H', 'ET1', 'ET2', 'PEN'].includes(m.phase)
+            ? 'live'
+            : 'scheduled'
 
-      const { error } = await supabase.from('games').upsert({
-        api_football_id: m.id,
-        home_team: translateTeam(m.home_team) || null,
-        away_team: translateTeam(m.away_team) || null,
-        home_score: m.home_score ?? null,
-        away_score: m.away_score ?? null,
-        kickoff_at: m.date || m.kickoff_utc,
-        status,
-        group_stage: m.group_stage ? translatePhase(m.group_stage) : (m.group_name ? `Grupo ${m.group_name}` : null),
-        venue: m.venue || m.stadium
-      }, { onConflict: 'api_football_id' })
+        const { error } = await supabase.from('games').upsert({
+          api_football_id: m.id,
+          home_team: translateTeam(m.home_team) || null,
+          away_team: translateTeam(m.away_team) || null,
+          home_score: m.home_score ?? null,
+          away_score: m.away_score ?? null,
+          kickoff_at: m.date || m.kickoff_utc,
+          status,
+          group_stage: m.group_name ? `Grupo ${m.group_name}` : translateRound(m.round),
+          venue: m.venue || m.stadium
+        }, { onConflict: 'api_football_id' })
 
-      if (error) {
-        console.error('UPSERT ERROR:', error)
-        throw error
+        if (error) {
+          console.error(`ERRO no jogo ${m.id} (${m.home_team} x ${m.away_team}):`, JSON.stringify(error))
+        }
+      } catch (err) {
+        console.error(`EXCEÇÃO no jogo ${m.id}:`, err)
       }
     }
 
