@@ -1,29 +1,26 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import MatchHeader from '@/components/game/MatchHeader'
-import MatchTimeline from '@/components/game/MatchTimeline'
+import MatchLive from '@/components/game/MatchLive'
 
 export default async function GamePage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
 
-  let game = null
-  const numericId = parseInt(params.id)
-  
-  if (!isNaN(numericId)) {
-    const { data } = await supabase
-      .from('games')
-      .select('*')
-      .eq('id', numericId)
-      .single()
-    game = data
-  }
+  const { data: game } = await supabase
+    .from('games')
+    .select('*')
+    .eq('id', params.id)
+    .single()
 
   if (!game) notFound()
 
-  return (
-    <div className="pb-24">
-      <MatchHeader game={game} />
-      <MatchTimeline gameId={game.id} />
-    </div>
-  )
+  // Busca palpite do usuário para esse jogo
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: bet } = await supabase
+    .from('bets')
+    .select('*')
+    .eq('user_id', user?.id ?? '')
+    .eq('game_id', game.id)
+    .single()
+
+  return <MatchLive game={game} bet={bet} />
 }
