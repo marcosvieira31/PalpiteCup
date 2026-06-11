@@ -3,6 +3,7 @@
 import { Database } from "@/types/database";
 import { useRouter } from "next/navigation";
 import TeamFlag from "@/components/ui/TeamFlag";
+import { formatTime } from "@/lib/dates";
 
 type Game = Database["public"]["Tables"]["games"]["Row"];
 type Bet = Database["public"]["Tables"]["bets"]["Row"];
@@ -19,7 +20,7 @@ interface GameCardProps {
 export default function GameCard({ game, bet, onBetChange, onJokerToggle, currentJoker, jokerUsed }: GameCardProps) {
   const router = useRouter();
   const isStarted = new Date() >= new Date(game.kickoff_at);
-  const time = new Date(game.kickoff_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  const time = formatTime(game.kickoff_at);
 
   const handleHomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onBetChange && !isStarted) {

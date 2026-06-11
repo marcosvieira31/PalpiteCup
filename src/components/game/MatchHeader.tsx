@@ -1,5 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { formatTime } from '@/lib/dates'
 import { Database } from "@/types/database";
 import TeamFlag from "@/components/ui/TeamFlag";
 
@@ -9,7 +10,7 @@ export default function MatchHeader({ game }: { game: Game }) {
   const isFinished = game.status === 'finished';
   const isLive = game.status === 'live';
   const isScheduled = game.status === 'pending';
-  const time = new Date(game.kickoff_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  const time = formatTime(game.kickoff_at);
 
   return (
     <div className="bg-white shadow-sm pb-6 pt-12 px-4 relative flex flex-col items-center border-b border-slate-200">

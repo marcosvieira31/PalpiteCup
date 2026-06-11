@@ -6,6 +6,7 @@ import CountdownDashboard from '@/components/dashboard/CountdownDashboard'
 import NotificationBell from '@/components/layout/NotificationBell'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
+import { formatTime } from '@/lib/dates'
 
 export default async function Dashboard() {
   const supabase = await createClient()
@@ -125,7 +126,7 @@ export default async function Dashboard() {
                     }`}>
                       {game.status === 'live' ? '🔴 AO VIVO'
                         : game.status === 'finished' ? 'ENCERRADO'
-                        : new Date(game.kickoff_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        : formatTime(game.kickoff_at)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">

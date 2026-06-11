@@ -1,5 +1,6 @@
 "use client"
 import Link from 'next/link'
+import { formatTime } from '@/lib/dates'
 import TeamFlag from '@/components/ui/TeamFlag'
 import { Game, Bet } from '@/types/database'
 
@@ -64,8 +65,7 @@ export default function MyBetCard({ game, bet }: Props) {
       <div className="mx-4 mt-3 bg-yellow-50 rounded-2xl border-2 border-dashed border-yellow-300 p-4 text-center active:scale-95 transition-transform">
         <p className="font-bebas text-yellow-700 tracking-wider text-lg">⚡ FAZER PALPITE</p>
         <p className="text-yellow-600 text-xs mt-1">
-          Toque para palpitar antes de{' '}
-          {kickoff.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+          {formatTime(game.kickoff_at)}
         </p>
       </div>
     </Link>

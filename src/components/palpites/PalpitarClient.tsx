@@ -5,6 +5,7 @@ import { submitBet } from '@/app/(app)/dashboard/actions'
 import TeamFlag from '@/components/ui/TeamFlag'
 import { shareBet } from '@/lib/share'
 import ShareButtons from '@/components/ui/ShareButtons'
+import { formatDate, formatTime, isBeforeKickoff } from '@/lib/dates'
 
 interface Props {
   games: Game[]
@@ -63,9 +64,7 @@ export default function PalpitarClient({ games, existingBets }: Props) {
   const pending = games.filter(g => !savedGames.has(g.id))
 
   const gamesByDate = games.reduce((acc, game) => {
-    const date = new Date(game.kickoff_at).toLocaleDateString('pt-BR', {
-      weekday: 'long', day: '2-digit', month: 'long'
-    })
+    const date = formatDate(game.kickoff_at)
     if (!acc[date]) acc[date] = []
     acc[date].push(game)
     return acc
@@ -102,23 +101,23 @@ export default function PalpitarClient({ games, existingBets }: Props) {
                 const isSaved = saved[String(game.id)]
                 const hasExisting = savedGames.has(game.id)
                 const kickoff = new Date(game.kickoff_at)
-                const isLocked = Date.now() >= kickoff.getTime()
+                const canBet = isBeforeKickoff(game.kickoff_at)
                 const diffHours = (kickoff.getTime() - Date.now()) / 1000 / 60 / 60
-                const isUrgent = !isLocked && diffHours < 2
+                const isUrgent = canBet && diffHours < 2
 
                 return (
                   <div key={game.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden ${
-                    isLocked ? 'border-slate-200 bg-slate-50 opacity-80' : isUrgent ? 'border-red-200' : 'border-slate-200'
+                    !canBet ? 'border-slate-200 bg-slate-50 opacity-80' : isUrgent ? 'border-red-200' : 'border-slate-200'
                   }`}>
                     <div className={`px-4 py-2 flex justify-between items-center ${
-                      isLocked ? 'bg-slate-200' : isUrgent ? 'bg-red-50' : 'bg-slate-50'
+                      !canBet ? 'bg-slate-200' : isUrgent ? 'bg-red-50' : 'bg-slate-50'
                     }`}>
                       <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
                         {game.group_stage ?? 'Mata-Mata'}
                       </span>
-                      <span className={`text-[10px] font-bold ${isLocked ? 'text-slate-500' : isUrgent ? 'text-red-500' : 'text-slate-400'}`}>
-                        {isLocked ? '🔒 ENCERRADO ' : isUrgent ? '🔴 ' : '🕐 '}
-                        {kickoff.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      <span className={`text-[10px] font-bold ${!canBet ? 'text-slate-500' : isUrgent ? 'text-red-500' : 'text-slate-400'}`}>
+                        {!canBet ? '🔒 ENCERRADO ' : isUrgent ? '🔴 ' : '🕐 '}
+                        {formatTime(game.kickoff_at)}
                       </span>
                     </div>
 
@@ -134,9 +133,9 @@ export default function PalpitarClient({ games, existingBets }: Props) {
                             value={bet.home}
                             onChange={e => updateBet(game.id, 'home', parseInt(e.target.value) || 0)}
                             onFocus={e => e.target.select()}
-                            disabled={isLocked}
+                            disabled={!canBet}
                             className={`w-10 h-10 text-center font-bebas text-xl border-2 rounded-xl outline-none ${
-                              isLocked ? 'border-slate-100 bg-slate-100 text-slate-500 cursor-not-allowed' : 'border-slate-200 focus:border-green-500'
+                              !canBet ? 'border-slate-100 bg-slate-100 text-slate-500 cursor-not-allowed opacity-50' : 'border-slate-200 focus:border-green-500'
                             }`}
                           />
                           <span className="font-bebas text-xl text-slate-400">×</span>
@@ -145,9 +144,9 @@ export default function PalpitarClient({ games, existingBets }: Props) {
                             value={bet.away}
                             onChange={e => updateBet(game.id, 'away', parseInt(e.target.value) || 0)}
                             onFocus={e => e.target.select()}
-                            disabled={isLocked}
+                            disabled={!canBet}
                             className={`w-10 h-10 text-center font-bebas text-xl border-2 rounded-xl outline-none ${
-                              isLocked ? 'border-slate-100 bg-slate-100 text-slate-500 cursor-not-allowed' : 'border-slate-200 focus:border-green-500'
+                              !canBet ? 'border-slate-100 bg-slate-100 text-slate-500 cursor-not-allowed opacity-50' : 'border-slate-200 focus:border-green-500'
                             }`}
                           />
                         </div>
@@ -160,9 +159,9 @@ export default function PalpitarClient({ games, existingBets }: Props) {
                       <div className="flex items-center justify-between mt-3">
                         <button
                           onClick={() => toggleJoker(game.id)}
-                          disabled={isLocked || (jokerUsed && !bet.joker)}
+                          disabled={!canBet || (jokerUsed && !bet.joker)}
                           className={`text-xs font-bebas tracking-wider px-3 py-1.5 rounded-full transition-colors ${
-                            isLocked
+                            !canBet
                               ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
                               : bet.joker
                               ? 'bg-yellow-400 text-blue-900'
@@ -175,10 +174,10 @@ export default function PalpitarClient({ games, existingBets }: Props) {
                         </button>
 
                         <button
-                          onClick={() => handleSubmit(game.id)}
-                          disabled={isLocked || isSaving}
+                          onClick={() => canBet && handleSubmit(game.id)}
+                          disabled={!canBet || isSaving}
                           className={`font-bebas tracking-wider px-5 py-2 rounded-xl text-sm transition-colors ${
-                            isLocked
+                            !canBet
                               ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
                               : isSaved
                               ? 'bg-green-500 text-white'
@@ -187,7 +186,7 @@ export default function PalpitarClient({ games, existingBets }: Props) {
                               : 'bg-green-500 text-white'
                           }`}
                         >
-                          {isLocked ? '🔒 TRAVADO' : isSaving ? 'SALVANDO...' : isSaved ? '✅ SALVO!' : hasExisting ? '✏️ EDITAR' : 'PALPITAR'}
+                          {!canBet ? '🔒 ENCERRADO' : isSaving ? 'SALVANDO...' : isSaved ? '✅ SALVO!' : hasExisting ? '✏️ EDITAR' : 'PALPITAR'}
                         </button>
                       </div>
 

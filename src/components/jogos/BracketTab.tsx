@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import TeamFlag from '@/components/ui/TeamFlag'
+import { formatDateShort, formatTime } from '@/lib/dates'
 
 const ROUNDS = [
   { key: 'Fase de 32', label: 'FASE DE 32', short: '32', matches: 16 },
@@ -82,7 +83,6 @@ export default function BracketTab() {
         )}
 
         {roundGames.map((game, idx) => {
-          const kickoff = new Date(game.kickoff_at)
           const isLive = game.status === 'live'
           const isFinished = game.status === 'finished'
 
@@ -94,15 +94,10 @@ export default function BracketTab() {
                 <span className="font-bebas text-yellow-400 text-sm tracking-wider">
                   JOGO {String(idx + 1).padStart(2, '0')}
                 </span>
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                  isLive ? 'bg-red-500 text-white animate-pulse'
-                  : isFinished ? 'bg-slate-600 text-white'
-                  : 'bg-white/20 text-white'
-                }`}>
+                <span className={`text-[9px] ${isLive ? 'text-red-400 animate-pulse' : 'text-blue-100'}`}>
                   {isLive ? '🔴 AO VIVO'
                     : isFinished ? 'ENCERRADO'
-                    : kickoff.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) +
-                      ' · ' + kickoff.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    : formatDateShort(game.kickoff_at) + ' · ' + formatTime(game.kickoff_at)}
                 </span>
               </div>
 

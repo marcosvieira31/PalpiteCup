@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase/client'
 import { Game } from '@/types/database'
 import Link from 'next/link'
 import TeamFlag from '@/components/ui/TeamFlag'
+import { formatTime } from '@/lib/dates'
 
 type Filter = 'hoje' | 'proximos' | 'encerrados'
 
@@ -87,7 +88,7 @@ export default function PartidaTab() {
                 }`}>
                   {game.status === 'live' ? '🔴 AO VIVO'
                     : game.status === 'finished' ? 'ENCERRADO'
-                    : new Date(game.kickoff_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    : formatTime(game.kickoff_at)}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-2">

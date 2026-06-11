@@ -1,5 +1,6 @@
 import TeamFlag from '@/components/ui/TeamFlag'
 import { Game } from '@/types/database'
+import { formatDateShort, formatTime } from '@/lib/dates'
 
 export default function NextMatchCard({ game }: { game: Game }) {
   const kickoff = new Date(game.kickoff_at)
@@ -56,10 +57,10 @@ export default function NextMatchCard({ game }: { game: Game }) {
             <>
               <span className="font-bebas text-3xl text-white/80">VS</span>
               <span className="text-yellow-300 text-xs font-bold">
-                {kickoff.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                {formatTime(game.kickoff_at)}
               </span>
-              <span className="text-white/60 text-[10px]">
-                {kickoff.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+              <span className="text-[10px] text-white/50 block mt-0.5">
+                {formatDateShort(game.kickoff_at)}
               </span>
             </>
           )}
