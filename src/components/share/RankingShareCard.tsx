@@ -17,11 +17,11 @@ interface Props {
 
 export default function RankingShareCard({ members, groupName, isGlobal }: Props) {
   const [generating, setGenerating] = useState(false)
-  const [format, setFormat] = useState<'story' | 'post'>('story')
+  const [showOptions, setShowOptions] = useState(false)
   const top5 = members.slice(0, 5)
 
   const handleGenerate = async (fmt: 'story' | 'post') => {
-    setFormat(fmt)
+    setShowOptions(false)
     setGenerating(true)
     // Pequeno delay para o DOM renderizar
     await new Promise(r => setTimeout(r, 100))
@@ -37,21 +37,39 @@ export default function RankingShareCard({ members, groupName, isGlobal }: Props
   return (
     <div>
       {/* Botões de geração */}
-      <div className="flex gap-2 mt-3">
+      <div className="relative mt-3">
         <button
-          onClick={() => handleGenerate('story')}
+          onClick={() => setShowOptions(!showOptions)}
           disabled={generating}
-          className="flex-1 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bebas tracking-wider rounded-xl py-3 text-sm disabled:opacity-50 active:scale-95 transition-transform"
+          className="w-full bg-gradient-to-r from-green-600 to-blue-900 text-white font-bebas tracking-wider rounded-xl py-3 text-sm disabled:opacity-50 active:scale-95 transition-transform flex items-center justify-center gap-2"
         >
-          {generating && format === 'story' ? '⏳ GERANDO...' : '📱 STORIES'}
+          {generating ? '⏳ GERANDO...' : '📸 COMPARTILHAR RANKING'}
         </button>
-        <button
-          onClick={() => handleGenerate('post')}
-          disabled={generating}
-          className="flex-1 bg-gradient-to-r from-blue-600 to-blue-400 text-white font-bebas tracking-wider rounded-xl py-3 text-sm disabled:opacity-50 active:scale-95 transition-transform"
-        >
-          {generating && format === 'post' ? '⏳ GERANDO...' : '🖼️ POST'}
-        </button>
+
+        {showOptions && !generating && (
+          <div className="absolute bottom-14 left-0 right-0 bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden z-10">
+            <button
+              onClick={() => handleGenerate('story')}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-b border-slate-100"
+            >
+              <span className="text-2xl">📱</span>
+              <div className="text-left">
+                <p className="font-bold text-slate-800 text-sm">Stories</p>
+                <p className="text-xs text-slate-400">Formato vertical (9:16)</p>
+              </div>
+            </button>
+            <button
+              onClick={() => handleGenerate('post')}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50"
+            >
+              <span className="text-2xl">🖼️</span>
+              <div className="text-left">
+                <p className="font-bold text-slate-800 text-sm">Post</p>
+                <p className="text-xs text-slate-400">Formato quadrado (1:1)</p>
+              </div>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Card Stories (9:16) — renderizado fora da tela */}
