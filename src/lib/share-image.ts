@@ -10,25 +10,33 @@ export async function generateShareImage(
     scale: 2,
     useCORS: true,
     allowTaint: true,
-    backgroundColor: null,
+    backgroundColor: '#22c55e',
     logging: false,
+    imageTimeout: 5000, // timeout de 5s por imagem
+    onclone: (doc) => {
+      // Remove imagens que podem travar o CORS
+      const imgs = doc.querySelectorAll('img')
+      imgs.forEach(img => {
+        img.crossOrigin = 'anonymous'
+        // Se não carregar em 3s, usa placeholder
+        if (!img.complete) img.src = ''
+      })
+    }
   })
 
   const blob = await new Promise<Blob>((resolve) => {
-    canvas.toBlob((b) => resolve(b!), 'image/png', 1.0)
+    canvas.toBlob((b) => resolve(b!), 'image/png', 0.9)
   })
 
   const file = new File([blob], `${filename}.png`, { type: 'image/png' })
 
-  // Tenta compartilhamento nativo (mobile)
-  if (navigator.share && navigator.canShare({ files: [file] })) {
+  if (navigator.share && navigator.canShare?.({ files: [file] })) {
     await navigator.share({
       title: 'PalpiteCup',
       text: '🏆 Confira o ranking do nosso bolão!',
       files: [file],
     })
   } else {
-    // Fallback: download direto
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
