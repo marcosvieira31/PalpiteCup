@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react';
 import clsx from "clsx";
+import RankingShareCard from '@/components/share/RankingShareCard'
 
 export interface RankingMember {
   user_id: string;
@@ -16,9 +17,10 @@ interface RankingListProps {
   filterTeams?: string[];
   filterPhases?: string[];
   group?: import('@/types/database').Database["public"]["Tables"]["groups"]["Row"];
+  groupName?: string;
 }
 
-export default function RankingList({ members, filterTeams = [], filterPhases = [], group }: RankingListProps) {
+export default function RankingList({ members, filterTeams = [], filterPhases = [], group, groupName }: RankingListProps) {
   const [showFilters, setShowFilters] = useState(false);
   const sorted = [...members].sort((a, b) => {
     if (b.points_total !== a.points_total) return b.points_total - a.points_total
@@ -35,6 +37,16 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
           {members.length} MEMBROS
         </span>
       </h2>
+
+      <RankingShareCard
+        members={sorted.map(m => ({
+          user_id: m.user_id,
+          username: m.users?.username ?? 'Usuário',
+          avatar_url: m.users?.avatar_url ?? null,
+          points_total: m.points_total
+        }))}
+        groupName={groupName}
+      />
 
       {hasFilter && group && (
         <div className="mb-3">

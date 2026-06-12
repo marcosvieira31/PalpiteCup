@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
+import RankingShareCard from '@/components/share/RankingShareCard'
 
 interface Player {
   id: string
@@ -57,6 +58,18 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
           RANKING GLOBAL
         </h1>
         <p className="text-blue-200 text-sm mt-1">Top 50 palpiteiros do PalpiteCup</p>
+      </div>
+
+      <div className="mx-4 mt-4">
+        <RankingShareCard
+          members={players.map(p => ({
+            user_id: p.id,
+            username: p.username,
+            avatar_url: p.avatar_url ?? null,
+            points_total: p.points_total
+          }))}
+          isGlobal={true}
+        />
       </div>
 
       {/* Minha posição */}
