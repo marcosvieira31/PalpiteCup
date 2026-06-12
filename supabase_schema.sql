@@ -219,10 +219,10 @@ begin
       end if;
 
       -- Update bet points
-      update public.bets set points_earned = final_points where id = bet_record.id;
+      update public.bets b set points_earned = final_points where b.id = bet_record.id;
       
       -- Update user total score
-      update public.users set points_total = points_total + final_points where id = bet_record.user_id;
+      update public.users u set points_total = u.points_total + final_points where u.id = bet_record.user_id;
     end loop;
   end if;
   return new;
