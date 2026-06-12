@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import clsx from "clsx";
 import RankingShareCard from '@/components/share/RankingShareCard'
+import Link from 'next/link'
 
 export interface RankingMember {
   user_id: string;
@@ -18,9 +19,10 @@ interface RankingListProps {
   filterPhases?: string[];
   group?: import('@/types/database').Database["public"]["Tables"]["groups"]["Row"];
   groupName?: string;
+  groupId?: number;
 }
 
-export default function RankingList({ members, filterTeams = [], filterPhases = [], group, groupName }: RankingListProps) {
+export default function RankingList({ members, filterTeams = [], filterPhases = [], group, groupName, groupId }: RankingListProps) {
   const [showFilters, setShowFilters] = useState(false);
   const sorted = [...members].sort((a, b) => {
     if (b.points_total !== a.points_total) return b.points_total - a.points_total
@@ -113,14 +115,17 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
           const isTop3 = index === 2;
 
           return (
-            <div 
+            <Link
               key={member.user_id}
-              className={clsx(
-                "flex items-center gap-4 bg-white p-3 rounded-2xl shadow-sm border",
-                isTop1 ? "border-yellow-400 bg-yellow-50/30" : "border-slate-100"
-              )}
+              href={`/palpites/usuario/${member.user_id}?groupId=${groupId ?? ''}&groupName=${encodeURIComponent(groupName ?? '')}`}
             >
-              <div className="w-8 flex justify-center items-center">
+              <div 
+                className={clsx(
+                  "flex items-center gap-4 bg-white p-3 rounded-2xl shadow-sm border cursor-pointer active:scale-95 transition-transform",
+                  isTop1 ? "border-yellow-400 bg-yellow-50/30" : "border-slate-100"
+                )}
+              >
+                <div className="w-8 flex justify-center items-center">
                 {isTop1 ? (
                   <span className="text-2xl drop-shadow-sm">👑</span>
                 ) : isTop2 ? (
@@ -151,7 +156,8 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
                 <span className="font-bebas text-3xl leading-none text-green-600">{member.points_total}</span>
                 <span className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Pontos</span>
               </div>
-            </div>
+              </div>
+            </Link>
           );
         })}
         {sorted.length === 0 && (

@@ -1,6 +1,5 @@
 "use client"
 import { useState } from 'react'
-import Link from 'next/link'
 import PalpitarClient from './PalpitarClient'
 import GroupBetsTab from './GroupBetsTab'
 import BracketBetsTab from './BracketBetsTab'
@@ -44,10 +43,6 @@ export default function PalpitesLayout({
             style={{ textShadow: '2px 2px 0 rgba(0,0,0,0.3)' }}>
             PALPITES
           </h1>
-          <Link href="/palpites/resultados"
-            className="bg-white/20 text-white font-bebas tracking-wider text-xs px-3 py-2 rounded-xl">
-            📊 RESULTADOS
-          </Link>
         </div>
         <div className="flex gap-1">
           {tabs.map(tab => (

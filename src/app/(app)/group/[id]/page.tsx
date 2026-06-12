@@ -66,6 +66,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
           filterPhases={group.filter_phases ?? []}
           group={group}
           groupName={group.name}
+          groupId={Number(params.id)}
         />
       </div>
     </div>

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import RankingShareCard from '@/components/share/RankingShareCard'
+import Link from 'next/link'
 
 interface Player {
   id: string
@@ -127,15 +128,15 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
           const medal = getMedal(position)
 
           return (
-            <div key={player.id}
-              className={`rounded-2xl border p-3 flex items-center gap-3 ${
+            <Link key={player.id} href={`/palpites/usuario/${player.id}`}>
+              <div className={`rounded-2xl border p-3 flex items-center gap-3 cursor-pointer active:scale-95 transition-transform ${
                 isMe
                   ? 'bg-green-50 border-green-300'
                   : position <= 3
                   ? 'bg-white border-yellow-200'
                   : 'bg-white border-slate-100'
               }`}>
-              <div className="w-8 text-center flex-shrink-0">
+                <div className="w-8 text-center flex-shrink-0">
                 {medal ? (
                   <span className="text-xl">{medal}</span>
                 ) : (
@@ -170,7 +171,8 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
                 </p>
                 <p className="text-[10px] text-slate-400">pontos</p>
               </div>
-            </div>
+              </div>
+            </Link>
           )
         })}
 
