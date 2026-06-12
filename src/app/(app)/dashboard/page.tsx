@@ -119,10 +119,10 @@ export default async function Dashboard() {
             <p className="text-slate-400 text-xs mt-1">A Copa começa em 11 de junho!</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 mt-1">
             {todayGames.map(game => (
               <Link key={game.id} href={`/game/${game.id}`}>
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mb-1">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
                       {game.group_stage ?? 'Copa do Mundo'}

@@ -121,7 +121,7 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
       )}
 
       {/* Lista completa */}
-      <div className="px-4 mt-4 space-y-2">
+      <div className="px-4 flex flex-col gap-3 mt-2">
         {players.map((player, idx) => {
           const position = idx + 1
           const isMe = player.id === currentUserId
@@ -129,7 +129,7 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
 
           return (
             <Link key={player.id} href={`/palpites/usuario/${player.id}`}>
-              <div className={`rounded-2xl border p-3 flex items-center gap-3 cursor-pointer active:scale-95 transition-transform ${
+              <div className={`rounded-2xl border p-3 flex items-center gap-3 cursor-pointer active:scale-95 transition-transform mb-1 ${
                 isMe
                   ? 'bg-green-50 border-green-300'
                   : position <= 3
