@@ -1,3 +1,18 @@
+async function toBase64(url: string): Promise<string> {
+  try {
+    const response = await fetch(url)
+    const blob = await response.blob()
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+  } catch {
+    return '' // retorna vazio se falhar
+  }
+}
+
 export async function generateShareImage(
   elementId: string,
   filename: string = 'palpitecup-ranking'
@@ -6,22 +21,24 @@ export async function generateShareImage(
   const element = document.getElementById(elementId)
   if (!element) return
 
+  // Pré-converte todas as imagens para base64
+  const imgs = element.querySelectorAll<HTMLImageElement>('img')
+  await Promise.all(Array.from(imgs).map(async (img) => {
+    // Para avatares do GitHub, Google ou locais
+    const urlToFetch = img.src.startsWith('/') ? window.location.origin + img.src : img.src;
+    const base64 = await toBase64(urlToFetch)
+    if (base64) img.src = base64
+  }))
+
+  // Aguarda um frame para garantir que as imagens foram atualizadas
+  await new Promise(r => requestAnimationFrame(r))
+
   const canvas = await html2canvas(element, {
     scale: 2,
     useCORS: true,
     allowTaint: true,
     backgroundColor: '#22c55e',
     logging: false,
-    imageTimeout: 5000, // timeout de 5s por imagem
-    onclone: (doc) => {
-      // Remove imagens que podem travar o CORS
-      const imgs = doc.querySelectorAll('img')
-      imgs.forEach(img => {
-        img.crossOrigin = 'anonymous'
-        // Se não carregar em 3s, usa placeholder
-        if (!img.complete) img.src = ''
-      })
-    }
   })
 
   const blob = await new Promise<Blob>((resolve) => {

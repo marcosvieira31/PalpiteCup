@@ -128,15 +128,13 @@ export default function RankingShareCard({ members, groupName, isGlobal }: Props
                 overflow: 'hidden',
                 border: '2px solid rgba(255,255,255,0.3)',
                 flexShrink: 0,
-                background: '#1e3a8a',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '20px',
-                fontWeight: '800',
-                color: '#facc15',
               }}>
-                {member.username.substring(0, 2).toUpperCase()}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={member.avatar_url ?? '/avatars/vini-jr.png'}
+                  alt={member.username}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '22px', fontWeight: '800', color: idx === 0 ? '#facc15' : 'white', letterSpacing: '0.5px' }}>
@@ -227,15 +225,13 @@ export default function RankingShareCard({ members, groupName, isGlobal }: Props
                 overflow: 'hidden',
                 border: '1.5px solid rgba(255,255,255,0.3)',
                 flexShrink: 0,
-                background: '#1e3a8a',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '16px',
-                fontWeight: '800',
-                color: '#facc15',
               }}>
-                {member.username.substring(0, 2).toUpperCase()}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={member.avatar_url ?? '/avatars/vini-jr.png'}
+                  alt={member.username}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
               </div>
               <div style={{ flex: 1, fontSize: '16px', fontWeight: '800', color: idx === 0 ? '#facc15' : 'white' }}>
                 {member.username}
