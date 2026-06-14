@@ -91,15 +91,119 @@ export default function RulesPage() {
             💡 EXEMPLO PRÁTICO
           </h3>
           <div className="space-y-2 text-sm text-slate-300">
-            <p>Jogo: Brasil 2 × 1 Argentina</p>
-            <div className="border-t border-slate-700 pt-2 space-y-1">
-              <p>🎯 Palpite <span className="text-green-400 font-bold">2×1</span> → <span className="text-yellow-400 font-bold">+5 pts</span></p>
-              <p>✅ Palpite <span className="text-blue-300 font-bold">3×2</span> → <span className="text-yellow-400 font-bold">+3 pts</span> (vencedor + diff)</p>
-              <p>👍 Palpite <span className="text-slate-300 font-bold">1×0</span> → <span className="text-yellow-400 font-bold">+1 pt</span> (só vencedor)</p>
-              <p>❌ Palpite <span className="text-red-400 font-bold">0×1</span> → <span className="text-slate-400 font-bold">0 pts</span></p>
+            <p className="text-slate-400 text-xs mb-3">Jogo: Brasil 2 × 1 Argentina</p>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center py-1.5 border-b border-slate-700">
+                <div className="flex items-center gap-2">
+                  <span>🎯</span>
+                  <span>Palpite <span className="text-green-400 font-bold">2×1</span></span>
+                </div>
+                <span className="text-yellow-400 font-bold">+5 pts</span>
+              </div>
+              <div className="flex justify-between items-center py-1.5 border-b border-slate-700">
+                <div className="flex items-center gap-2">
+                  <span>✅</span>
+                  <div>
+                    <span>Palpite <span className="text-blue-300 font-bold">3×2</span></span>
+                    <p className="text-[10px] text-slate-500">vencedor + diferença de 1 gol</p>
+                  </div>
+                </div>
+                <span className="text-yellow-400 font-bold">+3 pts</span>
+              </div>
+              <div className="flex justify-between items-center py-1.5 border-b border-slate-700">
+                <div className="flex items-center gap-2">
+                  <span>✅</span>
+                  <div>
+                    <span>Palpite <span className="text-blue-300 font-bold">1×0</span></span>
+                    <p className="text-[10px] text-slate-500">vencedor + diferença de 1 gol</p>
+                  </div>
+                </div>
+                <span className="text-yellow-400 font-bold">+3 pts</span>
+              </div>
+              <div className="flex justify-between items-center py-1.5 border-b border-slate-700">
+                <div className="flex items-center gap-2">
+                  <span>👍</span>
+                  <div>
+                    <span>Palpite <span className="text-slate-300 font-bold">2×0</span></span>
+                    <p className="text-[10px] text-slate-500">só o vencedor (diferença errada)</p>
+                  </div>
+                </div>
+                <span className="text-yellow-400 font-bold">+1 pt</span>
+              </div>
+              <div className="flex justify-between items-center py-1.5 border-b border-slate-700">
+                <div className="flex items-center gap-2">
+                  <span>❌</span>
+                  <div>
+                    <span>Palpite <span className="text-red-400 font-bold">0×1</span></span>
+                    <p className="text-[10px] text-slate-500">errou o vencedor</p>
+                  </div>
+                </div>
+                <span className="text-slate-500 font-bold">0 pts</span>
+              </div>
+              <div className="flex justify-between items-center py-1.5 border-b border-slate-700">
+                <div className="flex items-center gap-2">
+                  <span>❌</span>
+                  <div>
+                    <span>Palpite <span className="text-red-400 font-bold">1×1</span></span>
+                    <p className="text-[10px] text-slate-500">errou o vencedor (palpitou empate)</p>
+                  </div>
+                </div>
+                <span className="text-slate-500 font-bold">0 pts</span>
+              </div>
+              <div className="flex justify-between items-center py-1.5 pt-2">
+                <div className="flex items-center gap-2">
+                  <span>⚡</span>
+                  <div>
+                    <span>Palpite <span className="text-green-400 font-bold">2×1</span> + Coringa</span>
+                    <p className="text-[10px] text-slate-500">placar exato com coringa</p>
+                  </div>
+                </div>
+                <span className="text-yellow-400 font-bold">+10 pts</span>
+              </div>
             </div>
-            <div className="border-t border-slate-700 pt-2">
-              <p>⚡ Com Coringa em <span className="text-green-400 font-bold">2×1</span> → <span className="text-yellow-400 font-bold">+10 pts!</span></p>
+          </div>
+
+          {/* Exemplo de empate */}
+          <div className="mt-4 pt-4 border-t border-slate-700">
+            <p className="text-slate-400 text-xs mb-3">Jogo com empate: França 2 × 2 Alemanha</p>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center py-1.5 border-b border-slate-700">
+                <div className="flex items-center gap-2">
+                  <span>🎯</span>
+                  <span>Palpite <span className="text-green-400 font-bold">2×2</span></span>
+                </div>
+                <span className="text-yellow-400 font-bold">+5 pts</span>
+              </div>
+              <div className="flex justify-between items-center py-1.5 border-b border-slate-700">
+                <div className="flex items-center gap-2">
+                  <span>✅</span>
+                  <div>
+                    <span>Palpite <span className="text-blue-300 font-bold">1×1</span></span>
+                    <p className="text-[10px] text-slate-500">empate + diferença zero</p>
+                  </div>
+                </div>
+                <span className="text-yellow-400 font-bold">+3 pts</span>
+              </div>
+              <div className="flex justify-between items-center py-1.5 border-b border-slate-700">
+                <div className="flex items-center gap-2">
+                  <span>✅</span>
+                  <div>
+                    <span>Palpite <span className="text-blue-300 font-bold">0×0</span></span>
+                    <p className="text-[10px] text-slate-500">empate + diferença zero</p>
+                  </div>
+                </div>
+                <span className="text-yellow-400 font-bold">+3 pts</span>
+              </div>
+              <div className="flex justify-between items-center py-1.5">
+                <div className="flex items-center gap-2">
+                  <span>❌</span>
+                  <div>
+                    <span>Palpite <span className="text-red-400 font-bold">2×1</span></span>
+                    <p className="text-[10px] text-slate-500">errou — palpitou vitória</p>
+                  </div>
+                </div>
+                <span className="text-slate-500 font-bold">0 pts</span>
+              </div>
             </div>
           </div>
         </section>
