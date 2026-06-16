@@ -1,3 +1,5 @@
+export const maxDuration = 60
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { fetchAllMatches, fetchMatchesByStatus } from '@/lib/wc2026/client'
@@ -20,35 +22,36 @@ export async function GET(req: NextRequest) {
 
     const matches = hasLive ? liveData : await fetchAllMatches()
 
-    for (const m of matches) {
+    await Promise.all(matches.map(async (m) => {
       try {
-        const status =
-          m.status === 'completed' || m.phase === 'FT' || m.phase === 'FT_PEN'
-            ? 'finished'
-            : ['1H', 'HT', '2H', 'ET1', 'ET2', 'PEN'].includes(m.phase)
-            ? 'live'
-            : 'scheduled'
+        const status = m.status === 'completed' || m.phase === 'FT' || m.phase === 'FT_PEN'
+          ? 'finished'
+          : ['1H', 'HT', '2H', 'ET1', 'ET2', 'PEN'].includes(m.phase)
+          ? 'live'
+          : 'scheduled'
 
-        console.log(`Jogo ${m.id}: status=${m.status} phase=${m.phase} → mapeado para: ${status}`)
-
-        const { error } = await supabase.from('games').update({
-          home_team: translateTeam(m.home_team) || null,
-          away_team: translateTeam(m.away_team) || null,
+        const { error } = await supabase.from('games').upsert({
+          api_football_id: m.id,
+          home_team: translateTeam(m.home_team),
+          away_team: translateTeam(m.away_team),
           home_score: m.home_score ?? null,
           away_score: m.away_score ?? null,
-          kickoff_at: m.date || m.kickoff_utc,
+          kickoff_at: m.kickoff_utc,
           status,
           group_stage: m.group_name ? `Grupo ${m.group_name}` : translateRound(m.round),
-          venue: m.venue || m.stadium
-        }).eq('api_football_id', m.id)
+          venue: m.stadium
+        }, {
+          onConflict: 'api_football_id',
+          ignoreDuplicates: false
+        })
 
         if (error) {
-          console.error(`ERRO no jogo ${m.id} (${m.home_team} x ${m.away_team}):`, JSON.stringify(error))
+          console.error(`ERRO no jogo ${m.id}:`, JSON.stringify(error))
         }
       } catch (err) {
         console.error(`EXCEÇÃO no jogo ${m.id}:`, err)
       }
-    }
+    }))
 
     return NextResponse.json({
       ok: true,
