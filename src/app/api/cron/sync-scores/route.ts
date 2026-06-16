@@ -18,9 +18,14 @@ export async function GET(req: NextRequest) {
 
   try {
     const liveData = await fetchMatchesByStatus('live')
-    const hasLive = liveData.length > 0
+    const hasLive = Array.isArray(liveData) && liveData.length > 0
 
     const matches = hasLive ? liveData : await fetchAllMatches()
+
+    if (!Array.isArray(matches)) {
+      console.error('Erro na API externa (Chave desativada ou limite excedido):', matches)
+      return NextResponse.json({ error: 'External API Error', details: matches }, { status: 502 })
+    }
 
     await Promise.all(matches.map(async (m) => {
       try {
