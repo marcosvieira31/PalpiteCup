@@ -42,13 +42,17 @@ export default function RankingShareCard({ members, groupName, isGlobal, hideBut
           top: 0,
           width: '540px',
           height: '960px',
-          backgroundImage: `url(${typeof window !== 'undefined' ? window.location.origin : ''}/share-backgrounds/stadium-bg.png)`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          background: '#0a1f5c',
           fontFamily: 'Arial, sans-serif',
           overflow: 'hidden',
         }}
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/share-backgrounds/stadium-bg.png"
+          alt=""
+          style={{ position: 'absolute', top: 0, left: 0, width: '540px', height: '960px', objectFit: 'cover', zIndex: 0 }}
+        />
         {/* Header */}
         <div style={{ position: 'relative', zIndex: 1, padding: '56px 40px 28px' }}>
           <div style={{
@@ -126,13 +130,17 @@ export default function RankingShareCard({ members, groupName, isGlobal, hideBut
           top: 0,
           width: '600px',
           height: '600px',
-          backgroundImage: `url(${typeof window !== 'undefined' ? window.location.origin : ''}/share-backgrounds/stadium-bg-square.png)`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          background: '#0a1f5c',
           fontFamily: 'Arial, sans-serif',
           overflow: 'hidden',
         }}
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/share-backgrounds/stadium-bg-square.png"
+          alt=""
+          style={{ position: 'absolute', top: 0, left: 0, width: '600px', height: '600px', objectFit: 'cover', zIndex: 0 }}
+        />
         {/* Header */}
         <div style={{ position: 'relative', zIndex: 1, padding: '32px 32px 14px' }}>
           <div style={{

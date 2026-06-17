@@ -71,19 +71,22 @@ export default function LiveBetsShareCard({ liveGames: initialGames, liveBets: i
 
   const CardContent = ({ width, height, compact }: { width: number; height: number; compact: boolean }) => {
     const bgImage = compact ? '/share-backgrounds/stadium-bg-square.png' : '/share-backgrounds/stadium-bg.png'
-    const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
     return (
       <div style={{
         width: `${width}px`,
         height: `${height}px`,
-        backgroundImage: `url(${origin}${bgImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        background: '#0a1f5c',
         fontFamily: 'Arial, sans-serif',
         overflow: 'hidden',
         position: 'relative',
       }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={bgImage}
+          alt=""
+          style={{ position: 'absolute', top: 0, left: 0, width: `${width}px`, height: `${height}px`, objectFit: 'cover', zIndex: 0 }}
+        />
         <div style={{ position: 'relative', zIndex: 1, padding: compact ? '28px 26px 12px' : '48px 40px 20px' }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: compact ? '6px' : '8px',
