@@ -122,37 +122,37 @@ export default function PalpitarClient({ games, existingBets }: Props) {
                     </div>
 
                     <div className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 flex-1 justify-end">
-                          <span className="font-bold text-slate-800 text-xs text-right leading-tight">{game.home_team}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
+                          <span className="font-bold text-slate-800 text-xs text-right leading-tight line-clamp-2 min-w-0">{game.home_team}</span>
                           <TeamFlag team={game.home_team ?? ''} size={28} />
                         </div>
-                        <div className="flex items-center gap-2 px-2">
+                        <div className="flex items-center gap-1.5 px-1 flex-shrink-0">
                           <input
                             type="number" min="0" max="99"
                             value={bet.home}
                             onChange={e => updateBet(game.id, 'home', parseInt(e.target.value) || 0)}
                             onFocus={e => e.target.select()}
                             disabled={!canBet}
-                            className={`w-10 h-10 text-center font-bebas text-xl border-2 rounded-xl outline-none ${
+                            className={`w-9 h-9 text-center font-bebas text-lg border-2 rounded-xl outline-none ${
                               !canBet ? 'border-slate-100 bg-slate-100 text-slate-500 cursor-not-allowed opacity-50' : 'border-slate-200 focus:border-green-500'
                             }`}
                           />
-                          <span className="font-bebas text-xl text-slate-400">×</span>
+                          <span className="font-bebas text-lg text-slate-400">×</span>
                           <input
                             type="number" min="0" max="99"
                             value={bet.away}
                             onChange={e => updateBet(game.id, 'away', parseInt(e.target.value) || 0)}
                             onFocus={e => e.target.select()}
                             disabled={!canBet}
-                            className={`w-10 h-10 text-center font-bebas text-xl border-2 rounded-xl outline-none ${
+                            className={`w-9 h-9 text-center font-bebas text-lg border-2 rounded-xl outline-none ${
                               !canBet ? 'border-slate-100 bg-slate-100 text-slate-500 cursor-not-allowed opacity-50' : 'border-slate-200 focus:border-green-500'
                             }`}
                           />
                         </div>
-                        <div className="flex items-center gap-2 flex-1">
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
                           <TeamFlag team={game.away_team ?? ''} size={28} />
-                          <span className="font-bold text-slate-800 text-xs leading-tight">{game.away_team}</span>
+                          <span className="font-bold text-slate-800 text-xs leading-tight line-clamp-2 min-w-0">{game.away_team}</span>
                         </div>
                       </div>
 
