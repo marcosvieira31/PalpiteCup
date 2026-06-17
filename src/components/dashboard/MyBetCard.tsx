@@ -62,11 +62,11 @@ export default function MyBetCard({ game, bet }: Props) {
 
   return (
     <Link href="/palpites">
-      <div className="mx-4 mt-3 bg-yellow-50 rounded-2xl border-2 border-dashed border-yellow-300 p-4 text-center active:scale-95 transition-transform">
-        <p className="font-bebas text-yellow-700 tracking-wider text-lg">⚡ FAZER PALPITE</p>
-        <p className="text-yellow-600 text-xs mt-1">
+      <div className="mx-4 mt-3 bg-blue-900 rounded-2xl px-4 py-2.5 flex items-center justify-between active:scale-95 transition-transform">
+        <p className="font-bebas text-yellow-400 tracking-wider text-base">⚡ FAZER PALPITE</p>
+        <span className="text-white/70 text-xs font-bold">
           {formatTime(game.kickoff_at)}
-        </p>
+        </span>
       </div>
     </Link>
   )
