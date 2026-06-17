@@ -69,102 +69,108 @@ export default function LiveBetsShareCard({ liveGames: initialGames, liveBets: i
   const betsForGame = (gameId: number | string) =>
     initialBets.filter(b => String(b.game_id) === String(gameId))
 
-  const CardContent = ({ width, height, compact }: { width: number; height: number; compact: boolean }) => (
-    <div style={{
-      width: `${width}px`,
-      height: `${height}px`,
-      background: 'linear-gradient(135deg, #1e3a8a 0%, #1e3a8a 40%, #15803d 100%)',
-      fontFamily: 'Arial, sans-serif',
-      overflow: 'hidden',
-      position: 'relative',
-    }}>
-      <div style={{
-        position: 'absolute', inset: 0,
-        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px)',
-        backgroundSize: '20px 20px',
-      }} />
+  const CardContent = ({ width, height, compact }: { width: number; height: number; compact: boolean }) => {
+    const bgImage = compact ? '/share-backgrounds/stadium-bg-square.png' : '/share-backgrounds/stadium-bg.png'
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
-      <div style={{ position: 'relative', zIndex: 1, padding: compact ? '32px 28px 16px' : '48px 40px 24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+    return (
+      <div style={{
+        width: `${width}px`,
+        height: `${height}px`,
+        backgroundImage: `url(${origin}${bgImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        fontFamily: 'Arial, sans-serif',
+        overflow: 'hidden',
+        position: 'relative',
+      }}>
+        <div style={{ position: 'relative', zIndex: 1, padding: compact ? '28px 26px 12px' : '48px 40px 20px' }}>
           <div style={{
-            background: '#ef4444', color: 'white', fontSize: compact ? '11px' : '14px', fontWeight: 'bold',
-            padding: '4px 10px', borderRadius: '999px', letterSpacing: '1px',
+            display: 'inline-flex', alignItems: 'center', gap: compact ? '6px' : '8px',
+            background: '#ef4444', color: 'white', fontSize: compact ? '12px' : '16px', fontWeight: 'bold',
+            padding: compact ? '4px 12px' : '6px 16px', borderRadius: '999px', letterSpacing: '1px',
+            marginBottom: compact ? '10px' : '18px',
           }}>
-            🔴 AO VIVO
+            <span style={{ width: compact ? '6px' : '8px', height: compact ? '6px' : '8px', background: 'white', borderRadius: '50%' }} />
+            AO VIVO
+          </div>
+          <div style={{
+            fontSize: compact ? '32px' : '50px', fontWeight: '900', letterSpacing: '1px', lineHeight: 1,
+            background: 'linear-gradient(90deg, #facc15 0%, #22c55e 100%)',
+            WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+          }}>
+            {groupName.toUpperCase()}
+          </div>
+          <div style={{ fontSize: compact ? '14px' : '20px', color: 'rgba(255,255,255,0.85)', marginTop: compact ? '4px' : '6px', fontWeight: '600' }}>
+            Palpites dos jogos rolando agora
           </div>
         </div>
-        <div style={{ fontSize: compact ? '30px' : '44px', fontWeight: '900', color: '#facc15', letterSpacing: '1px', textShadow: '2px 2px 0 #15803d', lineHeight: 1 }}>
-          {groupName.toUpperCase()}
-        </div>
-        <div style={{ fontSize: compact ? '16px' : '20px', color: 'rgba(255,255,255,0.8)', marginTop: '6px' }}>
-          Palpites dos jogos rolando agora
-        </div>
-      </div>
 
-      <div style={{ position: 'relative', zIndex: 1, padding: `0 ${compact ? 24 : 32}px`, overflowY: 'auto' }}>
-        {liveGames.map(game => {
-          const bets = betsForGame(game.id)
-          return (
-            <div key={game.id} style={{
-              background: 'rgba(255,255,255,0.1)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: compact ? '12px' : '16px',
-              padding: compact ? '12px' : '16px',
-              marginBottom: compact ? '10px' : '14px',
-            }}>
-              <div style={{
-                display: 'flex', justifyContent: 'center', alignItems: 'center', gap: compact ? '10px' : '14px',
-                marginBottom: compact ? '8px' : '12px',
+        <div style={{ position: 'relative', zIndex: 1, padding: `0 ${compact ? 22 : 32}px`, overflowY: 'auto' }}>
+          {liveGames.map(game => {
+            const bets = betsForGame(game.id)
+            return (
+              <div key={game.id} style={{
+                background: 'rgba(15,30,80,0.55)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: compact ? '14px' : '18px',
+                padding: compact ? '12px' : '16px',
+                marginBottom: compact ? '10px' : '14px',
               }}>
-                <span style={{ color: 'white', fontWeight: '800', fontSize: compact ? '14px' : '18px' }}>{game.home_team}</span>
-                <span style={{
-                  color: '#facc15', fontWeight: '900', fontSize: compact ? '22px' : '30px',
-                  background: 'rgba(0,0,0,0.25)', borderRadius: '8px', padding: compact ? '2px 10px' : '4px 14px',
+                <div style={{
+                  display: 'flex', justifyContent: 'center', alignItems: 'center', gap: compact ? '10px' : '14px',
+                  marginBottom: compact ? '8px' : '12px',
                 }}>
-                  {game.home_score ?? 0} × {game.away_score ?? 0}
-                </span>
-                <span style={{ color: 'white', fontWeight: '800', fontSize: compact ? '14px' : '18px' }}>{game.away_team}</span>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? '4px' : '6px' }}>
-                {bets.length === 0 && (
-                  <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: compact ? '12px' : '14px', textAlign: 'center' }}>
-                    Nenhum palpite registrado
-                  </div>
-                )}
-                {bets.map(bet => (
-                  <div key={bet.user_id} style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    background: 'rgba(255,255,255,0.08)', borderRadius: '10px',
-                    padding: compact ? '6px 10px' : '8px 14px',
+                  <span style={{ color: 'white', fontWeight: '800', fontSize: compact ? '13px' : '17px' }}>{game.home_team}</span>
+                  <span style={{
+                    color: '#facc15', fontWeight: '900', fontSize: compact ? '20px' : '28px',
+                    background: 'rgba(30,58,138,0.7)', borderRadius: '8px', padding: compact ? '3px 12px' : '5px 16px',
                   }}>
-                    <span style={{ color: 'white', fontWeight: '700', fontSize: compact ? '13px' : '15px' }}>
-                      {bet.users?.username ?? 'Usuário'}{bet.used_joker ? ' ⚡' : ''}
-                    </span>
-                    <span style={{ color: '#facc15', fontWeight: '800', fontSize: compact ? '14px' : '17px' }}>
-                      {bet.home_bet} × {bet.away_bet}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )
-        })}
-      </div>
+                    {game.home_score ?? 0} × {game.away_score ?? 0}
+                  </span>
+                  <span style={{ color: 'white', fontWeight: '800', fontSize: compact ? '13px' : '17px' }}>{game.away_team}</span>
+                </div>
 
-      <div style={{
-        position: 'absolute', bottom: compact ? '16px' : '24px', left: 0, right: 0,
-        textAlign: 'center', zIndex: 1,
-      }}>
-        <div style={{ fontSize: compact ? '20px' : '26px', fontWeight: '900', color: '#facc15', letterSpacing: '2px', textShadow: '2px 2px 0 #15803d' }}>
-          PALPITECUP
+                <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? '4px' : '6px' }}>
+                  {bets.length === 0 && (
+                    <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: compact ? '12px' : '14px', textAlign: 'center' }}>
+                      Nenhum palpite registrado
+                    </div>
+                  )}
+                  {bets.map(bet => (
+                    <div key={bet.user_id} style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      background: 'rgba(30,58,138,0.4)', borderRadius: '10px',
+                      padding: compact ? '6px 10px' : '8px 14px',
+                    }}>
+                      <span style={{ color: 'white', fontWeight: '700', fontSize: compact ? '12px' : '15px' }}>
+                        {bet.users?.username ?? 'Usuário'}{bet.used_joker ? ' ⚡' : ''}
+                      </span>
+                      <span style={{ color: '#facc15', fontWeight: '800', fontSize: compact ? '13px' : '17px' }}>
+                        {bet.home_bet} × {bet.away_bet}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
         </div>
-        <div style={{ fontSize: compact ? '11px' : '13px', color: 'rgba(255,255,255,0.6)', marginTop: '2px' }}>
-          palpite-cup.vercel.app
+
+        <div style={{
+          position: 'absolute', bottom: compact ? '14px' : '24px', left: 0, right: 0,
+          textAlign: 'center', zIndex: 1,
+        }}>
+          <div style={{ fontSize: compact ? '18px' : '28px', fontWeight: '900', letterSpacing: '1px' }}>
+            <span style={{ color: 'white' }}>PALPITE</span><span style={{ color: '#22c55e' }}>CUP</span>
+          </div>
+          <div style={{ fontSize: compact ? '10px' : '13px', color: 'rgba(255,255,255,0.6)', marginTop: '2px' }}>
+            palpite-cup.vercel.app
+          </div>
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <>
