@@ -102,6 +102,7 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
       await renameGroup(groupId, trimmed)
       setDisplayedName(trimmed)
       setEditingName(false)
+      router.refresh()
     } catch (err) {
       setNameError(err instanceof Error ? err.message : 'Erro ao renomear.')
     } finally {
