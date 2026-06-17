@@ -202,3 +202,60 @@ export async function saveScoringStartDate(
 
   if (error) throw new Error(error.message)
 }
+
+const renameGroupSchema = z.object({
+  groupId: z.number().int().positive(),
+  name: z.string().trim().min(1).max(30),
+})
+
+export async function renameGroup(groupId: number | string, name: string) {
+  const parsed = renameGroupSchema.safeParse({ groupId: Number(groupId), name })
+  if (!parsed.success) throw new Error('Nome inválido. Use entre 1 e 30 caracteres.')
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Não autenticado.')
+
+  const { data: group } = await supabase
+    .from('groups')
+    .select('owner_id')
+    .eq('id', groupId)
+    .single()
+
+  if (!group) throw new Error('Grupo não encontrado.')
+  if (group.owner_id !== user.id) throw new Error('Apenas o líder pode renomear o grupo.')
+
+  const { error } = await supabase
+    .from('groups')
+    .update({ name: parsed.data.name })
+    .eq('id', groupId)
+
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteGroup(groupId: number | string) {
+  const id = Number(groupId)
+  if (!Number.isInteger(id) || id <= 0) throw new Error('Grupo inválido.')
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Não autenticado.')
+
+  const { data: group } = await supabase
+    .from('groups')
+    .select('owner_id')
+    .eq('id', id)
+    .single()
+
+  if (!group) throw new Error('Grupo não encontrado.')
+  if (group.owner_id !== user.id) throw new Error('Apenas o líder pode excluir o grupo.')
+
+  // As tabelas relacionadas (group_members, messages, chat_read_status, group_requests)
+  // têm "on delete cascade", então deletar o grupo já limpa tudo automaticamente.
+  const { error } = await supabase
+    .from('groups')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+}

@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase/client'
 import { Group } from '@/types/database'
 import { useUnreadCount } from '@/hooks/useUnreadCount'
 import { saveScoringStartDate } from '@/app/(app)/group/[id]/actions'
+import { useRouter } from 'next/navigation'
+import { renameGroup, deleteGroup } from '@/app/(app)/group/[id]/actions'
 
 interface Props {
   groupId: number | string
@@ -31,6 +33,16 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
   const [scoringStartDate, setScoringStartDate] = useState<string | null>(group?.scoring_start_date ?? null)
   const [savingDate, setSavingDate] = useState(false)
   const [dateError, setDateError] = useState<string | null>(null)
+
+  const router = useRouter()
+  const [editingName, setEditingName] = useState(false)
+  const [groupNameInput, setGroupNameInput] = useState(group.name)
+  const [savingName, setSavingName] = useState(false)
+  const [nameError, setNameError] = useState<string | null>(null)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const toggleGroupFilter = async (groupName: string) => {
     const updated = scoringGroupsFilter.includes(groupName)
@@ -74,6 +86,39 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
       setDateError(err instanceof Error ? err.message : 'Erro ao salvar.')
     } finally {
       setSavingDate(false)
+    }
+  }
+
+  const handleSaveName = async () => {
+    setNameError(null)
+    if (!groupNameInput.trim()) {
+      setNameError('Digite um nome.')
+      return
+    }
+    setSavingName(true)
+    try {
+      await renameGroup(groupId, groupNameInput.trim())
+      setEditingName(false)
+    } catch (err) {
+      setNameError(err instanceof Error ? err.message : 'Erro ao renomear.')
+    } finally {
+      setSavingName(false)
+    }
+  }
+
+  const handleDeleteGroup = async () => {
+    setDeleteError(null)
+    if (deleteConfirmText.trim() !== group.name) {
+      setDeleteError('O nome digitado não corresponde ao nome do grupo.')
+      return
+    }
+    setDeleting(true)
+    try {
+      await deleteGroup(groupId)
+      router.push('/groups')
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Erro ao excluir.')
+      setDeleting(false)
     }
   }
 
@@ -167,6 +212,47 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
               <button onClick={() => setSettingsOpen(false)} className="text-slate-400 text-2xl">×</button>
             </div>
             <div className="p-4 space-y-4">
+              {/* Nome do grupo */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-4">
+                <p className="font-bold text-slate-800 text-sm mb-2">✏️ Nome do Grupo</p>
+                {editingName ? (
+                  <>
+                    <input
+                      value={groupNameInput}
+                      onChange={e => setGroupNameInput(e.target.value)}
+                      maxLength={30}
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-green-500 mb-2"
+                    />
+                    {nameError && <p className="text-xs text-red-500 mb-2">{nameError}</p>}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => { setEditingName(false); setGroupNameInput(group.name); setNameError(null) }}
+                        disabled={savingName}
+                        className="flex-1 bg-slate-100 text-slate-600 font-bebas tracking-wider rounded-xl py-2 text-sm disabled:opacity-50"
+                      >
+                        CANCELAR
+                      </button>
+                      <button
+                        onClick={handleSaveName}
+                        disabled={savingName}
+                        className="flex-1 bg-green-500 text-white font-bebas tracking-wider rounded-xl py-2 text-sm disabled:opacity-50"
+                      >
+                        {savingName ? 'SALVANDO...' : 'SALVAR'}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between items-center">
+                    <p className="text-slate-600 text-sm">{group.name}</p>
+                    <button
+                      onClick={() => setEditingName(true)}
+                      className="bg-slate-100 text-slate-600 font-bebas tracking-wider rounded-xl px-3 py-1.5 text-xs"
+                    >
+                      EDITAR
+                    </button>
+                  </div>
+                )}
+              </div>
               {/* Toggle Resenha */}
               <div className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center">
                 <div>
@@ -380,6 +466,57 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
                   </div>
                 )}
               </div>
+
+              {/* Zona de perigo */}
+              <div className="bg-red-50 rounded-2xl border border-red-200 p-4 mt-6">
+                <p className="font-bold text-red-700 text-sm mb-1">🗑️ Excluir Grupo</p>
+                <p className="text-xs text-red-500 mb-3">Essa ação é permanente e remove todos os membros, mensagens e configurações do grupo.</p>
+                <button
+                  onClick={() => setDeleteModalOpen(true)}
+                  className="w-full bg-red-500 text-white font-bebas tracking-wider rounded-xl py-2.5 text-sm"
+                >
+                  EXCLUIR GRUPO
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Confirmar Exclusão */}
+      {deleteModalOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/60 flex items-end justify-center"
+          onClick={() => !deleting && setDeleteModalOpen(false)}>
+          <div className="bg-white w-full max-w-[390px] rounded-t-3xl p-5 space-y-4"
+            style={{ paddingBottom: '100px' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto" />
+            <p className="font-bebas text-2xl tracking-wider text-red-600">🗑️ EXCLUIR GRUPO</p>
+            <p className="text-sm text-slate-600">
+              Esta ação não pode ser desfeita. Para confirmar, digite o nome do grupo: <span className="font-bold">{group.name}</span>
+            </p>
+            <input
+              value={deleteConfirmText}
+              onChange={e => setDeleteConfirmText(e.target.value)}
+              placeholder="Digite o nome do grupo"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-red-500"
+            />
+            {deleteError && <p className="text-red-500 text-sm">{deleteError}</p>}
+            <div className="flex gap-2 pb-4">
+              <button
+                onClick={() => { setDeleteModalOpen(false); setDeleteConfirmText(''); setDeleteError(null) }}
+                disabled={deleting}
+                className="flex-1 bg-slate-100 text-slate-600 font-bebas tracking-wider rounded-xl py-3 disabled:opacity-50"
+              >
+                CANCELAR
+              </button>
+              <button
+                onClick={handleDeleteGroup}
+                disabled={deleting || deleteConfirmText.trim() !== group.name}
+                className="flex-1 bg-red-500 text-white font-bebas tracking-wider rounded-xl py-3 disabled:opacity-50"
+              >
+                {deleting ? 'EXCLUINDO...' : 'EXCLUIR PERMANENTEMENTE'}
+              </button>
             </div>
           </div>
         </div>
