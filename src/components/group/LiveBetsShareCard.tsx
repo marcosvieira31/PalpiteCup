@@ -28,10 +28,16 @@ interface Props {
   groupName: string
 }
 
+export async function generateLiveBetsShareImage(fmt: 'story' | 'post', groupName: string) {
+  await new Promise(r => setTimeout(r, 100))
+  await generateShareImage(
+    `live-bets-share-card-${fmt}`,
+    `palpitecup-ao-vivo-${groupName.replace(/\s/g, '-').toLowerCase()}`
+  )
+}
+
 export default function LiveBetsShareCard({ liveGames: initialGames, liveBets: initialBets, groupName }: Props) {
   const [liveGames, setLiveGames] = useState<LiveGameInfo[]>(initialGames)
-  const [generating, setGenerating] = useState(false)
-  const [showOptions, setShowOptions] = useState(false)
 
   useEffect(() => {
     const channel = supabase
@@ -59,17 +65,6 @@ export default function LiveBetsShareCard({ liveGames: initialGames, liveBets: i
   }, [groupName])
 
   if (liveGames.length === 0) return null
-
-  const handleGenerate = async (fmt: 'story' | 'post') => {
-    setShowOptions(false)
-    setGenerating(true)
-    await new Promise(r => setTimeout(r, 100))
-    await generateShareImage(
-      `live-bets-share-card-${fmt}`,
-      `palpitecup-ao-vivo-${groupName.replace(/\s/g, '-').toLowerCase()}`
-    )
-    setGenerating(false)
-  }
 
   const betsForGame = (gameId: number | string) =>
     initialBets.filter(b => String(b.game_id) === String(gameId))
@@ -172,48 +167,13 @@ export default function LiveBetsShareCard({ liveGames: initialGames, liveBets: i
   )
 
   return (
-    <div>
-      <div className="relative mt-3">
-        <button
-          onClick={() => setShowOptions(!showOptions)}
-          disabled={generating}
-          className="w-full bg-gradient-to-r from-red-600 to-blue-900 text-white font-bebas tracking-wider rounded-xl py-3 text-sm disabled:opacity-50 active:scale-95 transition-transform flex items-center justify-center gap-2"
-        >
-          {generating ? '⏳ GERANDO...' : '🔴 COMPARTILHAR PALPITES AO VIVO'}
-        </button>
-
-        {showOptions && !generating && (
-          <div className="absolute bottom-14 left-0 right-0 bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden z-10">
-            <button
-              onClick={() => handleGenerate('story')}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-b border-slate-100"
-            >
-              <span className="text-2xl">📱</span>
-              <div className="text-left">
-                <p className="font-bold text-slate-800 text-sm">Stories</p>
-                <p className="text-xs text-slate-400">Formato vertical (9:16)</p>
-              </div>
-            </button>
-            <button
-              onClick={() => handleGenerate('post')}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50"
-            >
-              <span className="text-2xl">🖼️</span>
-              <div className="text-left">
-                <p className="font-bold text-slate-800 text-sm">Post</p>
-                <p className="text-xs text-slate-400">Formato quadrado (1:1)</p>
-              </div>
-            </button>
-          </div>
-        )}
-      </div>
-
+    <>
       <div id="live-bets-share-card-story" style={{ position: 'fixed', left: '-9999px', top: 0 }}>
         <CardContent width={540} height={960} compact={false} />
       </div>
       <div id="live-bets-share-card-post" style={{ position: 'fixed', left: '-9999px', top: 0 }}>
         <CardContent width={600} height={600} compact={true} />
       </div>
-    </div>
+    </>
   )
 }

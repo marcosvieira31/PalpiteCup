@@ -104,6 +104,7 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
           points_total: m.points_total
         }))}
         groupName={groupName}
+        hideButton
       />
 
       {hasFilter && group && (

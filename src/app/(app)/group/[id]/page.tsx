@@ -5,6 +5,7 @@ import RankingList from '@/components/group/RankingList'
 import GroupActions from '@/components/group/GroupModals'
 import PendingRequests from '@/components/group/PendingRequests'
 import LiveBetsShareCard from '@/components/group/LiveBetsShareCard'
+import GroupShareMenu from '@/components/group/GroupShareMenu'
 import { getGroupPoints } from './actions'
 
 export default async function GroupPage({ params }: { params: { id: string } }) {
@@ -97,6 +98,11 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
           liveGames={liveGames}
           liveBets={(liveBetsData ?? []) as unknown as import('@/components/group/LiveBetsShareCard').LiveBetWithUser[]}
           groupName={group.name}
+        />
+
+        <GroupShareMenu
+          groupName={group.name}
+          hasLiveGame={liveGames.length > 0}
         />
 
         <RankingList
