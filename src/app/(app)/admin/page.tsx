@@ -156,19 +156,23 @@ function GameRow({ game, onUpdate }: { game: Game; onUpdate: (id: number, status
           className="w-16 border border-slate-200 rounded-lg px-2 py-2 text-center font-bebas text-lg"
         />
 
-        <button
-          onClick={() => handleSave('live')}
-          disabled={saving}
-          className="ml-auto bg-red-500 text-white rounded-lg px-3 py-2 text-xs font-bold disabled:opacity-50"
-        >
-          🔴 AO VIVO
-        </button>
+        {game.status !== 'finished' && (
+          <button
+            onClick={() => handleSave('live')}
+            disabled={saving}
+            className="ml-auto bg-red-500 text-white rounded-lg px-3 py-2 text-xs font-bold disabled:opacity-50"
+          >
+            🔴 AO VIVO
+          </button>
+        )}
         <button
           onClick={() => handleSave('finished')}
           disabled={saving}
-          className="bg-green-500 text-white rounded-lg px-3 py-2 text-xs font-bold disabled:opacity-50"
+          className={`text-white rounded-lg px-3 py-2 text-xs font-bold disabled:opacity-50 ${
+            game.status === 'finished' ? 'ml-auto bg-blue-600' : 'bg-green-500'
+          }`}
         >
-          ✅ FINALIZAR
+          {game.status === 'finished' ? '✏️ EDITAR' : '✅ FINALIZAR'}
         </button>
       </div>
     </div>
