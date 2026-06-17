@@ -6,20 +6,24 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function POST(req: NextRequest) {
-  const secret = req.headers.get('x-service-secret')
-  if (secret !== process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+const ADMIN_EMAILS = ['marcosnd.31@gmail.com']
+
+export async function POST(request: NextRequest) {
+  const { gameId, status, homeScore, awayScore, userEmail } = await request.json()
+
+  if (!ADMIN_EMAILS.includes(userEmail)) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 403 })
   }
 
-  const { gameId, homeScore, awayScore, status } = await req.json()
-
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('games')
-    .update({ home_score: homeScore, away_score: awayScore, status })
+    .update({ status, home_score: homeScore, away_score: awayScore })
     .eq('id', gameId)
+    .select()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, data })
 }

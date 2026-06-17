@@ -45,10 +45,29 @@ export default function AdminPage() {
   }
 
   const updateGame = async (gameId: number, status: string, homeScore: number, awayScore: number) => {
-    await supabase
-      .from('games')
-      .update({ status, home_score: homeScore, away_score: awayScore })
-      .eq('id', gameId)
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const response = await fetch('/api/admin/update-score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        gameId,
+        status,
+        homeScore,
+        awayScore,
+        userEmail: user?.email
+      })
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      alert(`Erro: ${result.error}`)
+      console.error('UPDATE ERROR:', result)
+    } else {
+      console.log('UPDATE SUCCESS:', result)
+    }
+
     loadGames()
   }
 
