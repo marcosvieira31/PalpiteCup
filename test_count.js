@@ -1,19 +1,9 @@
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
-
-const envLocal = fs.readFileSync('.env.local', 'utf8');
-const env = envLocal.split('\n').reduce((acc, line) => {
-  const [key, ...value] = line.split('=');
-  if (key && value.length > 0) {
-    acc[key.trim()] = value.join('=').trim().replace(/^"|"$/g, '');
-  }
+const env = fs.readFileSync('.env.local', 'utf8').split('\n').reduce((acc, line) => {
+  const [k, ...v] = line.split('=');
+  if(k && v.length) acc[k.trim()] = v.join('=').trim().replace(/^"|"$/g, '');
   return acc;
 }, {});
-
 const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
-
-async function run() {
-  const { count } = await supabase.from('games').select('*', { count: 'exact', head: true });
-  console.log('Total games in DB:', count);
-}
-run();
+supabase.from('games').select('*', { count: 'exact', head: true }).eq('status', 'finished').not('home_team', 'is', null).then(r => console.log('Filtro: finished, jogos encontrados:', r.count));

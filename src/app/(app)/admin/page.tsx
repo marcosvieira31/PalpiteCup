@@ -34,13 +34,16 @@ export default function AdminPage() {
   }, [authorized, filter])
 
   const loadGames = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('games')
       .select('*')
       .eq('status', filter)
       .not('home_team', 'is', null)
       .order('kickoff_at', { ascending: filter !== 'finished' })
       .limit(30)
+
+    if (error) console.error('LOAD ERROR:', error)
+    console.log(`Filtro: ${filter}, jogos encontrados:`, data?.length)
     setGames(data ?? [])
   }
 
@@ -64,11 +67,12 @@ export default function AdminPage() {
     if (!response.ok) {
       alert(`Erro: ${result.error}`)
       console.error('UPDATE ERROR:', result)
-    } else {
-      console.log('UPDATE SUCCESS:', result)
+      return
     }
 
-    loadGames()
+    console.log('UPDATE SUCCESS:', result)
+    // Remove o jogo da lista atual imediatamente (já que mudou de status)
+    setGames(prev => prev.filter(g => g.id !== gameId))
   }
 
   if (loading) return <p className="p-8 text-center text-slate-400">Carregando...</p>
