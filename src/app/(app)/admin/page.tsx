@@ -12,6 +12,8 @@ interface Game {
   kickoff_at: string
   status: string
   group_stage: string | null
+  home_score: number | null
+  away_score: number | null
 }
 
 export default function AdminPage() {
@@ -71,8 +73,8 @@ export default function AdminPage() {
     }
 
     console.log('UPDATE SUCCESS:', result)
-    // Remove o jogo da lista atual imediatamente (já que mudou de status)
-    setGames(prev => prev.filter(g => g.id !== gameId))
+    // Recarrega a lista do banco para refletir o estado real (placar e status atualizados)
+    await loadGames()
   }
 
   if (loading) return <p className="p-8 text-center text-slate-400">Carregando...</p>
@@ -109,8 +111,8 @@ export default function AdminPage() {
 }
 
 function GameRow({ game, onUpdate }: { game: Game; onUpdate: (id: number, status: string, h: number, a: number) => void }) {
-  const [home, setHome] = useState(0)
-  const [away, setAway] = useState(0)
+  const [home, setHome] = useState(game.home_score ?? 0)
+  const [away, setAway] = useState(game.away_score ?? 0)
   const [saving, setSaving] = useState(false)
 
   const kickoff = new Date(game.kickoff_at)
