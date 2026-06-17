@@ -99,8 +99,7 @@ export default function LiveBetsShareCard({ liveGames: initialGames, liveBets: i
           </div>
           <div style={{
             fontSize: compact ? '32px' : '50px', fontWeight: '900', letterSpacing: '1px', lineHeight: 1,
-            background: 'linear-gradient(90deg, #facc15 0%, #22c55e 100%)',
-            WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+            color: '#facc15', textShadow: '2px 2px 0 rgba(34,197,94,0.6)',
           }}>
             {groupName.toUpperCase()}
           </div>
