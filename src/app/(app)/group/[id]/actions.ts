@@ -2,6 +2,7 @@
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { DEADLINES } from '@/lib/deadlines'
 
 const filterSchema = z.object({
   groupId: z.number().int().positive(),
@@ -55,11 +56,13 @@ export async function getGroupPoints(groupId: number) {
   // Busca configurações do grupo com a key normal ou admin, mas admin não quebra
   const { data: group } = await supabaseAdmin
     .from('groups')
-    .select('filter_teams, filter_phases, scoring_bets, scoring_groups, scoring_bracket, scoring_journey, scoring_groups_filter, scoring_journey_filter')
+    .select('filter_teams, filter_phases, scoring_bets, scoring_groups, scoring_bracket, scoring_journey, scoring_groups_filter, scoring_journey_filter, scoring_start_date')
     .eq('id', groupId)
     .single()
 
   if (!group) return []
+
+  const cutoff = group.scoring_start_date ? new Date(group.scoring_start_date) : null
 
   const { data: members } = await supabaseAdmin
     .from('group_members')
@@ -75,12 +78,14 @@ export async function getGroupPoints(groupId: number) {
     if (group.scoring_bets !== false) { // defaulting to true for older groups
       const { data: bets } = await supabaseAdmin
         .from('bets')
-        .select('points_earned, games(home_team, away_team, group_stage)')
+        .select('points_earned, games(home_team, away_team, group_stage, kickoff_at)')
         .eq('user_id', member.user_id)
 
       totalPoints += (bets ?? []).reduce((sum, bet) => {
-        const game = bet.games as { home_team: string; away_team: string; group_stage: string } | null
+        const game = bet.games as { home_team: string; away_team: string; group_stage: string; kickoff_at: string } | null
         if (!game) return sum
+
+        if (cutoff && new Date(game.kickoff_at) < cutoff) return sum
 
         const hasTeamFilter = (group.filter_teams?.length ?? 0) > 0
         const hasPhaseFilter = (group.filter_phases?.length ?? 0) > 0
@@ -98,7 +103,7 @@ export async function getGroupPoints(groupId: number) {
     }
 
     // 2. Pontos de classificação dos grupos
-    if (group.scoring_groups) {
+    if (group.scoring_groups && !(cutoff && DEADLINES.groups < cutoff)) {
       const { data: groupPreds } = await supabaseAdmin
         .from('group_predictions')
         .select('points_earned, group_name')
@@ -116,14 +121,18 @@ export async function getGroupPoints(groupId: number) {
     if (group.scoring_bracket) {
       const { data: bracketPicks } = await supabaseAdmin
         .from('bracket_picks')
-        .select('points_earned')
+        .select('points_earned, round')
         .eq('user_id', member.user_id)
 
-      totalPoints += (bracketPicks ?? []).reduce((sum, p) => sum + (p.points_earned ?? 0), 0)
+      totalPoints += (bracketPicks ?? []).reduce((sum, p) => {
+        const roundDeadline = DEADLINES[p.round as keyof typeof DEADLINES]
+        if (cutoff && roundDeadline && roundDeadline < cutoff) return sum
+        return sum + (p.points_earned ?? 0)
+      }, 0)
     }
 
     // 4. Pontos de jornada
-    if (group.scoring_journey) {
+    if (group.scoring_journey && !(cutoff && DEADLINES.journey < cutoff)) {
       const { data: journeyPreds } = await supabaseAdmin
         .from('team_journey_predictions')
         .select('points_earned, team')
@@ -150,4 +159,46 @@ export async function getGroupPoints(groupId: number) {
     const bName = (b.users as { username: string } | null)?.username ?? ''
     return aName.localeCompare(bName)
   })
+}
+
+const scoringStartDateSchema = z.object({
+  groupId: z.number().int().positive(),
+  scoringStartDate: z.string().nullable(),
+})
+
+export async function saveScoringStartDate(
+  groupId: number | string,
+  scoringStartDate: string | null
+) {
+  const parsed = scoringStartDateSchema.safeParse({
+    groupId: Number(groupId),
+    scoringStartDate,
+  })
+  if (!parsed.success) throw new Error('Dados inválidos.')
+
+  if (scoringStartDate) {
+    const date = new Date(scoringStartDate)
+    const now = new Date()
+    if (date < now) throw new Error('A data de corte não pode ser no passado.')
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Não autenticado.')
+
+  const { data: group } = await supabase
+    .from('groups')
+    .select('owner_id')
+    .eq('id', groupId)
+    .single()
+
+  if (!group) throw new Error('Grupo não encontrado.')
+  if (group.owner_id !== user.id) throw new Error('Apenas o líder pode configurar.')
+
+  const { error } = await supabase
+    .from('groups')
+    .update({ scoring_start_date: scoringStartDate })
+    .eq('id', groupId)
+
+  if (error) throw new Error(error.message)
 }

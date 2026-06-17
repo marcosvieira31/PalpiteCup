@@ -5,6 +5,7 @@ import GroupFilterConfig from './GroupFilterConfig'
 import { supabase } from '@/lib/supabase/client'
 import { Group } from '@/types/database'
 import { useUnreadCount } from '@/hooks/useUnreadCount'
+import { saveScoringStartDate } from '@/app/(app)/group/[id]/actions'
 
 interface Props {
   groupId: number | string
@@ -27,6 +28,9 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
 
   const [scoringGroupsFilter, setScoringGroupsFilter] = useState<string[]>(group?.scoring_groups_filter ?? [])
   const [scoringJourneyFilter, setScoringJourneyFilter] = useState<string[]>(group?.scoring_journey_filter ?? [])
+  const [scoringStartDate, setScoringStartDate] = useState<string | null>(group?.scoring_start_date ?? null)
+  const [savingDate, setSavingDate] = useState(false)
+  const [dateError, setDateError] = useState<string | null>(null)
 
   const toggleGroupFilter = async (groupName: string) => {
     const updated = scoringGroupsFilter.includes(groupName)
@@ -58,6 +62,19 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
     }
     setters[field](value)
     await supabase.from('groups').update({ [field]: value }).eq('id', String(groupId))
+  }
+
+  const handleSetStartDate = async (value: string | null) => {
+    setDateError(null)
+    setSavingDate(true)
+    try {
+      await saveScoringStartDate(groupId, value)
+      setScoringStartDate(value)
+    } catch (err) {
+      setDateError(err instanceof Error ? err.message : 'Erro ao salvar.')
+    } finally {
+      setSavingDate(false)
+    }
   }
 
   const toggleChat = async (val: boolean) => {
@@ -178,6 +195,56 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
               <p className="font-bebas text-sm tracking-widest text-slate-500 uppercase px-1 mt-6">
                 🏆 Modalidades que pontuam no grupo
               </p>
+
+              {/* Data de início da pontuação */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-4">
+                <p className="font-bold text-slate-800 text-sm mb-1">📅 A partir de quando pontua</p>
+                <p className="text-xs text-slate-400 mb-3">
+                  {scoringStartDate
+                    ? `Conta jogos/fases a partir de ${new Date(scoringStartDate).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`
+                    : 'Conta desde a criação do grupo'}
+                </p>
+                <div className="flex gap-2 mb-2">
+                  <button
+                    onClick={() => handleSetStartDate(null)}
+                    disabled={savingDate}
+                    className={`flex-1 py-2 rounded-xl text-xs font-bebas tracking-wider disabled:opacity-50 ${
+                      !scoringStartDate ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    DESDE A CRIAÇÃO
+                  </button>
+                  <button
+                    onClick={() => {
+                      const input = document.getElementById(`scoring-date-input-${groupId}`) as HTMLInputElement | null
+                      if (input?.showPicker) {
+                        input.showPicker()
+                      } else {
+                        input?.focus()
+                      }
+                    }}
+                    disabled={savingDate}
+                    className={`flex-1 py-2 rounded-xl text-xs font-bebas tracking-wider disabled:opacity-50 ${
+                      scoringStartDate ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    A PARTIR DE DATA
+                  </button>
+                </div>
+                <input
+                  id={`scoring-date-input-${groupId}`}
+                  type="datetime-local"
+                  min={new Date().toISOString().slice(0, 16)}
+                  defaultValue={scoringStartDate ? new Date(scoringStartDate).toISOString().slice(0, 16) : ''}
+                  onChange={e => {
+                    if (!e.target.value) return
+                    const iso = new Date(e.target.value).toISOString()
+                    handleSetStartDate(iso)
+                  }}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                />
+                {dateError && <p className="text-xs text-red-500 mt-2">{dateError}</p>}
+              </div>
 
               {/* 1. Palpites de Partidas */}
               <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">

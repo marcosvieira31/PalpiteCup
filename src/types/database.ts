@@ -90,6 +90,7 @@ export interface Database {
           scoring_journey: boolean
           scoring_groups_filter: string[] | null
           scoring_journey_filter: string[] | null
+          scoring_start_date: string | null
           created_at: string
         }
         Insert: {
@@ -111,6 +112,7 @@ export interface Database {
           scoring_journey?: boolean
           scoring_groups_filter?: string[] | null
           scoring_journey_filter?: string[] | null
+          scoring_start_date?: string | null
           created_at?: string
         }
         Update: {
@@ -132,6 +134,7 @@ export interface Database {
           scoring_journey?: boolean
           scoring_groups_filter?: string[] | null
           scoring_journey_filter?: string[] | null
+          scoring_start_date?: string | null
           created_at?: string
         }
       }
@@ -466,6 +469,7 @@ export interface Group {
   filter_locked: boolean
   chat_enabled: boolean
   chat_filter_enabled: boolean
+  scoring_start_date?: string | null
   created_at: string
 }
 
