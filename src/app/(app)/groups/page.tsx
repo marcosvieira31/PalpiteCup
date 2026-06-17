@@ -23,12 +23,12 @@ export default async function GroupsPage() {
         <p className="text-white text-sm mt-1">Seus bolões da Copa</p>
       </div>
 
-      <div className="px-4 mt-4 space-y-3">
+      <div className="px-4 mt-4 space-y-4">
         {/* Botões de ação */}
         <GroupsActions />
 
         {/* Ranking Global */}
-        <Link href="/groups/global">
+        <Link href="/groups/global" className="block mt-1">
           <div className="bg-blue-900 rounded-2xl shadow-sm p-4 flex justify-between items-center active:scale-95 transition-transform">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-xl">
