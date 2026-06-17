@@ -4,6 +4,7 @@ import GroupHeader from '@/components/group/GroupHeader'
 import RankingList from '@/components/group/RankingList'
 import GroupActions from '@/components/group/GroupModals'
 import PendingRequests from '@/components/group/PendingRequests'
+import LiveBetsShareCard from '@/components/group/LiveBetsShareCard'
 import { getGroupPoints } from './actions'
 
 export default async function GroupPage({ params }: { params: { id: string } }) {
@@ -63,7 +64,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
   const { data: liveBetsData } = liveGameIds.length > 0
     ? await supabase
         .from('bets')
-        .select('user_id, game_id, home_bet, away_bet, used_joker')
+        .select('user_id, game_id, home_bet, away_bet, used_joker, users(username, avatar_url)')
         .in('game_id', liveGameIds)
     : { data: [] }
 
@@ -92,6 +93,12 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
 
       {/* Ranking é o foco principal */}
       <div className="px-4 mt-4">
+        <LiveBetsShareCard
+          liveGames={liveGames}
+          liveBets={(liveBetsData ?? []) as unknown as import('@/components/group/LiveBetsShareCard').LiveBetWithUser[]}
+          groupName={group.name}
+        />
+
         <RankingList
           members={computedMembers as unknown as import('@/components/group/RankingList').RankingMember[]}
           filterTeams={group.filter_teams ?? []}
