@@ -1,7 +1,8 @@
 "use client"
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import HCaptcha from '@hcaptcha/react-hcaptcha'
 
 type Mode = 'login' | 'register'
 
@@ -13,7 +14,14 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const captchaRef = useRef<HCaptcha>(null)
   const router = useRouter()
+
+  const resetCaptcha = () => {
+    captchaRef.current?.resetCaptcha()
+    setCaptchaToken(null)
+  }
 
   const handleSubmit = async () => {
     if (loading) return
@@ -21,6 +29,11 @@ export default function LoginPage() {
 
     if (password.length < 8) {
       setError('A senha deve ter no mínimo 8 caracteres.')
+      return
+    }
+
+    if (!captchaToken) {
+      setError('Confirme que você não é um robô.')
       return
     }
 
@@ -32,9 +45,11 @@ export default function LoginPage() {
         password,
         options: {
           data: { username },
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          captchaToken
         }
       })
+      resetCaptcha()
       if (error) {
         setError(error.message)
         setLoading(false)
@@ -45,7 +60,12 @@ export default function LoginPage() {
       return
     }
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: { captchaToken }
+    })
+    resetCaptcha()
     if (error) {
       setError('Email ou senha incorretos.')
       setLoading(false)
@@ -96,13 +116,13 @@ export default function LoginPage() {
       <div className="w-full bg-white rounded-2xl p-6 flex flex-col gap-3">
         <div className="flex rounded-xl overflow-hidden border border-slate-200 mb-2">
           <button
-            onClick={() => setMode('login')}
+            onClick={() => { setMode('login'); resetCaptcha(); setError('') }}
             className={`flex-1 py-2 text-sm font-bebas tracking-wider transition-colors ${mode === 'login' ? 'bg-green-500 text-white' : 'text-slate-400'}`}
           >
             ENTRAR
           </button>
           <button
-            onClick={() => setMode('register')}
+            onClick={() => { setMode('register'); resetCaptcha(); setError('') }}
             className={`flex-1 py-2 text-sm font-bebas tracking-wider transition-colors ${mode === 'register' ? 'bg-green-500 text-white' : 'text-slate-400'}`}
           >
             CADASTRAR
@@ -135,6 +155,15 @@ export default function LoginPage() {
           onKeyDown={e => e.key === 'Enter' && handleSubmit()}
           className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-green-500"
         />
+
+        <div className="flex justify-center">
+          <HCaptcha
+            ref={captchaRef}
+            sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+            onVerify={token => setCaptchaToken(token)}
+            onExpire={() => setCaptchaToken(null)}
+          />
+        </div>
 
         {error && (
           <p className="text-sm text-center text-red-500">{error}</p>
