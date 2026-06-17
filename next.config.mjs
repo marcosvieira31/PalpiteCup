@@ -21,7 +21,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.hcaptcha.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https://flagcdn.com https://hatscripts.github.io",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.wc2026api.com https://*.hcaptcha.com",
+      "connect-src 'self' data: https://*.supabase.co wss://*.supabase.co https://api.wc2026api.com https://*.hcaptcha.com",
       "frame-src 'self' https://*.hcaptcha.com newassets.hcaptcha.com",
     ].join('; ')
   }
