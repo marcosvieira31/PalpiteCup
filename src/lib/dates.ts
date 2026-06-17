@@ -38,5 +38,7 @@ export function formatDateTime(date: string | Date): string {
 }
 
 export function isBeforeKickoff(kickoff_at: string): boolean {
-  return new Date() < new Date(kickoff_at)
+  const TEN_MINUTES_MS = 10 * 60 * 1000
+  const cutoff = new Date(kickoff_at).getTime() - TEN_MINUTES_MS
+  return new Date().getTime() < cutoff
 }

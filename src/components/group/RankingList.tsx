@@ -65,6 +65,21 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
   const livePointsByUser = sumLivePointsByUser(liveGames, liveBets)
   const hasLiveGame = liveGames.length > 0
 
+  const liveBetsByUser: Record<string, { home_team: string | null; away_team: string | null; home_bet: number; away_bet: number; home_score: number | null; away_score: number | null }[]> = {}
+  for (const bet of liveBets) {
+    const game = liveGames.find(g => String(g.id) === String(bet.game_id))
+    if (!game) continue
+    if (!liveBetsByUser[bet.user_id]) liveBetsByUser[bet.user_id] = []
+    liveBetsByUser[bet.user_id].push({
+      home_team: game.home_team ?? null,
+      away_team: game.away_team ?? null,
+      home_bet: bet.home_bet,
+      away_bet: bet.away_bet,
+      home_score: game.home_score,
+      away_score: game.away_score,
+    })
+  }
+
   const sorted = [...members]
     .map(m => ({
       ...m,
@@ -221,6 +236,25 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
                 </span>
               </div>
               </div>
+
+              {(liveBetsByUser[member.user_id]?.length ?? 0) > 0 && (
+                <div className="mt-1.5 flex flex-col gap-1">
+                  {liveBetsByUser[member.user_id].map((bet, i) => (
+                    <div key={i} className="flex items-center justify-between bg-red-50 border border-red-200 rounded-xl px-3 py-1.5">
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-red-600">
+                        <span className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />
+                        AO VIVO
+                      </span>
+                      <span className="text-[11px] text-slate-600 truncate flex-1 px-2">
+                        {bet.home_team} {bet.home_score ?? 0}×{bet.away_score ?? 0} {bet.away_team}
+                      </span>
+                      <span className="text-[11px] font-bold text-slate-800">
+                        Palpite: {bet.home_bet}×{bet.away_bet}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </Link>
           );
         })}

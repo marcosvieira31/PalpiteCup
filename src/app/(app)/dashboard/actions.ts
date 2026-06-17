@@ -32,8 +32,10 @@ export async function submitBet(
     .single()
 
   if (!game) throw new Error('Jogo não encontrado.')
-  if (new Date() >= new Date(game.kickoff_at)) {
-    throw new Error('Prazo de palpite encerrado.')
+  const TEN_MINUTES_MS = 10 * 60 * 1000
+  const cutoff = new Date(new Date(game.kickoff_at).getTime() - TEN_MINUTES_MS)
+  if (new Date() >= cutoff) {
+    throw new Error('Prazo de palpite encerrado (10 minutos antes do início do jogo).')
   }
   if (game.status !== 'scheduled') {
     throw new Error('Jogo já iniciado.')

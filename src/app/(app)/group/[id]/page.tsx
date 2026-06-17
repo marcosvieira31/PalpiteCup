@@ -62,12 +62,17 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
 
   const liveGameIds = liveGames.map(g => g.id)
 
-  const { data: liveBetsData } = liveGameIds.length > 0
+  const memberIds = (group.group_members ?? []).map((m: { user_id: string }) => m.user_id)
+
+  const { data: liveBetsRaw } = liveGameIds.length > 0 && memberIds.length > 0
     ? await supabase
         .from('bets')
         .select('user_id, game_id, home_bet, away_bet, used_joker, users(username, avatar_url)')
         .in('game_id', liveGameIds)
+        .in('user_id', memberIds)
     : { data: [] }
+
+  const liveBetsData = liveBetsRaw ?? []
 
   const computedMembers = await getGroupPoints(Number(params.id))
 

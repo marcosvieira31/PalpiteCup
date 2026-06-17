@@ -3,6 +3,8 @@ export interface LiveGame {
   home_score: number | null
   away_score: number | null
   status: string
+  home_team?: string | null
+  away_team?: string | null
 }
 
 export interface LiveBet {
