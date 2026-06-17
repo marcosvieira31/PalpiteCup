@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import RankingGlobal from '@/components/ranking/RankingGlobal'
 
-export default async function RankingPage() {
+export default async function GroupsGlobalPage() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()

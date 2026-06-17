@@ -14,23 +14,23 @@ export default function CountdownDashboard() {
   }
 
   return (
-    <div className="px-4 mt-6 space-y-3">
-      <h2 className="font-bebas text-xl tracking-widest text-slate-800">⏱ PRAZOS DOS PALPITES</h2>
+    <div className="px-4 mt-4 space-y-1.5">
+      <h2 className="font-bebas text-sm tracking-widest text-slate-500 uppercase mb-1">⏱ Prazos dos Palpites</h2>
 
       <Countdown
         deadline={DEADLINES.journey}
         label="Até onde vai"
-        variant="card"
+        variant="mini"
       />
       <Countdown
         deadline={DEADLINES.groups}
         label="Classificação dos Grupos"
-        variant="card"
+        variant="mini"
       />
       <Countdown
         deadline={bracketDeadline}
         label={bracketLabel[bracketKey]}
-        variant="card"
+        variant="mini"
       />
     </div>
   )

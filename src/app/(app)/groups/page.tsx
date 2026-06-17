@@ -27,6 +27,22 @@ export default async function GroupsPage() {
         {/* Botões de ação */}
         <GroupsActions />
 
+        {/* Ranking Global */}
+        <Link href="/groups/global">
+          <div className="bg-blue-900 rounded-2xl shadow-sm p-4 flex justify-between items-center active:scale-95 transition-transform">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-xl">
+                🏆
+              </div>
+              <div>
+                <p className="font-bold text-yellow-400 text-sm">Ranking Global</p>
+                <p className="text-xs text-blue-200 mt-0.5">Todos os usuários do PalpiteCup</p>
+              </div>
+            </div>
+            <span className="text-blue-300 text-xl">›</span>
+          </div>
+        </Link>
+
         {/* Meus grupos */}
         {myGroups && myGroups.length > 0 ? (
           <div className="space-y-3 mt-2">

@@ -5,7 +5,7 @@ import { getTimeLeft } from '@/lib/deadlines'
 interface Props {
   deadline: Date
   label: string
-  variant?: 'banner' | 'compact' | 'card'
+  variant?: 'banner' | 'compact' | 'card' | 'mini'
   onExpire?: () => void
 }
 
@@ -76,6 +76,31 @@ export default function Countdown({ deadline, label, variant = 'banner', onExpir
             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">seg</p>
           </div>
         </div>
+      )}
+    </div>
+  )
+
+  if (variant === 'mini') return (
+    <div className={`rounded-xl px-3 py-2 flex items-center justify-between ${
+      timeLeft.expired
+        ? 'bg-red-50 border border-red-100'
+        : timeLeft.days === 0
+        ? 'bg-orange-50 border border-orange-200'
+        : 'bg-blue-50 border border-blue-100'
+    }`}>
+      <p className={`text-[11px] font-bold uppercase tracking-wide truncate pr-2 ${
+        timeLeft.expired ? 'text-red-600' : timeLeft.days === 0 ? 'text-orange-600' : 'text-blue-600'
+      }`}>
+        {timeLeft.expired ? '🔒' : '⏱'} {label}
+      </p>
+      {timeLeft.expired ? (
+        <p className="font-bebas text-sm text-red-600 tracking-wider whitespace-nowrap">ENCERRADO</p>
+      ) : (
+        <p className={`font-bebas text-base tracking-wider whitespace-nowrap ${
+          timeLeft.days === 0 ? 'text-orange-600' : 'text-blue-700'
+        }`}>
+          {timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}{String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
+        </p>
       )}
     </div>
   )

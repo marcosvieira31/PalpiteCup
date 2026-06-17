@@ -87,7 +87,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
       {/* Header */}
       <div className="bg-blue-900 px-4 pt-6 pb-6"
         style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1.5px, transparent 1.5px)', backgroundSize: '12px 12px' }}>
-        <Link href={searchParams.groupId ? `/group/${searchParams.groupId}` : '/ranking'}
+        <Link href={searchParams.groupId ? `/group/${searchParams.groupId}` : '/groups/global'}
           className="text-white/60 text-sm mb-3 flex items-center gap-1">
           ‹ Voltar
         </Link>
