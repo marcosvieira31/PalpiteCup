@@ -13,10 +13,26 @@ export default async function GroupsGlobalPage() {
     .order('username', { ascending: true })
     .limit(50)
 
+  const { data: liveGames } = await supabase
+    .from('games')
+    .select('id, home_score, away_score, status')
+    .eq('status', 'live')
+
+  const liveGameIds = (liveGames ?? []).map(g => g.id)
+
+  const { data: liveBets } = liveGameIds.length > 0
+    ? await supabase
+        .from('bets')
+        .select('user_id, game_id, home_bet, away_bet, used_joker')
+        .in('game_id', liveGameIds)
+    : { data: [] }
+
   return (
     <RankingGlobal
       players={players ?? []}
       currentUserId={user?.id ?? ''}
+      initialLiveGames={liveGames ?? []}
+      initialLiveBets={liveBets ?? []}
     />
   )
 }

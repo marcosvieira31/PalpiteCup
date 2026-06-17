@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
+import { sumLivePointsByUser, LiveGame, LiveBet } from '@/lib/scoring'
 import RankingShareCard from '@/components/share/RankingShareCard'
 import Link from 'next/link'
 
@@ -8,16 +9,21 @@ interface Player {
   id: string
   username: string
   points_total: number
+  live_points_total?: number
   avatar_url?: string
 }
 
 interface Props {
   players: Player[]
   currentUserId: string
+  initialLiveGames?: LiveGame[]
+  initialLiveBets?: LiveBet[]
 }
 
-export default function RankingGlobal({ players: initial, currentUserId }: Props) {
+export default function RankingGlobal({ players: initial, currentUserId, initialLiveGames = [], initialLiveBets = [] }: Props) {
   const [players, setPlayers] = useState<Player[]>(initial)
+  const [liveGames, setLiveGames] = useState<LiveGame[]>(initialLiveGames)
+  const [liveBets] = useState<LiveBet[]>(initialLiveBets)
 
   useEffect(() => {
     const channel = supabase
@@ -40,7 +46,48 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
     return () => { supabase.removeChannel(channel) }
   }, [])
 
-  const myPosition = players.findIndex(p => p.id === currentUserId) + 1
+  useEffect(() => {
+    const channel = supabase
+      .channel('global-live-ranking')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'games'
+      }, (payload) => {
+        const updated = payload.new as { id: number | string; status: string; home_score: number | null; away_score: number | null }
+
+        setLiveGames(prev => {
+          if (updated.status !== 'live') {
+            return prev.filter(g => String(g.id) !== String(updated.id))
+          }
+          const exists = prev.some(g => String(g.id) === String(updated.id))
+          if (exists) {
+            return prev.map(g => String(g.id) === String(updated.id) ? { ...g, ...updated } : g)
+          }
+          return [...prev, updated]
+        })
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [])
+
+  const livePointsByUser = sumLivePointsByUser(liveGames, liveBets)
+  const hasLiveGame = liveGames.length > 0
+
+  const displayPlayers = players.map(p => ({
+    ...p,
+    live_points_total: p.points_total + (livePointsByUser[p.id] ?? 0)
+  }))
+
+  const sortedForDisplay = hasLiveGame
+    ? [...displayPlayers].sort((a, b) => {
+        if (b.live_points_total !== a.live_points_total) return b.live_points_total - a.live_points_total
+        return a.username.localeCompare(b.username)
+      })
+    : displayPlayers
+
+  const myPosition = sortedForDisplay.findIndex(p => p.id === currentUserId) + 1
 
   const getMedal = (position: number) => {
     if (position === 1) return '👑'
@@ -54,9 +101,15 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
       {/* Header */}
       <div className="bg-blue-900 px-4 pt-6 pb-6"
         style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1.5px, transparent 1.5px)', backgroundSize: '12px 12px' }}>
-        <h1 className="font-bebas text-4xl text-yellow-400 tracking-widest"
+        <h1 className="font-bebas text-4xl text-yellow-400 tracking-widest flex items-center gap-2"
           style={{ textShadow: '2px 2px 0 rgba(0,0,0,0.3)' }}>
           RANKING GLOBAL
+          {hasLiveGame && (
+            <span className="flex items-center gap-1 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+              AO VIVO
+            </span>
+          )}
         </h1>
         <p className="text-blue-200 text-sm mt-1">Top 50 palpiteiros do PalpiteCup</p>
       </div>
@@ -72,9 +125,13 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
             <p className="font-bebas text-3xl text-white"># {myPosition}</p>
           </div>
           <div className="text-right">
-            <p className="text-white/70 text-xs font-bold tracking-wider uppercase">Meus Pontos</p>
+            <p className="text-white/70 text-xs font-bold tracking-wider uppercase">
+              {hasLiveGame ? 'Pontos (ao vivo)' : 'Meus Pontos'}
+            </p>
             <p className="font-bebas text-3xl text-yellow-300">
-              {players.find(p => p.id === currentUserId)?.points_total ?? 0}
+              {hasLiveGame
+                ? sortedForDisplay.find(p => p.id === currentUserId)?.live_points_total ?? 0
+                : players.find(p => p.id === currentUserId)?.points_total ?? 0}
             </p>
           </div>
         </div>
@@ -93,9 +150,9 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
       </div>
 
       {/* Top 3 */}
-      {players.length >= 3 && (
+      {sortedForDisplay.length >= 3 && (
         <div className="mx-4 mt-4 grid grid-cols-3 gap-2 items-end">
-          {[players[1], players[0], players[2]].map((player, idx) => {
+          {[sortedForDisplay[1], sortedForDisplay[0], sortedForDisplay[2]].map((player, idx) => {
             const realPos = idx === 0 ? 2 : idx === 1 ? 1 : 3
             const sizes = ['h-24', 'h-32', 'h-24']
             const colors = ['bg-slate-100', 'bg-yellow-400', 'bg-orange-100']
@@ -112,7 +169,7 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
                   {player.username}
                 </p>
                 <p className={`font-bebas text-sm ${textColors[idx]}`}>
-                  {player.points_total} pts
+                  {hasLiveGame ? player.live_points_total : player.points_total} pts
                 </p>
               </div>
             )
@@ -122,7 +179,7 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
 
       {/* Lista completa */}
       <div className="px-4 flex flex-col gap-3 mt-2">
-        {players.map((player, idx) => {
+        {sortedForDisplay.map((player, idx) => {
           const position = idx + 1
           const isMe = player.id === currentUserId
           const medal = getMedal(position)
@@ -161,15 +218,17 @@ export default function RankingGlobal({ players: initial, currentUserId }: Props
 
               <div className="text-right flex-shrink-0">
                 <p className={`font-bebas text-xl ${
-                  position === 1 ? 'text-yellow-500'
-                  : position === 2 ? 'text-slate-400'
-                  : position === 3 ? 'text-orange-400'
-                  : isMe ? 'text-green-600'
-                  : 'text-slate-600'
+                  hasLiveGame && (livePointsByUser[player.id] ?? 0) !== 0
+                    ? 'text-red-500'
+                    : position === 1 ? 'text-yellow-500'
+                    : position === 2 ? 'text-slate-400'
+                    : position === 3 ? 'text-orange-400'
+                    : isMe ? 'text-green-600'
+                    : 'text-slate-600'
                 }`}>
-                  {player.points_total}
+                  {hasLiveGame ? player.live_points_total : player.points_total}
                 </p>
-                <p className="text-[10px] text-slate-400">pontos</p>
+                <p className="text-[10px] text-slate-400">{hasLiveGame ? 'ao vivo' : 'pontos'}</p>
               </div>
               </div>
             </Link>

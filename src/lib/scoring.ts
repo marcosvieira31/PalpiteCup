@@ -1,5 +1,5 @@
 export interface LiveGame {
-  id: string
+  id: number | string
   home_score: number | null
   away_score: number | null
   status: string
@@ -7,7 +7,7 @@ export interface LiveGame {
 
 export interface LiveBet {
   user_id: string
-  game_id: string
+  game_id: number | string
   home_bet: number
   away_bet: number
   used_joker: boolean
@@ -41,7 +41,7 @@ export function sumLivePointsByUser(liveGames: LiveGame[], liveBets: LiveBet[]):
   const result: Record<string, number> = {}
 
   for (const bet of liveBets) {
-    const game = liveGames.find(g => g.id === bet.game_id)
+    const game = liveGames.find(g => String(g.id) === String(bet.game_id))
     if (!game || game.home_score === null || game.away_score === null) continue
 
     const points = calculateBetPoints(
