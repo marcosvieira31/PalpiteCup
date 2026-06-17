@@ -11,12 +11,12 @@ const COPA_GROUPS: Record<string, string[]> = {
   'C': ['Brasil', 'Marrocos', 'Haiti', 'Escócia'],
   'D': ['Estados Unidos', 'Paraguai', 'Austrália', 'Turquia'],
   'E': ['Alemanha', 'Costa do Marfim', 'Equador', 'Curaçao'],
-  'F': ['Holanda', 'Japão', 'Tunísia', 'Nova Zelândia'],
+  'F': ['Holanda', 'Japão', 'Tunísia', 'Suécia'],
   'G': ['Bélgica', 'Egito', 'Irã', 'Nova Zelândia'],
   'H': ['Espanha', 'Uruguai', 'Arábia Saudita', 'Cabo Verde'],
-  'I': ['França', 'Senegal', 'Noruega', 'Uzbequistão'],
+  'I': ['França', 'Senegal', 'Noruega', 'Iraque'],
   'J': ['Argentina', 'Argélia', 'Áustria', 'Jordânia'],
-  'K': ['Portugal', 'Colômbia', 'Uzbequistão', 'Iraque'],
+  'K': ['Portugal', 'Colômbia', 'Uzbequistão', 'Rep. Dem. do Congo'],
   'L': ['Inglaterra', 'Croácia', 'Gana', 'Panamá'],
 }
 
