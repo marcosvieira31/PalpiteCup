@@ -36,6 +36,7 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
 
   const router = useRouter()
   const [editingName, setEditingName] = useState(false)
+  const [displayedName, setDisplayedName] = useState(group.name)
   const [groupNameInput, setGroupNameInput] = useState(group.name)
   const [savingName, setSavingName] = useState(false)
   const [nameError, setNameError] = useState<string | null>(null)
@@ -91,13 +92,15 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
 
   const handleSaveName = async () => {
     setNameError(null)
-    if (!groupNameInput.trim()) {
+    const trimmed = groupNameInput.trim()
+    if (!trimmed) {
       setNameError('Digite um nome.')
       return
     }
     setSavingName(true)
     try {
-      await renameGroup(groupId, groupNameInput.trim())
+      await renameGroup(groupId, trimmed)
+      setDisplayedName(trimmed)
       setEditingName(false)
     } catch (err) {
       setNameError(err instanceof Error ? err.message : 'Erro ao renomear.')
@@ -108,7 +111,7 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
 
   const handleDeleteGroup = async () => {
     setDeleteError(null)
-    if (deleteConfirmText.trim() !== group.name) {
+    if (deleteConfirmText.trim() !== displayedName) {
       setDeleteError('O nome digitado não corresponde ao nome do grupo.')
       return
     }
@@ -226,7 +229,7 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
                     {nameError && <p className="text-xs text-red-500 mb-2">{nameError}</p>}
                     <div className="flex gap-2">
                       <button
-                        onClick={() => { setEditingName(false); setGroupNameInput(group.name); setNameError(null) }}
+                        onClick={() => { setEditingName(false); setGroupNameInput(displayedName); setNameError(null) }}
                         disabled={savingName}
                         className="flex-1 bg-slate-100 text-slate-600 font-bebas tracking-wider rounded-xl py-2 text-sm disabled:opacity-50"
                       >
@@ -243,9 +246,9 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
                   </>
                 ) : (
                   <div className="flex justify-between items-center">
-                    <p className="text-slate-600 text-sm">{group.name}</p>
+                    <p className="text-slate-600 text-sm">{displayedName}</p>
                     <button
-                      onClick={() => setEditingName(true)}
+                      onClick={() => { setEditingName(true); setGroupNameInput(displayedName) }}
                       className="bg-slate-100 text-slate-600 font-bebas tracking-wider rounded-xl px-3 py-1.5 text-xs"
                     >
                       EDITAR
@@ -493,7 +496,7 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
             <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto" />
             <p className="font-bebas text-2xl tracking-wider text-red-600">🗑️ EXCLUIR GRUPO</p>
             <p className="text-sm text-slate-600">
-              Esta ação não pode ser desfeita. Para confirmar, digite o nome do grupo: <span className="font-bold">{group.name}</span>
+              Esta ação não pode ser desfeita. Para confirmar, digite o nome do grupo: <span className="font-bold">{displayedName}</span>
             </p>
             <input
               value={deleteConfirmText}
@@ -512,7 +515,7 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
               </button>
               <button
                 onClick={handleDeleteGroup}
-                disabled={deleting || deleteConfirmText.trim() !== group.name}
+                disabled={deleting || deleteConfirmText.trim() !== displayedName}
                 className="flex-1 bg-red-500 text-white font-bebas tracking-wider rounded-xl py-3 disabled:opacity-50"
               >
                 {deleting ? 'EXCLUINDO...' : 'EXCLUIR PERMANENTEMENTE'}
