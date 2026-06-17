@@ -43,6 +43,7 @@ create table public.groups (
   scoring_journey boolean default false,
   scoring_groups_filter text[] default '{}',
   scoring_journey_filter text[] default '{}',
+  scoring_start_date timestamptz null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
