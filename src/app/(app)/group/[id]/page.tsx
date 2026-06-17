@@ -35,6 +35,38 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
 
   const isOwner = user?.id === group.owner_id
 
+  // Jogos ao vivo, respeitando os filtros de times/fases do grupo (mesma lógica usada na pontuação)
+  const { data: liveGamesData } = await supabase
+    .from('games')
+    .select('id, home_team, away_team, home_score, away_score, status, group_stage')
+    .eq('status', 'live')
+
+  let liveGames = liveGamesData ?? []
+
+  const hasTeamFilter = (group.filter_teams?.length ?? 0) > 0
+  const hasPhaseFilter = (group.filter_phases?.length ?? 0) > 0
+
+  if (hasTeamFilter) {
+    liveGames = liveGames.filter(g =>
+      group.filter_teams!.includes(g.home_team ?? '') ||
+      group.filter_teams!.includes(g.away_team ?? '')
+    )
+  }
+  if (hasPhaseFilter) {
+    liveGames = liveGames.filter(g =>
+      group.filter_phases!.includes(g.group_stage ?? '')
+    )
+  }
+
+  const liveGameIds = liveGames.map(g => g.id)
+
+  const { data: liveBetsData } = liveGameIds.length > 0
+    ? await supabase
+        .from('bets')
+        .select('user_id, game_id, home_bet, away_bet, used_joker')
+        .in('game_id', liveGameIds)
+    : { data: [] }
+
   const computedMembers = await getGroupPoints(Number(params.id))
 
   return (
@@ -67,6 +99,8 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
           group={group}
           groupName={group.name}
           groupId={Number(params.id)}
+          initialLiveGames={liveGames}
+          initialLiveBets={liveBetsData ?? []}
         />
       </div>
     </div>

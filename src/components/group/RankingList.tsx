@@ -1,5 +1,7 @@
 "use client";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase/client'
+import { sumLivePointsByUser, LiveGame, LiveBet } from '@/lib/scoring'
 import clsx from "clsx";
 import RankingShareCard from '@/components/share/RankingShareCard'
 import Link from 'next/link'
@@ -7,6 +9,7 @@ import Link from 'next/link'
 export interface RankingMember {
   user_id: string;
   points_total: number;
+  live_points_total?: number;
   users: {
     username: string;
     avatar_url: string | null;
@@ -20,21 +23,74 @@ interface RankingListProps {
   group?: import('@/types/database').Database["public"]["Tables"]["groups"]["Row"];
   groupName?: string;
   groupId?: number;
+  initialLiveGames?: LiveGame[];
+  initialLiveBets?: LiveBet[];
 }
 
-export default function RankingList({ members, filterTeams = [], filterPhases = [], group, groupName, groupId }: RankingListProps) {
+export default function RankingList({ members, filterTeams = [], filterPhases = [], group, groupName, groupId, initialLiveGames = [], initialLiveBets = [] }: RankingListProps) {
   const [showFilters, setShowFilters] = useState(false);
-  const sorted = [...members].sort((a, b) => {
-    if (b.points_total !== a.points_total) return b.points_total - a.points_total
-    return (a.users?.username ?? '').localeCompare(b.users?.username ?? '')
-  })
+  const [liveGames, setLiveGames] = useState<LiveGame[]>(initialLiveGames)
+  const [liveBets] = useState<LiveBet[]>(initialLiveBets)
+
+  useEffect(() => {
+    if (!groupId) return
+
+    const channel = supabase
+      .channel(`group-live-ranking-${groupId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'games'
+      }, (payload) => {
+        const updated = payload.new as { id: string; status: string; home_score: number | null; away_score: number | null }
+
+        setLiveGames(prev => {
+          // Jogo virou finished -> remove da lista de live (a trigger SQL já vai consolidar o ponto oficial)
+          if (updated.status !== 'live') {
+            return prev.filter(g => g.id !== updated.id)
+          }
+          // Jogo já estava na lista -> atualiza placar
+          const exists = prev.some(g => g.id === updated.id)
+          if (exists) {
+            return prev.map(g => g.id === updated.id ? { ...g, ...updated } : g)
+          }
+          return prev
+        })
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [groupId])
+
+  const livePointsByUser = sumLivePointsByUser(liveGames, liveBets)
+  const hasLiveGame = liveGames.length > 0
+
+  const sorted = [...members]
+    .map(m => ({
+      ...m,
+      live_points_total: m.points_total + (livePointsByUser[m.user_id] ?? 0)
+    }))
+    .sort((a, b) => {
+      const aTotal = hasLiveGame ? a.live_points_total : a.points_total
+      const bTotal = hasLiveGame ? b.live_points_total : b.points_total
+      if (bTotal !== aTotal) return bTotal - aTotal
+      return (a.users?.username ?? '').localeCompare(b.users?.username ?? '')
+    })
 
   const hasFilter = filterTeams.length > 0 || filterPhases.length > 0
 
   return (
     <div className="px-4 pt-6">
-      <h2 className="font-bebas text-2xl tracking-widest text-slate-800 mb-4 flex items-center justify-between">
-        Ranking
+      <h2 className="font-bebas text-2xl tracking-widest text-slate-800 mb-4 flex items-center justify-between gap-2">
+        <span className="flex items-center gap-2">
+          Ranking
+          {hasLiveGame && (
+            <span className="flex items-center gap-1 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+              AO VIVO
+            </span>
+          )}
+        </span>
         <span className="text-[10px] font-sans font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-full">
           {members.length} MEMBROS
         </span>
@@ -153,8 +209,15 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
               </div>
 
               <div className="flex flex-col items-end pr-2">
-                <span className="font-bebas text-3xl leading-none text-green-600">{member.points_total}</span>
-                <span className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Pontos</span>
+                <span className={clsx(
+                  "font-bebas text-3xl leading-none",
+                  hasLiveGame && (livePointsByUser[member.user_id] ?? 0) !== 0 ? "text-red-500" : "text-green-600"
+                )}>
+                  {hasLiveGame ? member.live_points_total : member.points_total}
+                </span>
+                <span className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">
+                  {hasLiveGame ? 'Pontos (ao vivo)' : 'Pontos'}
+                </span>
               </div>
               </div>
             </Link>
