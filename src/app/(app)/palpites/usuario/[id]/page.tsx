@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import TeamFlag from '@/components/ui/TeamFlag'
 import { formatDateShort } from '@/lib/dates'
+import { calculateBetPoints } from '@/lib/scoring'
 
 interface Props {
   params: { id: string }
@@ -21,11 +22,11 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
 
   if (!profile) notFound()
 
-  // Busca jogos finalizados
+  // Busca jogos finalizados e ao vivo (ao vivo mostra placar/pontos provisórios)
   const gamesQuery = supabase
     .from('games')
     .select('*')
-    .eq('status', 'finished')
+    .in('status', ['finished', 'live'])
     .order('kickoff_at', { ascending: false })
 
   // Se veio de um grupo com filtro, aplica o filtro
@@ -76,7 +77,15 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
     .eq('user_id', params.id)
     .in('game_id', gameIds.length > 0 ? gameIds : ['00000000-0000-0000-0000-000000000000'])
 
-  const totalPoints = (bets ?? []).reduce((sum, b) => sum + (b.points_earned ?? 0), 0)
+  const totalPoints = (bets ?? []).reduce((sum, b) => {
+    const game = games?.find(g => g.id === b.game_id)
+    if (!game) return sum
+    if (game.status === 'live') {
+      if (game.home_score === null || game.away_score === null) return sum
+      return sum + calculateBetPoints(b.home_bet, b.away_bet, game.home_score, game.away_score, b.used_joker ?? false)
+    }
+    return sum + (b.points_earned ?? 0)
+  }, 0)
   const exactScores = (bets ?? []).filter(b => {
     const game = games?.find(g => g.id === b.game_id)
     return game && b.home_bet === game.home_score && b.away_bet === game.away_score
@@ -108,7 +117,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
             <p className="text-blue-200 text-sm mt-1">
               {searchParams.groupName
                 ? `Palpites em ${searchParams.groupName}`
-                : 'Palpites nos jogos encerrados'}
+                : 'Palpites nos jogos encerrados e ao vivo'}
             </p>
           </div>
         </div>
@@ -134,11 +143,12 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
         {!games || games.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-3xl mb-2">⏳</p>
-            <p className="text-slate-500">Nenhum jogo finalizado ainda.</p>
+            <p className="text-slate-500">Nenhum jogo finalizado ou ao vivo ainda.</p>
           </div>
         ) : (
           games.map(game => {
             const bet = bets?.find(b => b.game_id === game.id)
+            const isLive = game.status === 'live'
 
             const isExact = bet && bet.home_bet === game.home_score && bet.away_bet === game.away_score
             const betDiff = bet ? bet.home_bet - bet.away_bet : null
@@ -148,17 +158,28 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
             const realWinner = (game.home_score ?? 0) > (game.away_score ?? 0) ? 'home' : (game.home_score ?? 0) < (game.away_score ?? 0) ? 'away' : 'draw'
             const isWinner = betWinner === realWinner && !isExact && !isDiff
 
+            const livePoints = bet && game.home_score !== null && game.away_score !== null
+              ? calculateBetPoints(bet.home_bet, bet.away_bet, game.home_score, game.away_score, bet.used_joker ?? false)
+              : 0
+
             const resultIcon = !bet ? '—' : isExact ? '🎯' : isDiff ? '✅' : isWinner ? '👍' : '❌'
             const resultColor = !bet ? 'text-slate-300' : isExact ? 'text-green-600' : isDiff ? 'text-blue-600' : isWinner ? 'text-yellow-600' : 'text-red-400'
 
             return (
               <div key={game.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 {/* Resultado */}
-                <div className="bg-slate-800 px-4 py-2 flex items-center justify-between">
-                  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+                <div className={`px-4 py-2 flex items-center justify-between ${isLive ? 'bg-red-600' : 'bg-slate-800'}`}>
+                  <span className="text-slate-200 text-[10px] font-bold uppercase tracking-wider">
                     {game.group_stage} · {formatDateShort(game.kickoff_at)}
                   </span>
-                  <span className="text-slate-400 text-[10px] font-bold">ENCERRADO</span>
+                  {isLive ? (
+                    <span className="flex items-center gap-1 text-white text-[10px] font-bold">
+                      <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                      AO VIVO
+                    </span>
+                  ) : (
+                    <span className="text-slate-400 text-[10px] font-bold">ENCERRADO</span>
+                  )}
                 </div>
 
                 <div className="px-4 py-3">
@@ -192,9 +213,9 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
                           {bet.used_joker && ' ⚡'}
                         </span>
                       </div>
-                      {(bet.points_earned ?? 0) > 0 && (
-                        <span className={`font-bebas text-xl ${resultColor}`}>
-                          +{bet.points_earned} pts
+                      {(isLive ? livePoints : (bet.points_earned ?? 0)) > 0 && (
+                        <span className={`font-bebas text-xl ${isLive ? 'text-red-500' : resultColor}`}>
+                          +{isLive ? livePoints : bet.points_earned} pts{isLive ? ' (provisório)' : ''}
                         </span>
                       )}
                     </div>
