@@ -100,6 +100,21 @@ export default async function Perfil() {
           </Link>
         </div>
 
+        {user?.email === 'marcosnd.31@gmail.com' && (
+          <Link href="/admin">
+            <div className="bg-slate-900 rounded-2xl p-4 flex justify-between items-center mt-3">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">🔧</span>
+                <div>
+                  <p className="font-bold text-white text-sm">Painel Admin</p>
+                  <p className="text-xs text-slate-400">Atualizar resultados manualmente</p>
+                </div>
+              </div>
+              <span className="text-slate-500 text-lg">›</span>
+            </div>
+          </Link>
+        )}
+
         <div className="mt-6">
           <LogoutButton />
         </div>
