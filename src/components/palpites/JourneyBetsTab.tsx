@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import TeamFlag from '@/components/ui/TeamFlag'
 import { TeamJourneyPrediction } from '@/types/database'
@@ -37,6 +37,32 @@ export default function JourneyBetsTab({ allTeams, existingPredictions, userId }
   const [predictions, setPredictions] = useState<Record<string, string>>(
     Object.fromEntries(existingPredictions.map(p => [p.team, p.predicted_phase]))
   )
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`journey-predictions-${userId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'team_journey_predictions',
+        filter: `user_id=eq.${userId}`,
+      }, (payload) => {
+        if (payload.eventType === 'DELETE') {
+          const deletedTeam = (payload.old as { team: string }).team
+          setPredictions(prev => {
+            const updated = { ...prev }
+            delete updated[deletedTeam]
+            return updated
+          })
+        } else {
+          const row = payload.new as { team: string; predicted_phase: string }
+          setPredictions(prev => ({ ...prev, [row.team]: row.predicted_phase }))
+        }
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [userId])
   const [saving, setSaving] = useState<string | null>(null)
   const [saved, setSaved] = useState<string | null>(null)
   const [search, setSearch] = useState('')
