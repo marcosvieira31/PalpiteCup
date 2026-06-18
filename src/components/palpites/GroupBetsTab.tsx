@@ -53,6 +53,8 @@ export default function GroupBetsTab({ existingPredictions, userId }: Props) {
     if (isLocked || !selecting) return
     const { group, position } = selecting
 
+    const previousTeamAtPosition4 = position === 4 ? predictions[group]?.[3] : undefined
+
     const updated = [...(predictions[group] ?? ['', '', '', ''])]
     updated[position - 1] = team
     setPredictions(prev => ({ ...prev, [group]: updated }))
@@ -66,6 +68,27 @@ export default function GroupBetsTab({ existingPredictions, userId }: Props) {
       position,
       predicted_team: team,
     }, { onConflict: 'user_id,group_name,position' })
+
+    // Automação: 4º lugar do grupo é automaticamente marcado como eliminado na fase de grupos
+    if (position === 4 && team) {
+      await supabase.from('team_journey_predictions').upsert({
+        user_id: userId,
+        team,
+        predicted_phase: 'group_stage',
+        auto_filled: true,
+      }, { onConflict: 'user_id,team' })
+
+      // Se o 4º lugar anterior era outro time e ainda estava marcado pela automação
+      // (não foi editado manualmente depois), reverte removendo a previsão dele.
+      if (previousTeamAtPosition4 && previousTeamAtPosition4 !== team) {
+        await supabase
+          .from('team_journey_predictions')
+          .delete()
+          .eq('user_id', userId)
+          .eq('team', previousTeamAtPosition4)
+          .eq('auto_filled', true)
+      }
+    }
 
     setSaving(null)
     setSaved(`${group}-${position}`)

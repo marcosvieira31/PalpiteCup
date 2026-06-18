@@ -64,6 +64,7 @@ export default function JourneyBetsTab({ allTeams, existingPredictions, userId }
       user_id: userId,
       team,
       predicted_phase: phase,
+      auto_filled: false,
     }, { onConflict: 'user_id,team' })
 
     setSaving(null)
