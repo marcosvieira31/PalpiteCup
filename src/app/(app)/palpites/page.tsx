@@ -14,8 +14,27 @@ export default async function PalpitesPage() {
     .not('away_team', 'is', null)
     .order('kickoff_at')
 
-  const nextRoundNumber = allGames?.[0]?.round_number ?? 1
-  const games = (allGames ?? []).filter(g => g.round_number === nextRoundNumber)
+  const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000
+  const now = Date.now()
+
+  const roundNumbers = [...new Set((allGames ?? []).map(g => g.round_number))].sort((a, b) => a - b)
+  const currentRoundNumber = roundNumbers[0] ?? 1
+  const nextRoundNumber = roundNumbers[1] ?? null
+
+  let visibleRoundNumbers = [currentRoundNumber]
+
+  if (nextRoundNumber !== null) {
+    const nextRoundGames = (allGames ?? []).filter(g => g.round_number === nextRoundNumber)
+    const firstKickoffNextRound = nextRoundGames.length > 0
+      ? Math.min(...nextRoundGames.map(g => new Date(g.kickoff_at).getTime()))
+      : null
+
+    if (firstKickoffNextRound !== null && (firstKickoffNextRound - now) <= FIVE_DAYS_MS) {
+      visibleRoundNumbers = [currentRoundNumber, nextRoundNumber]
+    }
+  }
+
+  const games = (allGames ?? []).filter(g => visibleRoundNumbers.includes(g.round_number))
 
   const { data: bets } = await supabase
     .from('bets')
