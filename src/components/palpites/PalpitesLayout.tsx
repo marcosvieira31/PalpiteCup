@@ -2,34 +2,31 @@
 import { useState } from 'react'
 import PalpitarClient from './PalpitarClient'
 import GroupBetsTab from './GroupBetsTab'
-import BracketBetsTab from './BracketBetsTab'
 import JourneyBetsTab from './JourneyBetsTab'
 import Countdown from '@/components/ui/Countdown'
-import { DEADLINES, getCurrentBracketDeadline } from '@/lib/deadlines'
-import { Game, Bet, GroupPrediction, BracketPick, TeamJourneyPrediction } from '@/types/database'
+import { DEADLINES } from '@/lib/deadlines'
+import { Game, Bet, GroupPrediction, TeamJourneyPrediction } from '@/types/database'
 
-type Tab = 'partidas' | 'grupos' | 'mata-mata' | 'jornada'
+type Tab = 'partidas' | 'grupos' | 'jornada'
 
 interface Props {
   games: Game[]
   existingBets: Bet[]
   allTeams: string[]
   groupPredictions: GroupPrediction[]
-  bracketPicks: BracketPick[]
   journeyPredictions: TeamJourneyPrediction[]
   userId: string
 }
 
 export default function PalpitesLayout({
   games, existingBets, allTeams,
-  groupPredictions, bracketPicks, journeyPredictions, userId
+  groupPredictions, journeyPredictions, userId
 }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('partidas')
 
   const tabs = [
     { id: 'partidas' as Tab, label: '⚽', full: 'PARTIDAS' },
     { id: 'grupos' as Tab, label: '📊', full: 'GRUPOS' },
-    { id: 'mata-mata' as Tab, label: '⚔️', full: 'MATA-MATA' },
     { id: 'jornada' as Tab, label: '🗺️', full: 'ATÉ ONDE VAI' },
   ]
 
@@ -83,25 +80,6 @@ export default function PalpitesLayout({
                 userId={userId}
               />
             </div>
-          </div>
-        )}
-        {activeTab === 'mata-mata' && (
-          <div>
-            {(() => {
-              const { key, deadline } = getCurrentBracketDeadline()
-              return (
-                <Countdown
-                  deadline={deadline}
-                  label={`Bracket ${key === 'phase_of_32' ? '— Fase de 32' : key === 'round_of_16' ? '— Oitavas' : key === 'quarter_final' ? '— Quartas' : key === 'semi_final' ? '— Semis' : '— Final'} fecha em`}
-                  variant="banner"
-                />
-              )
-            })()}
-            <BracketBetsTab
-              allTeams={allTeams}
-              existingPicks={bracketPicks}
-              userId={userId}
-            />
           </div>
         )}
         {activeTab === 'jornada' && (

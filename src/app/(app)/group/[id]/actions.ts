@@ -56,7 +56,7 @@ export async function getGroupPoints(groupId: number) {
   // Busca configurações do grupo com a key normal ou admin, mas admin não quebra
   const { data: group } = await supabaseAdmin
     .from('groups')
-    .select('filter_teams, filter_phases, scoring_bets, scoring_groups, scoring_bracket, scoring_journey, scoring_groups_filter, scoring_journey_filter, scoring_start_date')
+    .select('filter_teams, filter_phases, scoring_bets, scoring_groups, scoring_journey, scoring_groups_filter, scoring_journey_filter, scoring_start_date')
     .eq('id', groupId)
     .single()
 
@@ -113,20 +113,6 @@ export async function getGroupPoints(groupId: number) {
 
       totalPoints += (groupPreds ?? []).reduce((sum, p) => {
         if (hasGroupFilter && !group.scoring_groups_filter!.includes(p.group_name)) return sum
-        return sum + (p.points_earned ?? 0)
-      }, 0)
-    }
-
-    // 3. Pontos de bracket
-    if (group.scoring_bracket) {
-      const { data: bracketPicks } = await supabaseAdmin
-        .from('bracket_picks')
-        .select('points_earned, round')
-        .eq('user_id', member.user_id)
-
-      totalPoints += (bracketPicks ?? []).reduce((sum, p) => {
-        const roundDeadline = DEADLINES[p.round as keyof typeof DEADLINES]
-        if (cutoff && roundDeadline && roundDeadline < cutoff) return sum
         return sum + (p.points_earned ?? 0)
       }, 0)
     }

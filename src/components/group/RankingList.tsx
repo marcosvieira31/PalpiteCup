@@ -159,12 +159,6 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
                   </p>
                 </div>
               )}
-              {group.scoring_bracket && (
-                <div>
-                  <p className="text-blue-700 text-[10px] font-bold">⚔️ BRACKET MATA-MATA</p>
-                  <p className="text-blue-500 text-[10px]">Fase de 32 até a Final</p>
-                </div>
-              )}
               {group.scoring_journey && (
                 <div>
                   <p className="text-blue-700 text-[10px] font-bold">🗺️ ATÉ ONDE VAI</p>

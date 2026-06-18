@@ -25,7 +25,6 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
   
   const [scoringBets, setScoringBets] = useState(group?.scoring_bets ?? true)
   const [scoringGroups, setScoringGroups] = useState(group?.scoring_groups ?? false)
-  const [scoringBracket, setScoringBracket] = useState(group?.scoring_bracket ?? false)
   const [scoringJourney, setScoringJourney] = useState(group?.scoring_journey ?? false)
 
   const [scoringGroupsFilter, setScoringGroupsFilter] = useState<string[]>(group?.scoring_groups_filter ?? [])
@@ -64,13 +63,12 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
   const { unreadCount, markAsRead } = useUnreadCount(groupId, userId)
 
   const handleToggleScoring = async (
-    field: 'scoring_bets' | 'scoring_groups' | 'scoring_bracket' | 'scoring_journey',
+    field: 'scoring_bets' | 'scoring_groups' | 'scoring_journey',
     value: boolean
   ) => {
     const setters = {
       scoring_bets: setScoringBets,
       scoring_groups: setScoringGroups,
-      scoring_bracket: setScoringBracket,
       scoring_journey: setScoringJourney,
     }
     setters[field](value)
@@ -401,18 +399,6 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
                     )}
                   </div>
                 )}
-              </div>
-
-              {/* 3. Bracket Mata-Mata */}
-              <div className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center">
-                <div>
-                  <p className="font-bold text-slate-800 text-sm">⚔️ Bracket Mata-Mata</p>
-                  <p className="text-xs text-slate-400">Fase de 32 até a Final</p>
-                </div>
-                <button onClick={() => handleToggleScoring('scoring_bracket', !scoringBracket)}
-                  className={`w-12 h-6 rounded-full relative transition-colors ${scoringBracket ? 'bg-green-500' : 'bg-slate-300'}`}>
-                  <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${scoringBracket ? 'left-6' : 'left-0.5'}`} />
-                </button>
               </div>
 
               {/* 4. Até onde vai */}

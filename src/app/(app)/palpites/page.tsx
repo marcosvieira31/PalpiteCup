@@ -58,11 +58,6 @@ export default async function PalpitesPage() {
     .select('*')
     .eq('user_id', user?.id ?? '')
 
-  const { data: bracketPicks } = await supabase
-    .from('bracket_picks')
-    .select('*')
-    .eq('user_id', user?.id ?? '')
-
   const { data: journeyPredictions } = await supabase
     .from('team_journey_predictions')
     .select('*')
@@ -74,7 +69,6 @@ export default async function PalpitesPage() {
       existingBets={bets ?? []}
       allTeams={allTeams}
       groupPredictions={groupPredictions ?? []}
-      bracketPicks={bracketPicks ?? []}
       journeyPredictions={journeyPredictions ?? []}
       userId={user?.id ?? ''}
     />

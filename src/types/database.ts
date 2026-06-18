@@ -86,7 +86,6 @@ export interface Database {
           description: string | null
           scoring_bets: boolean
           scoring_groups: boolean
-          scoring_bracket: boolean
           scoring_journey: boolean
           scoring_groups_filter: string[] | null
           scoring_journey_filter: string[] | null
@@ -108,7 +107,6 @@ export interface Database {
           description?: string | null
           scoring_bets?: boolean
           scoring_groups?: boolean
-          scoring_bracket?: boolean
           scoring_journey?: boolean
           scoring_groups_filter?: string[] | null
           scoring_journey_filter?: string[] | null
@@ -130,7 +128,6 @@ export interface Database {
           description?: string | null
           scoring_bets?: boolean
           scoring_groups?: boolean
-          scoring_bracket?: boolean
           scoring_journey?: boolean
           scoring_groups_filter?: string[] | null
           scoring_journey_filter?: string[] | null
@@ -478,18 +475,6 @@ export interface GroupPrediction {
   user_id: string
   group_name: string
   position: number
-  predicted_team: string
-  points_earned: number
-  locked: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface BracketPick {
-  id: number
-  user_id: string
-  round: 'phase_of_32' | 'round_of_16' | 'quarter_final' | 'semi_final' | 'third_place' | 'final' | 'champion'
-  match_number: number
   predicted_team: string
   points_earned: number
   locked: boolean
