@@ -50,10 +50,30 @@ export default function JourneyBetsTab({ allTeams, existingPredictions, userId }
 
     const currentPhaseForTeam = predictions[team]
     const isChangingFromSamePhase = currentPhaseForTeam === phase
+
+    // Clicar de novo na fase já selecionada remove o palpite
+    if (isChangingFromSamePhase) {
+      setPredictions(prev => {
+        const updated = { ...prev }
+        delete updated[team]
+        return updated
+      })
+      setSaving(team)
+
+      await supabase
+        .from('team_journey_predictions')
+        .delete()
+        .eq('user_id', userId)
+        .eq('team', team)
+
+      setSaving(null)
+      return
+    }
+
     const currentCountInPhase = countByPhase[phase] ?? 0
     const limit = PHASE_LIMITS[phase] ?? Infinity
 
-    if (!isChangingFromSamePhase && currentCountInPhase >= limit) {
+    if (currentCountInPhase >= limit) {
       return
     }
 

@@ -62,6 +62,26 @@ export default function BracketBetsTab({ allTeams, existingPicks, userId }: Prop
     setSaving(null)
   }
 
+  const handleRemove = async (round: string, slot: number) => {
+    if (isLocked) return
+
+    setPicks(prev => {
+      const updated = { ...(prev[round] ?? {}) }
+      delete updated[slot]
+      return { ...prev, [round]: updated }
+    })
+
+    setSaving(`${round}-${slot}`)
+    await supabase
+      .from('bracket_picks')
+      .delete()
+      .eq('user_id', userId)
+      .eq('round', round)
+      .eq('match_number', slot)
+    setSaving(null)
+  }
+
+
   const currentRound = ROUNDS.find(r => r.key === activeRound)!
   const currentPicks = picks[activeRound] ?? {}
   const filledCount = Object.keys(currentPicks).length
@@ -119,34 +139,44 @@ export default function BracketBetsTab({ allTeams, existingPicks, userId }: Prop
             const isSaving = saving === `${activeRound}-${idx + 1}`
 
             return (
-              <button
-                key={idx}
-                onClick={() => !isLocked && setSelecting({ round: activeRound, slot: idx + 1 })}
-                disabled={isLocked}
-                className={`flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all ${
-                  isLocked && !team
-                    ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-50'
-                  : isLocked && team
-                    ? 'border-green-200 bg-green-50/50 cursor-not-allowed opacity-70'
-                  : team
-                    ? 'border-green-300 bg-green-50'
-                    : 'border-dashed border-slate-300 bg-slate-50'
-                }`}
-              >
-                <span className="text-[10px] text-slate-400 font-bold w-4 flex-shrink-0">
-                  {idx + 1}
-                </span>
-                {team ? (
-                  <>
-                    <TeamFlag team={team} size={22} />
-                    <span className="font-bold text-slate-800 text-xs truncate flex-1">{team}</span>
-                  </>
-                ) : (
-                  <span className="text-slate-400 text-xs flex-1">
-                    {isSaving ? '...' : '+ Escolher'}
+              <div key={idx} className="relative">
+                <button
+                  onClick={() => !isLocked && setSelecting({ round: activeRound, slot: idx + 1 })}
+                  disabled={isLocked}
+                  className={`w-full flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all ${
+                    isLocked && !team
+                      ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-50'
+                    : isLocked && team
+                      ? 'border-green-200 bg-green-50/50 cursor-not-allowed opacity-70'
+                    : team
+                      ? 'border-green-300 bg-green-50'
+                      : 'border-dashed border-slate-300 bg-slate-50'
+                  }`}
+                >
+                  <span className="text-[10px] text-slate-400 font-bold w-4 flex-shrink-0">
+                    {idx + 1}
                   </span>
+                  {team ? (
+                    <>
+                      <TeamFlag team={team} size={22} />
+                      <span className="font-bold text-slate-800 text-xs truncate flex-1">{team}</span>
+                    </>
+                  ) : (
+                    <span className="text-slate-400 text-xs flex-1">
+                      {isSaving ? '...' : '+ Escolher'}
+                    </span>
+                  )}
+                </button>
+
+                {team && !isLocked && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleRemove(activeRound, idx + 1) }}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm"
+                  >
+                    ×
+                  </button>
                 )}
-              </button>
+              </div>
             )
           })}
         </div>

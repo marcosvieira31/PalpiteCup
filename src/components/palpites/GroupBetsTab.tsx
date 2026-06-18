@@ -95,6 +95,35 @@ export default function GroupBetsTab({ existingPredictions, userId }: Props) {
     setTimeout(() => setSaved(null), 1500)
   }
 
+  const handleRemove = async (group: string, position: number) => {
+    if (isLocked) return
+
+    const updated = [...(predictions[group] ?? ['', '', '', ''])]
+    const removedTeam = updated[position - 1]
+    updated[position - 1] = ''
+    setPredictions(prev => ({ ...prev, [group]: updated }))
+
+    setSaving(`${group}-${position}`)
+    await supabase
+      .from('group_predictions')
+      .delete()
+      .eq('user_id', userId)
+      .eq('group_name', `Grupo ${group}`)
+      .eq('position', position)
+
+    // Se essa era a posição 4 (eliminado), reverte a automação em Até onde vai
+    if (position === 4 && removedTeam) {
+      await supabase
+        .from('team_journey_predictions')
+        .delete()
+        .eq('user_id', userId)
+        .eq('team', removedTeam)
+        .eq('auto_filled', true)
+    }
+
+    setSaving(null)
+  }
+
   const groupTeams = selecting ? (COPA_GROUPS[selecting.group] ?? []) : []
   const filteredTeams = groupTeams.filter(t =>
     t.toLowerCase().includes(search.toLowerCase())
@@ -126,41 +155,51 @@ export default function GroupBetsTab({ existingPredictions, userId }: Props) {
               const isSaved = saved === `${group}-${position}`
 
               return (
-                <button
-                  key={position}
-                  onClick={() => !isLocked && setSelecting({ group, position })}
-                  disabled={isLocked}
-                  className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                    isLocked && !selectedTeam
-                      ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-50'
-                      : isLocked && selectedTeam
-                      ? 'border-green-200 bg-green-50/50 cursor-not-allowed opacity-70'
-                      : selectedTeam
-                      ? 'border-green-300 bg-green-50'
-                      : 'border-dashed border-slate-300 bg-slate-50'
-                  }`}
-                >
-                  <span className={`font-bebas text-lg w-6 flex-shrink-0 ${
-                    position === 1 ? 'text-yellow-500'
-                    : position === 2 ? 'text-slate-400'
-                    : 'text-slate-300'
-                  }`}>
-                    {POSITION_LABELS[position - 1]}
-                  </span>
-
-                  {selectedTeam ? (
-                    <>
-                      <TeamFlag team={selectedTeam} size={24} />
-                      <span className="font-bold text-slate-800 text-sm flex-1">{selectedTeam}</span>
-                      {isSaving && <span className="text-xs text-slate-400">...</span>}
-                      {isSaved && <span className="text-xs text-green-600">✅</span>}
-                    </>
-                  ) : (
-                    <span className="text-slate-400 text-sm flex-1">
-                      {isSaving ? 'Salvando...' : '+ Escolher time'}
+                <div key={position} className="relative">
+                  <button
+                    onClick={() => !isLocked && setSelecting({ group, position })}
+                    disabled={isLocked}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                      isLocked && !selectedTeam
+                        ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-50'
+                        : isLocked && selectedTeam
+                        ? 'border-green-200 bg-green-50/50 cursor-not-allowed opacity-70'
+                        : selectedTeam
+                        ? 'border-green-300 bg-green-50'
+                        : 'border-dashed border-slate-300 bg-slate-50'
+                    }`}
+                  >
+                    <span className={`font-bebas text-lg w-6 flex-shrink-0 ${
+                      position === 1 ? 'text-yellow-500'
+                      : position === 2 ? 'text-slate-400'
+                      : 'text-slate-300'
+                    }`}>
+                      {POSITION_LABELS[position - 1]}
                     </span>
+
+                    {selectedTeam ? (
+                      <>
+                        <TeamFlag team={selectedTeam} size={24} />
+                        <span className="font-bold text-slate-800 text-sm flex-1">{selectedTeam}</span>
+                        {isSaving && <span className="text-xs text-slate-400">...</span>}
+                        {isSaved && <span className="text-xs text-green-600">✅</span>}
+                      </>
+                    ) : (
+                      <span className="text-slate-400 text-sm flex-1">
+                        {isSaving ? 'Salvando...' : '+ Escolher time'}
+                      </span>
+                    )}
+                  </button>
+
+                  {selectedTeam && !isLocked && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleRemove(group, position) }}
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm"
+                    >
+                      ×
+                    </button>
                   )}
-                </button>
+                </div>
               )
             })}
           </div>
