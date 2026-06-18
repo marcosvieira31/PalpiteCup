@@ -16,6 +16,17 @@ const PHASES = [
   { key: 'champion', label: 'Campeão', short: '🏆' },
 ]
 
+const PHASE_LIMITS: Record<string, number> = {
+  group_stage: 16,
+  phase_of_32: 16,
+  round_of_16: 8,
+  quarter_final: 4,
+  semi_final: 1,
+  third_place: 1,
+  runner_up: 1,
+  champion: 1,
+}
+
 interface Props {
   allTeams: string[]
   existingPredictions: TeamJourneyPrediction[]
@@ -36,6 +47,16 @@ export default function JourneyBetsTab({ allTeams, existingPredictions, userId }
 
   const handleSelect = async (team: string, phase: string) => {
     if (isLocked) return
+
+    const currentPhaseForTeam = predictions[team]
+    const isChangingFromSamePhase = currentPhaseForTeam === phase
+    const currentCountInPhase = countByPhase[phase] ?? 0
+    const limit = PHASE_LIMITS[phase] ?? Infinity
+
+    if (!isChangingFromSamePhase && currentCountInPhase >= limit) {
+      return
+    }
+
     setPredictions(prev => ({ ...prev, [team]: phase }))
     setSaving(team)
 
@@ -51,6 +72,11 @@ export default function JourneyBetsTab({ allTeams, existingPredictions, userId }
   }
 
   const filledCount = Object.keys(predictions).length
+
+  const countByPhase = Object.values(predictions).reduce((acc, phase) => {
+    acc[phase] = (acc[phase] ?? 0) + 1
+    return acc
+  }, {} as Record<string, number>)
 
   const filteredTeams = allTeams
     .filter(t => t.toLowerCase().includes(search.toLowerCase()))
@@ -111,22 +137,32 @@ export default function JourneyBetsTab({ allTeams, existingPredictions, userId }
                 {isSaved && <span className="text-xs text-green-600">✅</span>}
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {PHASES.map(phase => (
-                  <button
-                    key={phase.key}
-                    onClick={() => !isLocked && handleSelect(team, phase.key)}
-                    disabled={isLocked}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors ${
-                      isLocked
-                        ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                        : selectedPhase === phase.key
-                        ? 'bg-blue-900 text-yellow-400'
-                        : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                    }`}
-                  >
-                    {phase.short}
-                  </button>
-                ))}
+                {PHASES.map(phase => {
+                  const isSelected = selectedPhase === phase.key
+                  const limit = PHASE_LIMITS[phase.key] ?? Infinity
+                  const currentCount = countByPhase[phase.key] ?? 0
+                  const isFull = !isSelected && currentCount >= limit
+                  const isDisabled = isLocked || isFull
+
+                  return (
+                    <button
+                      key={phase.key}
+                      onClick={() => !isDisabled && handleSelect(team, phase.key)}
+                      disabled={isDisabled}
+                      title={isFull ? `Limite de ${limit} seleção(ões) atingido nessa fase` : undefined}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+                        isDisabled
+                          ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                          : isSelected
+                          ? 'bg-blue-900 text-yellow-400'
+                          : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                      }`}
+                    >
+                      {phase.short}
+                      {isFull && ' 🔒'}
+                    </button>
+                  )
+                })}
               </div>
             </div>
           )
