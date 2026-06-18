@@ -97,7 +97,8 @@ export default function GroupBetsTab({ existingPredictions, userId }: Props) {
           </div>
           <div className="p-3 space-y-2">
             {[1, 2, 3, 4].map(position => {
-              const selectedTeam = predictions[group]?.[position - 1] ?? ''
+              const rawSelectedTeam = predictions[group]?.[position - 1] ?? ''
+              const selectedTeam = COPA_GROUPS[group]?.includes(rawSelectedTeam) ? rawSelectedTeam : ''
               const isSaving = saving === `${group}-${position}`
               const isSaved = saved === `${group}-${position}`
 
