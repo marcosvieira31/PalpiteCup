@@ -67,12 +67,28 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
   const { data: liveBetsRaw } = liveGameIds.length > 0 && memberIds.length > 0
     ? await supabase
         .from('bets')
-        .select('user_id, game_id, home_bet, away_bet, used_joker, users(username, avatar_url)')
+        .select('user_id, game_id, home_bet, away_bet, users(username, avatar_url)')
         .in('game_id', liveGameIds)
         .in('user_id', memberIds)
     : { data: [] }
 
   const liveBetsData = liveBetsRaw ?? []
+
+  // Busca joker_picks para os jogos ao vivo
+  const { data: liveJokerPicks } = liveGameIds.length > 0 && memberIds.length > 0
+    ? await supabase
+        .from('joker_picks')
+        .select('user_id, game_id')
+        .in('game_id', liveGameIds)
+        .in('user_id', memberIds)
+    : { data: [] }
+
+  const liveBets = liveBetsData.map(b => ({
+    ...b,
+    has_joker: (liveJokerPicks ?? []).some(
+      jp => String(jp.game_id) === String(b.game_id) && jp.user_id === b.user_id
+    )
+  }))
 
   const computedMembers = await getGroupPoints(Number(params.id))
 
@@ -101,7 +117,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
       <div className="px-4 mt-4">
         <LiveBetsShareCard
           liveGames={liveGames}
-          liveBets={(liveBetsData ?? []) as unknown as import('@/components/group/LiveBetsShareCard').LiveBetWithUser[]}
+          liveBets={liveBets as unknown as import('@/components/group/LiveBetsShareCard').LiveBetWithUser[]}
           groupName={group.name}
         />
 
@@ -118,7 +134,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
           groupName={group.name}
           groupId={Number(params.id)}
           initialLiveGames={liveGames}
-          initialLiveBets={liveBetsData ?? []}
+          initialLiveBets={liveBets}
         />
       </div>
     </div>

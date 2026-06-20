@@ -1,12 +1,12 @@
 'use server'
 import { createClient } from '@/lib/supabase/server'
 import { betSchema } from '@/lib/validations'
+import { z } from 'zod'
 
 export async function submitBet(
   gameId: number | string,
   home: number,
   away: number,
-  joker: boolean
 ) {
   if (typeof gameId === 'string' && gameId.startsWith('mock-')) return
 
@@ -14,9 +14,7 @@ export async function submitBet(
     gameId: Number(gameId),
     home,
     away,
-    joker
   })
-
   if (!parsed.success) {
     throw new Error(parsed.error.errors[0].message)
   }
@@ -32,6 +30,7 @@ export async function submitBet(
     .single()
 
   if (!game) throw new Error('Jogo não encontrado.')
+
   const TEN_MINUTES_MS = 10 * 60 * 1000
   const cutoff = new Date(new Date(game.kickoff_at).getTime() - TEN_MINUTES_MS)
   if (new Date() >= cutoff) {
@@ -46,12 +45,58 @@ export async function submitBet(
     game_id: parsed.data.gameId,
     home_bet: parsed.data.home,
     away_bet: parsed.data.away,
-    used_joker: parsed.data.joker
   }, { onConflict: 'user_id,game_id' })
 
   if (error) throw new Error(error.message)
 
-  // Call check badges
-  const { checkBadges } = await import('@/lib/badges/check-badges');
-  await checkBadges(user.id);
+  const { checkBadges } = await import('@/lib/badges/check-badges')
+  await checkBadges(user.id)
+}
+
+const jokerSchema = z.object({
+  gameId: z.number().int().positive(),
+  roundNumber: z.number().int().positive(),
+})
+
+export async function toggleJoker(
+  gameId: number,
+  roundNumber: number,
+  activate: boolean,
+) {
+  const parsed = jokerSchema.safeParse({ gameId, roundNumber })
+  if (!parsed.success) throw new Error(parsed.error.errors[0].message)
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Não autenticado.')
+
+  const { data: game } = await supabase
+    .from('games')
+    .select('kickoff_at, status')
+    .eq('id', parsed.data.gameId)
+    .single()
+
+  if (!game) throw new Error('Jogo não encontrado.')
+
+  const TEN_MINUTES_MS = 10 * 60 * 1000
+  const cutoff = new Date(new Date(game.kickoff_at).getTime() - TEN_MINUTES_MS)
+  if (new Date() >= cutoff) {
+    throw new Error('Prazo de palpite encerrado.')
+  }
+
+  if (activate) {
+    const { error } = await supabase.from('joker_picks').upsert({
+      user_id: user.id,
+      game_id: parsed.data.gameId,
+      round_number: parsed.data.roundNumber,
+    }, { onConflict: 'user_id,round_number' })
+    if (error) throw new Error(error.message)
+  } else {
+    const { error } = await supabase
+      .from('joker_picks')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('game_id', parsed.data.gameId)
+    if (error) throw new Error(error.message)
+  }
 }

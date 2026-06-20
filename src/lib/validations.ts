@@ -4,7 +4,6 @@ export const betSchema = z.object({
   gameId: z.number().int().positive(),
   home: z.number().int().min(0).max(99),
   away: z.number().int().min(0).max(99),
-  joker: z.boolean(),
 })
 
 export const usernameSchema = z.object({

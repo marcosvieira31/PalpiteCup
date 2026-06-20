@@ -55,17 +55,17 @@ export default function MatchLive({ game: initialGame, bet }: Props) {
   const getBetResult = () => {
     if (!bet || !isFinished) return null
     if (bet.home_bet === game.home_score && bet.away_bet === game.away_score) {
-      return { label: '🎯 PLACAR EXATO!', color: 'bg-green-500', pts: bet.used_joker ? 10 : 5 }
+      return { label: '🎯 PLACAR EXATO!', color: 'bg-green-500', pts: bet.has_joker ? 10 : 5 }
     }
     const betDiff = bet.home_bet - bet.away_bet
     const realDiff = (game.home_score ?? 0) - (game.away_score ?? 0)
     if (betDiff === realDiff) {
-      return { label: '✅ Vencedor + Diferença', color: 'bg-blue-500', pts: bet.used_joker ? 6 : 3 }
+      return { label: '✅ Vencedor + Diferença', color: 'bg-blue-500', pts: bet.has_joker ? 6 : 3 }
     }
     const betWinner = bet.home_bet > bet.away_bet ? 'home' : bet.home_bet < bet.away_bet ? 'away' : 'draw'
     const realWinner = (game.home_score ?? 0) > (game.away_score ?? 0) ? 'home' : (game.home_score ?? 0) < (game.away_score ?? 0) ? 'away' : 'draw'
     if (betWinner === realWinner) {
-      return { label: '👍 Acertou o Vencedor', color: 'bg-yellow-500', pts: bet.used_joker ? 2 : 1 }
+      return { label: '👍 Acertou o Vencedor', color: 'bg-yellow-500', pts: bet.has_joker ? 2 : 1 }
     }
     return { label: '❌ Não pontuou', color: 'bg-red-400', pts: 0 }
   }
@@ -150,7 +150,7 @@ export default function MatchLive({ game: initialGame, bet }: Props) {
             <div className="flex justify-between items-center mt-1">
               <p className="text-white/80 text-sm">
                 Seu palpite: {bet!.home_bet} × {bet!.away_bet}
-                {bet!.used_joker && ' ⚡ Coringa'}
+                {bet!.has_joker && ' ⚡ Coringa'}
               </p>
               {betResult.pts > 0 && (
                 <p className="font-bebas text-2xl">+{betResult.pts} pts</p>
@@ -169,7 +169,7 @@ export default function MatchLive({ game: initialGame, bet }: Props) {
                 {bet.home_bet} × {bet.away_bet}
               </span>
               <TeamFlag team={game.away_team ?? ''} size={28} />
-              {bet.used_joker && (
+              {bet.has_joker && (
                 <span className="ml-auto bg-yellow-400 text-blue-900 font-bebas text-xs px-2 py-1 rounded-full">
                   ⚡ CORINGA
                 </span>

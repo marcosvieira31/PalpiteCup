@@ -22,5 +22,14 @@ export default async function GamePage({ params }: { params: { id: string } }) {
     .eq('game_id', game.id)
     .single()
 
-  return <MatchLive game={game} bet={bet} />
+  const { data: jokerPick } = user ? await supabase
+    .from('joker_picks')
+    .select('game_id')
+    .eq('user_id', user.id)
+    .eq('game_id', game.id)
+    .maybeSingle() : { data: null }
+
+  const betWithJoker = bet ? { ...bet, has_joker: !!jokerPick } : null
+
+  return <MatchLive game={game} bet={betWithJoker as import('@/types/database').Bet} />
 }

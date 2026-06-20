@@ -77,16 +77,29 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
     .eq('user_id', params.id)
     .in('game_id', gameIds.length > 0 ? gameIds : ['00000000-0000-0000-0000-000000000000'])
 
-  const totalPoints = (bets ?? []).reduce((sum, b) => {
+  // Busca joker_picks do usuário para cruzar com os palpites
+  const { data: jokerPicks } = await supabase
+    .from('joker_picks')
+    .select('game_id')
+    .eq('user_id', params.id)
+
+  const jokerGameIds = new Set((jokerPicks ?? []).map(jp => String(jp.game_id)))
+
+  const betsWithJoker = (bets ?? []).map(b => ({
+    ...b,
+    has_joker: jokerGameIds.has(String(b.game_id))
+  }))
+
+  const totalPoints = betsWithJoker.reduce((sum, b) => {
     const game = games?.find(g => g.id === b.game_id)
     if (!game) return sum
     if (game.status === 'live') {
       if (game.home_score === null || game.away_score === null) return sum
-      return sum + calculateBetPoints(b.home_bet, b.away_bet, game.home_score, game.away_score, b.used_joker ?? false)
+      return sum + calculateBetPoints(b.home_bet, b.away_bet, game.home_score, game.away_score, b.has_joker)
     }
     return sum + (b.points_earned ?? 0)
   }, 0)
-  const exactScores = (bets ?? []).filter(b => {
+  const exactScores = betsWithJoker.filter(b => {
     const game = games?.find(g => g.id === b.game_id)
     return game && b.home_bet === game.home_score && b.away_bet === game.away_score
   }).length
@@ -147,7 +160,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
           </div>
         ) : (
           games.map(game => {
-            const bet = bets?.find(b => b.game_id === game.id)
+            const bet = betsWithJoker.find(b => b.game_id === game.id)
             const isLive = game.status === 'live'
 
             const isExact = bet && bet.home_bet === game.home_score && bet.away_bet === game.away_score
@@ -159,7 +172,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
             const isWinner = betWinner === realWinner && !isExact && !isDiff
 
             const livePoints = bet && game.home_score !== null && game.away_score !== null
-              ? calculateBetPoints(bet.home_bet, bet.away_bet, game.home_score, game.away_score, bet.used_joker ?? false)
+              ? calculateBetPoints(bet.home_bet, bet.away_bet, game.home_score, game.away_score, bet.has_joker ?? false)
               : 0
 
             const resultIcon = !bet ? '—' : isExact ? '🎯' : isDiff ? '✅' : isWinner ? '👍' : '❌'
@@ -210,7 +223,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
                         <span className="text-lg">{resultIcon}</span>
                         <span className="text-sm font-bold text-slate-700">
                           Palpite: {bet.home_bet} × {bet.away_bet}
-                          {bet.used_joker && ' ⚡'}
+                          {bet.has_joker && ' ⚡'}
                         </span>
                       </div>
                       {(isLive ? livePoints : (bet.points_earned ?? 0)) > 0 && (

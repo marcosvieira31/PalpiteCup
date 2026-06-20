@@ -18,7 +18,7 @@ export interface LiveBetWithUser {
   game_id: number | string
   home_bet: number
   away_bet: number
-  used_joker: boolean
+  has_joker?: boolean
   users: { username: string; avatar_url: string | null } | null
 }
 
@@ -146,7 +146,7 @@ export default function LiveBetsShareCard({ liveGames: initialGames, liveBets: i
                       padding: compact ? '6px 10px' : '8px 14px',
                     }}>
                       <span style={{ color: 'white', fontWeight: '700', fontSize: compact ? '12px' : '15px' }}>
-                        {bet.users?.username ?? 'Usuário'}{bet.used_joker ? ' ⚡' : ''}
+                        {bet.users?.username ?? 'Usuário'}{bet.has_joker ? ' ⚡' : ''}
                       </span>
                       <span style={{ color: '#facc15', fontWeight: '800', fontSize: compact ? '13px' : '17px' }}>
                         {bet.home_bet} × {bet.away_bet}

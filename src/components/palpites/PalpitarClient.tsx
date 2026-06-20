@@ -1,58 +1,85 @@
 "use client"
 import { useState } from 'react'
 import { Game, Bet } from '@/types/database'
-import { submitBet } from '@/app/(app)/dashboard/actions'
+import { submitBet, toggleJoker as toggleJokerAction } from '@/app/(app)/dashboard/actions'
 import TeamFlag from '@/components/ui/TeamFlag'
 import { shareBet } from '@/lib/share'
 import ShareButtons from '@/components/ui/ShareButtons'
 import { formatDate, formatTime, isBeforeKickoff } from '@/lib/dates'
 
+interface JokerPick {
+  game_id: number
+  round_number: number
+}
+
 interface Props {
   games: Game[]
   existingBets: Bet[]
+  jokerPicks: JokerPick[]
 }
 
-export default function PalpitarClient({ games, existingBets }: Props) {
-  const [bets, setBets] = useState<Record<string, { home: number; away: number; joker: boolean }>>(
+export default function PalpitarClient({ games, existingBets, jokerPicks }: Props) {
+  const [bets, setBets] = useState<Record<string, { home: number; away: number }>>(
     Object.fromEntries(
       existingBets.map(b => [b.game_id, {
         home: b.home_bet,
         away: b.away_bet,
-        joker: b.used_joker
       }])
     )
   )
+
+  // jokerGameId: qual jogo tem o coringa ativo (por round_number, só 1 por rodada)
+  const [jokerByRound, setJokerByRound] = useState<Record<number, number>>(
+    Object.fromEntries(
+      jokerPicks.map(jp => [jp.round_number, jp.game_id])
+    )
+  )
+
   const [saving, setSaving] = useState<Record<string, boolean>>({})
   const [saved, setSaved] = useState<Record<string, boolean>>({})
+  const [jokerSaving, setJokerSaving] = useState<Record<string, boolean>>({})
   const [savedGames, setSavedGames] = useState<Set<string | number>>(
     new Set(existingBets.map(b => b.game_id))
   )
   const [sharing, setSharing] = useState<string | number | null>(null)
-  const jokerUsed = Object.values(bets).some(b => b.joker)
 
   const updateBet = (gameId: string | number, field: 'home' | 'away', value: number) => {
     setBets(prev => ({
       ...prev,
-      [gameId]: { ...prev[gameId] ?? { home: 0, away: 0, joker: false }, [field]: Math.max(0, value) }
+      [gameId]: { ...prev[gameId] ?? { home: 0, away: 0 }, [field]: Math.max(0, value) }
     }))
   }
 
-  const toggleJoker = (gameId: string | number) => {
-    setBets(prev => {
-      const current = prev[gameId] ?? { home: 0, away: 0, joker: false }
-      const newJoker = !current.joker
-      const updated = { ...prev }
-      Object.keys(updated).forEach(k => { updated[k] = { ...updated[k], joker: false } })
-      updated[String(gameId)] = { ...current, joker: newJoker }
-      return updated
-    })
+  const handleToggleJoker = async (game: Game) => {
+    const roundNumber = game.round_number ?? 1
+    const currentJokerGameId = jokerByRound[roundNumber]
+    const isActive = currentJokerGameId === game.id
+
+    setJokerSaving(prev => ({ ...prev, [game.id]: true }))
+    try {
+      if (isActive) {
+        // Desativar
+        await toggleJokerAction(game.id, roundNumber, false)
+        setJokerByRound(prev => {
+          const updated = { ...prev }
+          delete updated[roundNumber]
+          return updated
+        })
+      } else {
+        // Ativar (substitui qualquer coringa anterior da mesma rodada)
+        await toggleJokerAction(game.id, roundNumber, true)
+        setJokerByRound(prev => ({ ...prev, [roundNumber]: game.id }))
+      }
+    } finally {
+      setJokerSaving(prev => ({ ...prev, [game.id]: false }))
+    }
   }
 
   const handleSubmit = async (gameId: string | number) => {
-    const bet = bets[String(gameId)] ?? { home: 0, away: 0, joker: false }
+    const bet = bets[String(gameId)] ?? { home: 0, away: 0 }
     setSaving(prev => ({ ...prev, [gameId]: true }))
     try {
-      await submitBet(gameId as number, bet.home, bet.away, bet.joker)
+      await submitBet(gameId as number, bet.home, bet.away)
       setSaved(prev => ({ ...prev, [gameId]: true }))
       setSavedGames(prev => new Set([...prev, gameId]))
       setTimeout(() => setSaved(prev => ({ ...prev, [gameId]: false })), 2000)
@@ -96,9 +123,14 @@ export default function PalpitarClient({ games, existingBets }: Props) {
             </h3>
             <div className="space-y-4">
               {dateGames.map(game => {
-                const bet = bets[String(game.id)] ?? { home: 0, away: 0, joker: false }
+                const bet = bets[String(game.id)] ?? { home: 0, away: 0 }
+                const roundNumber = game.round_number ?? 1
+                const jokerGameIdForRound = jokerByRound[roundNumber]
+                const isJokerActive = jokerGameIdForRound === game.id
+                const isJokerUsedInRound = jokerGameIdForRound !== undefined
                 const isSaving = saving[String(game.id)]
                 const isSaved = saved[String(game.id)]
+                const isJokerSaving = jokerSaving[String(game.id)]
                 const hasExisting = savedGames.has(game.id)
                 const kickoff = new Date(game.kickoff_at)
                 const canBet = isBeforeKickoff(game.kickoff_at)
@@ -158,19 +190,19 @@ export default function PalpitarClient({ games, existingBets }: Props) {
 
                       <div className="flex items-center justify-between mt-3">
                         <button
-                          onClick={() => toggleJoker(game.id)}
-                          disabled={!canBet || (jokerUsed && !bet.joker)}
+                          onClick={() => canBet && !isJokerSaving && handleToggleJoker(game)}
+                          disabled={!canBet || isJokerSaving || (!isJokerActive && isJokerUsedInRound)}
                           className={`text-xs font-bebas tracking-wider px-3 py-1.5 rounded-full transition-colors ${
                             !canBet
                               ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                              : bet.joker
+                              : isJokerActive
                               ? 'bg-yellow-400 text-blue-900'
-                              : jokerUsed
+                              : isJokerUsedInRound
                               ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
                               : 'bg-slate-100 text-slate-500 hover:bg-yellow-100'
                           }`}
                         >
-                          ⚡ CORINGA {bet.joker ? '(ATIVO)' : ''}
+                          {isJokerSaving ? '...' : `⚡ CORINGA ${isJokerActive ? '(ATIVO)' : ''}`}
                         </button>
 
                         <button

@@ -35,6 +35,20 @@ export default async function ResultadosPage() {
     .in('game_id', gameIds)
     .order('points_earned', { ascending: false })
 
+  const { data: allJokerPicks } = await supabase
+    .from('joker_picks')
+    .select('user_id, game_id')
+    .in('game_id', gameIds)
+
+  const jokerSet = new Set(
+    (allJokerPicks ?? []).map(jp => `${jp.user_id}-${jp.game_id}`)
+  )
+
+  const allBetsWithJoker = (allBets ?? []).map(b => ({
+    ...b,
+    has_joker: jokerSet.has(`${b.user_id}-${b.game_id}`)
+  }))
+
   return (
     <div className="pb-24">
       <div className="bg-blue-900 px-4 pt-6 pb-6"
@@ -49,7 +63,7 @@ export default async function ResultadosPage() {
 
       <div className="px-4 mt-4 space-y-6">
         {games.map(game => {
-          const gameBets = (allBets ?? []).filter(b => b.game_id === game.id)
+          const gameBets = allBetsWithJoker.filter(b => b.game_id === game.id)
             .sort((a, b) => b.points_earned - a.points_earned)
 
           return (
@@ -119,7 +133,7 @@ export default async function ResultadosPage() {
                             <span className="font-bebas text-sm text-slate-600">
                               {bet.home_bet} × {bet.away_bet}
                             </span>
-                            {bet.used_joker && (
+                            {bet.has_joker && (
                               <span className="text-[9px] bg-yellow-100 text-yellow-700 font-bold px-1.5 rounded-full">⚡</span>
                             )}
                           </div>

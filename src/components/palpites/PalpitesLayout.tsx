@@ -9,9 +9,15 @@ import { Game, Bet, GroupPrediction, TeamJourneyPrediction } from '@/types/datab
 
 type Tab = 'partidas' | 'grupos' | 'jornada'
 
+interface JokerPick {
+  game_id: number
+  round_number: number
+}
+
 interface Props {
   games: Game[]
   existingBets: Bet[]
+  jokerPicks: JokerPick[]
   allTeams: string[]
   groupPredictions: GroupPrediction[]
   journeyPredictions: TeamJourneyPrediction[]
@@ -19,7 +25,7 @@ interface Props {
 }
 
 export default function PalpitesLayout({
-  games, existingBets, allTeams,
+  games, existingBets, jokerPicks, allTeams,
   groupPredictions, journeyPredictions, userId
 }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('partidas')
@@ -64,6 +70,7 @@ export default function PalpitesLayout({
             <PalpitarClient
               games={games}
               existingBets={existingBets}
+              jokerPicks={jokerPicks}
             />
           </div>
         )}

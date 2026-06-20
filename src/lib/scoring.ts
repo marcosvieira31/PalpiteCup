@@ -12,7 +12,7 @@ export interface LiveBet {
   game_id: number | string
   home_bet: number
   away_bet: number
-  used_joker: boolean
+  has_joker: boolean
 }
 
 export function calculateBetPoints(
@@ -51,7 +51,7 @@ export function sumLivePointsByUser(liveGames: LiveGame[], liveBets: LiveBet[]):
       bet.away_bet,
       game.home_score,
       game.away_score,
-      bet.used_joker
+      bet.has_joker
     )
 
     result[bet.user_id] = (result[bet.user_id] ?? 0) + points

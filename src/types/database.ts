@@ -176,7 +176,6 @@ export interface Database {
           game_id: string
           home_bet: number
           away_bet: number
-          used_joker: boolean
           points_earned: number | null
           submitted_at: string
         }
@@ -186,7 +185,6 @@ export interface Database {
           game_id: string
           home_bet: number
           away_bet: number
-          used_joker?: boolean
           points_earned?: number | null
           submitted_at?: string
         }
@@ -196,7 +194,6 @@ export interface Database {
           game_id?: string
           home_bet?: number
           away_bet?: number
-          used_joker?: boolean
           points_earned?: number | null
           submitted_at?: string
         }
@@ -385,7 +382,7 @@ export interface Bet {
   game_id: string
   home_bet: number
   away_bet: number
-  used_joker: boolean
+  has_joker?: boolean
   points_earned: number | null
   submitted_at: string
 }
