@@ -26,6 +26,7 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
   const [scoringBets, setScoringBets] = useState(group?.scoring_bets ?? true)
   const [scoringGroups, setScoringGroups] = useState(group?.scoring_groups ?? false)
   const [scoringJourney, setScoringJourney] = useState(group?.scoring_journey ?? false)
+  const [scoringJoker, setScoringJoker] = useState(group?.scoring_joker ?? true)
 
   const [scoringGroupsFilter, setScoringGroupsFilter] = useState<string[]>(group?.scoring_groups_filter ?? [])
   const [scoringJourneyFilter, setScoringJourneyFilter] = useState<string[]>(group?.scoring_journey_filter ?? [])
@@ -63,13 +64,14 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
   const { unreadCount, markAsRead } = useUnreadCount(groupId, userId)
 
   const handleToggleScoring = async (
-    field: 'scoring_bets' | 'scoring_groups' | 'scoring_journey',
+    field: 'scoring_bets' | 'scoring_groups' | 'scoring_journey' | 'scoring_joker',
     value: boolean
   ) => {
     const setters = {
       scoring_bets: setScoringBets,
       scoring_groups: setScoringGroups,
       scoring_journey: setScoringJourney,
+      scoring_joker: setScoringJoker,
     }
     setters[field](value)
     await supabase.from('groups').update({ [field]: value }).eq('id', String(groupId))
@@ -447,14 +449,28 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
                       ))}
                     </div>
                     {scoringJourneyFilter.length > 0 && (
-                      <button
-                        onClick={() => { setScoringJourneyFilter([]); supabase.from('groups').update({ scoring_journey_filter: [] }).eq('id', String(groupId)) }}
-                        className="w-full mt-2 py-1.5 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-500">
-                        TODAS AS SELEÇÕES
+                    <div className="mt-3 flex justify-end">
+                      <button onClick={() => { setScoringJourneyFilter([]); supabase.from('groups').update({ scoring_journey_filter: [] }).eq('id', String(groupId)) }}
+                        className="text-[10px] font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full uppercase"
+                      >
+                        Limpar Seleções
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                </div>
                 )}
+              </div>
+
+              {/* 5. Coringa */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center">
+                <div>
+                  <p className="font-bold text-slate-800 text-sm">⚡ Coringa</p>
+                  <p className="text-xs text-slate-400">Multiplicador x2 nos palpites</p>
+                </div>
+                <button onClick={() => handleToggleScoring('scoring_joker', !scoringJoker)}
+                  className={`w-12 h-6 rounded-full relative transition-colors ${scoringJoker ? 'bg-green-500' : 'bg-slate-300'}`}>
+                  <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${scoringJoker ? 'left-6' : 'left-0.5'}`} />
+                </button>
               </div>
 
               {/* Zona de perigo */}

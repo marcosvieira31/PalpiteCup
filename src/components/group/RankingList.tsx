@@ -6,6 +6,18 @@ import clsx from "clsx";
 import RankingShareCard from '@/components/share/RankingShareCard'
 import Link from 'next/link'
 
+export interface MemberJokerPick {
+  user_id: string
+  game_id: number
+  round_number: number
+  games: {
+    home_team: string | null
+    away_team: string | null
+    kickoff_at: string
+    status: string
+  } | null
+}
+
 export interface RankingMember {
   user_id: string;
   points_total: number;
@@ -25,9 +37,10 @@ interface RankingListProps {
   groupId?: number;
   initialLiveGames?: LiveGame[];
   initialLiveBets?: LiveBet[];
+  memberJokerPicks?: MemberJokerPick[];
 }
 
-export default function RankingList({ members, filterTeams = [], filterPhases = [], group, groupName, groupId, initialLiveGames = [], initialLiveBets = [] }: RankingListProps) {
+export default function RankingList({ members, filterTeams = [], filterPhases = [], group, groupName, groupId, initialLiveGames = [], initialLiveBets = [], memberJokerPicks = [] }: RankingListProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [liveGames, setLiveGames] = useState<LiveGame[]>(initialLiveGames)
   const [liveBets] = useState<LiveBet[]>(initialLiveBets)
@@ -78,6 +91,13 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
       home_score: game.home_score,
       away_score: game.away_score,
     })
+  }
+
+  const jokerPicksByUser: Record<string, MemberJokerPick[]> = {}
+  for (const jp of memberJokerPicks) {
+    if (!jp.games) continue
+    if (!jokerPicksByUser[jp.user_id]) jokerPicksByUser[jp.user_id] = []
+    jokerPicksByUser[jp.user_id].push(jp)
   }
 
   const sorted = [...members]
@@ -246,6 +266,16 @@ export default function RankingList({ members, filterTeams = [], filterPhases = 
                         Palpite: {bet.home_bet}×{bet.away_bet}
                       </span>
                     </div>
+                  ))}
+                </div>
+              )}
+
+              {(jokerPicksByUser[member.user_id]?.length ?? 0) > 0 && (
+                <div className="mt-1 flex flex-wrap gap-1 px-1">
+                  {jokerPicksByUser[member.user_id].map((jp, i) => (
+                    <span key={i} className="flex items-center gap-1 bg-yellow-50 border border-yellow-200 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      ⚡ R{jp.round_number} · {jp.games?.home_team ?? '?'} × {jp.games?.away_team ?? '?'}
+                    </span>
                   ))}
                 </div>
               )}

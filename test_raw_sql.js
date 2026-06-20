@@ -17,23 +17,12 @@ async function run() {
   await client.connect();
   
   try {
-    console.log("Dropping trigger calculate_points_after_game...");
-    await client.query(`DROP TRIGGER IF EXISTS calculate_points_after_game ON public.games;`);
-    
-    console.log("Updating game 1 to finished...");
-    await client.query(`UPDATE public.games SET status = 'finished' WHERE api_football_id = 1;`);
-    console.log("Success! The calculate_points trigger was the problem.");
-
+    console.log("Adding scoring_joker column...");
+    await client.query(`alter table public.groups add column if not exists scoring_joker boolean default true;`);
+    console.log("Success!");
   } catch (err) {
-    console.error("Error with calculate_points dropped:", err.message);
+    console.error("Error:", err.message);
   } finally {
-    // restore it just in case
-    await client.query(`
-      create trigger calculate_points_after_game
-      after update on public.games
-      for each row execute function calculate_points();
-    `);
-    await client.query(`UPDATE public.games SET status = 'scheduled' WHERE api_football_id = 1;`);
     await client.end();
   }
 }

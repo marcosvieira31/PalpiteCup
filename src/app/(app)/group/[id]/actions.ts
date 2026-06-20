@@ -56,7 +56,7 @@ export async function getGroupPoints(groupId: number) {
   // Busca configurações do grupo com a key normal ou admin, mas admin não quebra
   const { data: group } = await supabaseAdmin
     .from('groups')
-    .select('filter_teams, filter_phases, scoring_bets, scoring_groups, scoring_journey, scoring_groups_filter, scoring_journey_filter, scoring_start_date')
+    .select('filter_teams, filter_phases, scoring_bets, scoring_groups, scoring_journey, scoring_joker, scoring_groups_filter, scoring_journey_filter, scoring_start_date')
     .eq('id', groupId)
     .single()
 
@@ -75,11 +75,21 @@ export async function getGroupPoints(groupId: number) {
     let totalPoints = 0
 
     // 1. Pontos de partidas (com filtro de times/fases)
-    if (group.scoring_bets !== false) { // defaulting to true for older groups
+    if (group.scoring_bets !== false) {
       const { data: bets } = await supabaseAdmin
         .from('bets')
-        .select('points_earned, games(home_team, away_team, group_stage, kickoff_at)')
+        .select('game_id, points_earned, games(home_team, away_team, group_stage, kickoff_at)')
         .eq('user_id', member.user_id)
+
+      // Busca joker_picks do membro para este grupo (para desconto se scoring_joker=false)
+      const jokerPickGameIds = new Set<number>()
+      if (group.scoring_joker === false) {
+        const { data: jokerPicks } = await supabaseAdmin
+          .from('joker_picks')
+          .select('game_id')
+          .eq('user_id', member.user_id)
+        ;(jokerPicks ?? []).forEach(jp => jokerPickGameIds.add(jp.game_id))
+      }
 
       totalPoints += (bets ?? []).reduce((sum, bet) => {
         const game = bet.games as { home_team: string; away_team: string; group_stage: string; kickoff_at: string } | null
@@ -97,8 +107,16 @@ export async function getGroupPoints(groupId: number) {
         const phaseMatch = !hasPhaseFilter ||
           group.filter_phases!.includes(game.group_stage)
 
-        if (teamMatch && phaseMatch) return sum + (bet.points_earned ?? 0)
-        return sum
+        if (!teamMatch || !phaseMatch) return sum
+
+        let points = bet.points_earned ?? 0
+
+        // Se coringa desativado e esse palpite usou coringa, divide por 2 (remove o x2)
+        if (group.scoring_joker === false && jokerPickGameIds.has(bet.game_id as number)) {
+          points = Math.floor(points / 2)
+        }
+
+        return sum + points
       }, 0)
     }
 
@@ -242,6 +260,42 @@ export async function deleteGroup(groupId: number | string) {
     .from('groups')
     .delete()
     .eq('id', id)
+
+  if (error) throw new Error(error.message)
+}
+
+const scoringJokerSchema = z.object({
+  groupId: z.number().int().positive(),
+  scoringJoker: z.boolean(),
+})
+
+export async function saveScoringJoker(
+  groupId: number | string,
+  scoringJoker: boolean
+) {
+  const parsed = scoringJokerSchema.safeParse({
+    groupId: Number(groupId),
+    scoringJoker,
+  })
+  if (!parsed.success) throw new Error('Dados inválidos.')
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Não autenticado.')
+
+  const { data: group } = await supabase
+    .from('groups')
+    .select('owner_id')
+    .eq('id', groupId)
+    .single()
+
+  if (!group) throw new Error('Grupo não encontrado.')
+  if (group.owner_id !== user.id) throw new Error('Apenas o líder pode configurar.')
+
+  const { error } = await supabase
+    .from('groups')
+    .update({ scoring_joker: scoringJoker })
+    .eq('id', groupId)
 
   if (error) throw new Error(error.message)
 }
