@@ -64,7 +64,10 @@ export async function toggleJoker(
   activate: boolean,
 ) {
   const parsed = jokerSchema.safeParse({ gameId, roundNumber })
-  if (!parsed.success) throw new Error(parsed.error.errors[0].message)
+  if (!parsed.success) {
+    console.error('[toggleJoker] validation error:', parsed.error.errors, { gameId, roundNumber, activate })
+    throw new Error(parsed.error.errors[0].message)
+  }
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -84,19 +87,30 @@ export async function toggleJoker(
     throw new Error('Prazo de palpite encerrado.')
   }
 
-  if (activate) {
-    const { error } = await supabase.from('joker_picks').upsert({
-      user_id: user.id,
-      game_id: parsed.data.gameId,
-      round_number: parsed.data.roundNumber,
-    }, { onConflict: 'user_id,round_number' })
-    if (error) throw new Error(error.message)
-  } else {
-    const { error } = await supabase
-      .from('joker_picks')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('game_id', parsed.data.gameId)
-    if (error) throw new Error(error.message)
+  try {
+    if (activate) {
+      const { error } = await supabase.from('joker_picks').upsert({
+        user_id: user.id,
+        game_id: parsed.data.gameId,
+        round_number: parsed.data.roundNumber,
+      }, { onConflict: 'user_id,round_number' })
+      if (error) {
+        console.error('[toggleJoker] upsert error:', error)
+        throw new Error(error.message)
+      }
+    } else {
+      const { error } = await supabase
+        .from('joker_picks')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('game_id', parsed.data.gameId)
+      if (error) {
+        console.error('[toggleJoker] delete error:', error)
+        throw new Error(error.message)
+      }
+    }
+  } catch (err) {
+    console.error('[toggleJoker] unexpected error:', err)
+    throw err
   }
 }
