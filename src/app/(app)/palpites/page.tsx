@@ -42,10 +42,10 @@ export default async function PalpitesPage() {
     .eq('user_id', user?.id ?? '')
     .in('game_id', games.map(g => g.id))
 
-  const { data: jokerPicks } = await supabase
+  const { data: jokerPicks } = user?.id ? await supabase
     .from('joker_picks')
     .select('game_id, round_number')
-    .eq('user_id', user?.id ?? '')
+    .eq('user_id', user.id) : { data: [] }
 
   // Todos os times
   const { data: allTeamsData } = await supabase
