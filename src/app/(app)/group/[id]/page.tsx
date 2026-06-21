@@ -104,8 +104,9 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
   const { data: jokerAuditRaw } = isOwner && memberIds.length > 0
     ? await supabase
         .from('joker_picks')
-        .select('user_id, game_id, round_number, games(home_team, away_team), users(username, avatar_url)')
+        .select('user_id, game_id, round_number, games!inner(home_team, away_team, status), users(username, avatar_url)')
         .in('user_id', memberIds)
+        .eq('games.status', 'finished')
         .order('round_number')
     : { data: [] }
 
