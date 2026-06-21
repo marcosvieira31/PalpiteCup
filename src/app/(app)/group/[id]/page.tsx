@@ -92,14 +92,6 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
 
   const computedMembers = await getGroupPoints(Number(params.id))
 
-  // Busca joker_picks históricos de todos os membros (jogos encerrados)
-  const { data: memberJokerPicks } = memberIds.length > 0
-    ? await supabase
-        .from('joker_picks')
-        .select('user_id, game_id, round_number, games(home_team, away_team, kickoff_at, status)')
-        .in('user_id', memberIds)
-    : { data: [] }
-
   // Busca joker_picks de todos os membros com dados do jogo e do usuário (para auditoria do líder)
   const { data: jokerAuditRaw } = isOwner && memberIds.length > 0
     ? await supabase
@@ -164,7 +156,6 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
           groupId={Number(params.id)}
           initialLiveGames={liveGames}
           initialLiveBets={liveBets}
-          memberJokerPicks={(memberJokerPicks ?? []) as unknown as import('@/components/group/RankingList').MemberJokerPick[]}
         />
       </div>
     </div>
