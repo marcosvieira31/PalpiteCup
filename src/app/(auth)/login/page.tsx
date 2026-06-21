@@ -17,10 +17,12 @@ export default function LoginPage() {
   const [resetSent, setResetSent] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const captchaRef = useRef<HCaptcha>(null)
+  const forgotCaptchaRef = useRef<HCaptcha>(null)
   const router = useRouter()
 
   const resetCaptcha = () => {
     captchaRef.current?.resetCaptcha()
+    forgotCaptchaRef.current?.resetCaptcha()
     setCaptchaToken(null)
   }
 
@@ -171,7 +173,7 @@ export default function LoginPage() {
 
               <div className="flex justify-center">
                 <HCaptcha
-                  ref={captchaRef}
+                  ref={forgotCaptchaRef}
                   sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
                   onVerify={token => setCaptchaToken(token)}
                   onExpire={() => setCaptchaToken(null)}
