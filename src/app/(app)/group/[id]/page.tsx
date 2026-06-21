@@ -100,6 +100,25 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
         .in('user_id', memberIds)
     : { data: [] }
 
+  // Busca joker_picks de todos os membros com dados do jogo e do usuário (para auditoria do líder)
+  const { data: jokerAuditRaw } = isOwner && memberIds.length > 0
+    ? await supabase
+        .from('joker_picks')
+        .select('user_id, game_id, round_number, games(home_team, away_team), users(username, avatar_url)')
+        .in('user_id', memberIds)
+        .order('round_number')
+    : { data: [] }
+
+  const jokerAudit = (jokerAuditRaw ?? []).map(jp => ({
+    user_id: jp.user_id,
+    game_id: jp.game_id,
+    round_number: jp.round_number,
+    username: (jp.users as { username: string; avatar_url: string | null } | null)?.username ?? 'Usuário',
+    avatar_url: (jp.users as { username: string; avatar_url: string | null } | null)?.avatar_url ?? null,
+    home_team: (jp.games as { home_team: string | null; away_team: string | null } | null)?.home_team ?? null,
+    away_team: (jp.games as { home_team: string | null; away_team: string | null } | null)?.away_team ?? null,
+  }))
+
   return (
     <div className="pb-24">
       <GroupHeader group={group} />
@@ -110,6 +129,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
           groupId={group.id}
           userId={user?.id ?? ''}
           isOwner={isOwner}
+          jokerAudit={jokerAudit as import('@/components/group/GroupModals').JokerAuditEntry[]}
           group={group as unknown as import('@/types/database').Group}
           allTeams={allTeams}
         />

@@ -9,15 +9,26 @@ import { saveScoringStartDate } from '@/app/(app)/group/[id]/actions'
 import { useRouter } from 'next/navigation'
 import { renameGroup, deleteGroup } from '@/app/(app)/group/[id]/actions'
 
+export interface JokerAuditEntry {
+  user_id: string
+  game_id: number
+  round_number: number
+  username: string
+  avatar_url: string | null
+  home_team: string | null
+  away_team: string | null
+}
+
 interface Props {
   groupId: number | string
   userId: string
   isOwner: boolean
   group: Group
   allTeams: string[]
+  jokerAudit?: JokerAuditEntry[]
 }
 
-export default function GroupActions({ groupId, userId, isOwner, group, allTeams }: Props) {
+export default function GroupActions({ groupId, userId, isOwner, group, allTeams, jokerAudit = [] }: Props) {
   const [chatOpen, setChatOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [chatEnabled, setChatEnabled] = useState(group.chat_enabled ?? true)
@@ -472,6 +483,43 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
                   <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${scoringJoker ? 'left-6' : 'left-0.5'}`} />
                 </button>
               </div>
+
+              {/* Histórico de Coringas dos Membros */}
+              {jokerAudit.length > 0 && (
+                <div className="bg-white rounded-2xl border border-slate-200 p-4">
+                  <p className="font-bold text-slate-800 text-sm mb-3">⚡ Histórico de Coringas</p>
+                  <div className="space-y-3">
+                    {Object.entries(
+                      jokerAudit.reduce((acc, jp) => {
+                        if (!acc[jp.user_id]) acc[jp.user_id] = { username: jp.username, avatar_url: jp.avatar_url, picks: [] }
+                        acc[jp.user_id].picks.push(jp)
+                        return acc
+                      }, {} as Record<string, { username: string; avatar_url: string | null; picks: JokerAuditEntry[] }>)
+                    ).map(([userId, data]) => (
+                      <div key={userId} className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 border border-slate-200">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={data.avatar_url ?? '/avatars/vini-jr.png'}
+                            alt={data.username}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-slate-800 text-xs mb-1">{data.username}</p>
+                          <div className="flex flex-wrap gap-1">
+                            {data.picks.map((jp, i) => (
+                              <span key={i} className="text-[10px] bg-yellow-50 border border-yellow-200 text-yellow-700 font-bold px-2 py-0.5 rounded-full">
+                                ⚡ R{jp.round_number} · {jp.home_team ?? '?'} × {jp.away_team ?? '?'}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Zona de perigo */}
               <div className="bg-red-50 rounded-2xl border border-red-200 p-4 mt-6">
