@@ -38,6 +38,7 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
   const [scoringGroups, setScoringGroups] = useState(group?.scoring_groups ?? false)
   const [scoringJourney, setScoringJourney] = useState(group?.scoring_journey ?? false)
   const [scoringJoker, setScoringJoker] = useState(group?.scoring_joker ?? true)
+  const [jokerConfirmPending, setJokerConfirmPending] = useState<boolean | null>(null)
 
   const [scoringGroupsFilter, setScoringGroupsFilter] = useState<string[]>(group?.scoring_groups_filter ?? [])
   const [scoringJourneyFilter, setScoringJourneyFilter] = useState<string[]>(group?.scoring_journey_filter ?? [])
@@ -473,15 +474,50 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
               </div>
 
               {/* 5. Coringa */}
-              <div className="bg-white rounded-2xl border border-slate-200 p-4 flex justify-between items-center">
-                <div>
-                  <p className="font-bold text-slate-800 text-sm">⚡ Coringa</p>
-                  <p className="text-xs text-slate-400">Multiplicador x2 nos palpites</p>
+              <div className={`bg-white rounded-2xl border p-4 transition-all ${jokerConfirmPending !== null ? 'border-yellow-300 bg-yellow-50' : 'border-slate-200'}`}>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-bold text-slate-800 text-sm">⚡ Coringa</p>
+                    <p className="text-xs text-slate-400">Multiplicador x2 nos palpites</p>
+                  </div>
+                  <button
+                    onClick={() => jokerConfirmPending === null && setJokerConfirmPending(!scoringJoker)}
+                    className={`w-12 h-6 rounded-full relative transition-colors ${scoringJoker ? 'bg-green-500' : 'bg-slate-300'}`}>
+                    <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${scoringJoker ? 'left-6' : 'left-0.5'}`} />
+                  </button>
                 </div>
-                <button onClick={() => handleToggleScoring('scoring_joker', !scoringJoker)}
-                  className={`w-12 h-6 rounded-full relative transition-colors ${scoringJoker ? 'bg-green-500' : 'bg-slate-300'}`}>
-                  <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${scoringJoker ? 'left-6' : 'left-0.5'}`} />
-                </button>
+
+                {jokerConfirmPending !== null && (
+                  <div className="mt-3 pt-3 border-t border-yellow-200">
+                    <p className="text-xs text-slate-700 font-medium mb-1">
+                      {jokerConfirmPending
+                        ? '⚡ Ativar o Coringa neste grupo?'
+                        : '🔕 Desativar o Coringa neste grupo?'}
+                    </p>
+                    <p className="text-[11px] text-slate-500 mb-3">
+                      {jokerConfirmPending
+                        ? 'O multiplicador x2 voltará a ser aplicado no ranking deste grupo para todos os palpites com Coringa, incluindo os anteriores.'
+                        : 'O multiplicador x2 será removido do ranking deste grupo. Os Coringas usados continuarão salvos e voltarão a pontuar se você reativar.'}
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setJokerConfirmPending(null)}
+                        className="flex-1 bg-slate-100 text-slate-600 font-bebas tracking-wider rounded-xl py-2 text-sm"
+                      >
+                        CANCELAR
+                      </button>
+                      <button
+                        onClick={async () => {
+                          await handleToggleScoring('scoring_joker', jokerConfirmPending)
+                          setJokerConfirmPending(null)
+                        }}
+                        className={`flex-1 font-bebas tracking-wider rounded-xl py-2 text-sm text-white ${jokerConfirmPending ? 'bg-green-500' : 'bg-yellow-500'}`}
+                      >
+                        {jokerConfirmPending ? 'ATIVAR' : 'DESATIVAR'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Histórico de Coringas dos Membros */}
