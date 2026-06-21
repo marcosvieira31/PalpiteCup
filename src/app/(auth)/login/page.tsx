@@ -31,10 +31,16 @@ export default function LoginPage() {
       setError('Digite seu email para recuperar a senha.')
       return
     }
+    if (!captchaToken) {
+      setError('Confirme que você não é um robô.')
+      return
+    }
     setLoading(true)
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
+      captchaToken,
     })
+    resetCaptcha()
     setLoading(false)
     if (error) {
       setError('Não foi possível enviar o email. Verifique o endereço e tente novamente.')
@@ -134,7 +140,7 @@ export default function LoginPage() {
       {mode === 'forgot' ? (
         <div className="w-full bg-white rounded-2xl p-6 flex flex-col gap-3">
           <button
-            onClick={() => { setMode('login'); setError(''); setResetSent(false) }}
+            onClick={() => { setMode('login'); setError(''); setResetSent(false); resetCaptcha() }}
             className="text-slate-400 text-sm text-left flex items-center gap-1 mb-1"
           >
             ‹ Voltar ao login
@@ -162,6 +168,15 @@ export default function LoginPage() {
                 onKeyDown={e => e.key === 'Enter' && handleForgotPassword()}
                 className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-green-500"
               />
+
+              <div className="flex justify-center">
+                <HCaptcha
+                  ref={captchaRef}
+                  sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+                  onVerify={token => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken(null)}
+                />
+              </div>
 
               {error && (
                 <p className="text-sm text-center text-red-500">{error}</p>
