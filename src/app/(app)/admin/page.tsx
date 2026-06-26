@@ -50,8 +50,6 @@ export default function AdminPage() {
   }
 
   const updateGame = async (gameId: number, status: string, homeScore: number, awayScore: number) => {
-    const { data: { user } } = await supabase.auth.getUser()
-
     const response = await fetch('/api/admin/update-score', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -59,8 +57,7 @@ export default function AdminPage() {
         gameId,
         status,
         homeScore,
-        awayScore,
-        userEmail: user?.email
+        awayScore
       })
     })
 

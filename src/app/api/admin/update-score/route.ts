@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
-const supabase = createClient(
+const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
@@ -9,13 +11,28 @@ const supabase = createClient(
 const ADMIN_EMAILS = ['marcosnd.31@gmail.com', 'rivelinoantonio39@gmail.com']
 
 export async function POST(request: NextRequest) {
-  const { gameId, status, homeScore, awayScore, userEmail } = await request.json()
+  // Verifica autenticação via sessão do servidor (não confia no cliente)
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: () => {},
+      },
+    }
+  )
 
-  if (!ADMIN_EMAILS.includes(userEmail)) {
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user?.email || !ADMIN_EMAILS.includes(user.email)) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 403 })
   }
 
-  const { data, error } = await supabase
+  const { gameId, status, homeScore, awayScore } = await request.json()
+
+  const { data, error } = await supabaseAdmin
     .from('games')
     .update({ status, home_score: homeScore, away_score: awayScore })
     .eq('id', gameId)
