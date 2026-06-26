@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const ADMIN_EMAILS = ['marcosnd.31@gmail.com']
+const ADMIN_EMAILS = ['marcosnd.31@gmail.com', 'rivelinoantonio39@gmail.com']
 
 export async function POST(request: NextRequest) {
   const { gameId, status, homeScore, awayScore, userEmail } = await request.json()
