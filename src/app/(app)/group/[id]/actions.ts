@@ -299,3 +299,106 @@ export async function saveScoringJoker(
 
   if (error) throw new Error(error.message)
 }
+
+export async function getGroupPointsDetailed(groupId: number) {
+  const { data: group } = await supabaseAdmin
+    .from('groups')
+    .select('filter_teams, filter_phases, scoring_bets, scoring_groups, scoring_journey, scoring_joker, scoring_groups_filter, scoring_journey_filter, scoring_start_date')
+    .eq('id', groupId)
+    .single()
+
+  if (!group) return []
+
+  const cutoff = group.scoring_start_date ? new Date(group.scoring_start_date) : null
+
+  const { data: members } = await supabaseAdmin
+    .from('group_members')
+    .select('user_id, users(username, avatar_url)')
+    .eq('group_id', groupId)
+
+  if (!members) return []
+
+  const results = await Promise.all(members.map(async (member) => {
+    // --- PARTIDAS ---
+    let betsPoints = 0
+    const { data: bets } = await supabaseAdmin
+      .from('bets')
+      .select('game_id, points_earned, games(home_team, away_team, group_stage, kickoff_at)')
+      .eq('user_id', member.user_id)
+
+    const jokerPickGameIds = new Set<number>()
+    if (group.scoring_joker === false) {
+      const { data: jokerPicks } = await supabaseAdmin
+        .from('joker_picks')
+        .select('game_id')
+        .eq('user_id', member.user_id)
+      ;(jokerPicks ?? []).forEach(jp => jokerPickGameIds.add(jp.game_id))
+    }
+
+    if (group.scoring_bets !== false) {
+      betsPoints = (bets ?? []).reduce((sum, bet) => {
+        const game = bet.games as { home_team: string; away_team: string; group_stage: string; kickoff_at: string } | null
+        if (!game) return sum
+        if (cutoff && new Date(game.kickoff_at) < cutoff) return sum
+        const hasTeamFilter = (group.filter_teams?.length ?? 0) > 0
+        const hasPhaseFilter = (group.filter_phases?.length ?? 0) > 0
+        const teamMatch = !hasTeamFilter || group.filter_teams!.includes(game.home_team) || group.filter_teams!.includes(game.away_team)
+        const phaseMatch = !hasPhaseFilter || group.filter_phases!.includes(game.group_stage)
+        if (!teamMatch || !phaseMatch) return sum
+        let points = bet.points_earned ?? 0
+        if (group.scoring_joker === false && jokerPickGameIds.has(bet.game_id as number)) {
+          points = Math.floor(points / 2)
+        }
+        return sum + points
+      }, 0)
+    }
+
+    // --- GRUPOS ---
+    let groupsPoints = 0
+    const { data: groupPreds } = await supabaseAdmin
+      .from('group_predictions')
+      .select('group_name, position, predicted_team, points_earned')
+      .eq('user_id', member.user_id)
+
+    if (group.scoring_groups && !(cutoff && DEADLINES.groups < cutoff)) {
+      const hasGroupFilter = (group.scoring_groups_filter?.length ?? 0) > 0
+      groupsPoints = (groupPreds ?? []).reduce((sum, p) => {
+        if (hasGroupFilter && !group.scoring_groups_filter!.includes(p.group_name)) return sum
+        return sum + (p.points_earned ?? 0)
+      }, 0)
+    }
+
+    // --- JORNADA ---
+    let journeyPoints = 0
+    const { data: journeyPreds } = await supabaseAdmin
+      .from('team_journey_predictions')
+      .select('team, predicted_phase, points_earned')
+      .eq('user_id', member.user_id)
+
+    if (group.scoring_journey && !(cutoff && DEADLINES.journey < cutoff)) {
+      const hasJourneyFilter = (group.scoring_journey_filter?.length ?? 0) > 0
+      journeyPoints = (journeyPreds ?? []).reduce((sum, p) => {
+        if (hasJourneyFilter && !group.scoring_journey_filter!.includes(p.team)) return sum
+        return sum + (p.points_earned ?? 0)
+      }, 0)
+    }
+
+    return {
+      user_id: member.user_id,
+      users: member.users,
+      points_total: betsPoints + groupsPoints + journeyPoints,
+      points_bets: betsPoints,
+      points_groups: groupsPoints,
+      points_journey: journeyPoints,
+      group_predictions: groupPreds ?? [],
+      journey_predictions: journeyPreds ?? [],
+    }
+  }))
+
+  return results.sort((a, b) => {
+    if (b.points_total !== a.points_total) return b.points_total - a.points_total
+    const aName = (a.users as { username: string } | null)?.username ?? ''
+    const bName = (b.users as { username: string } | null)?.username ?? ''
+    return aName.localeCompare(bName)
+  })
+}

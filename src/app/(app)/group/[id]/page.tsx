@@ -6,7 +6,7 @@ import GroupActions from '@/components/group/GroupModals'
 import PendingRequests from '@/components/group/PendingRequests'
 import LiveBetsShareCard from '@/components/group/LiveBetsShareCard'
 import GroupShareMenu from '@/components/group/GroupShareMenu'
-import { getGroupPoints } from './actions'
+import { getGroupPoints, getGroupPointsDetailed } from './actions'
 
 export default async function GroupPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -92,6 +92,15 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
 
   const computedMembers = await getGroupPoints(Number(params.id))
 
+  const detailedMembers = await getGroupPointsDetailed(Number(params.id))
+
+  // Busca classificação final dos grupos para o modal de detalhamento
+  const { data: groupStandings } = await supabase
+    .from('group_standings')
+    .select('group_name, position, team')
+    .order('group_name')
+    .order('position')
+
   // Busca joker_picks de todos os membros com dados do jogo e do usuário (para auditoria do líder)
   const { data: jokerAuditRaw } = isOwner && memberIds.length > 0
     ? await supabase
@@ -149,6 +158,8 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
 
         <RankingList
           members={computedMembers as unknown as import('@/components/group/RankingList').RankingMember[]}
+          detailedMembers={detailedMembers as unknown as import('@/components/group/RankingList').DetailedMember[]}
+          groupStandings={groupStandings ?? []}
           filterTeams={group.filter_teams ?? []}
           filterPhases={group.filter_phases ?? []}
           group={group}
