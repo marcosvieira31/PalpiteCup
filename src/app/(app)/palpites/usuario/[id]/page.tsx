@@ -186,7 +186,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
             const isWinner = betWinner === realWinner && !isExact && !isDiff
 
             const livePoints = bet && game.home_score !== null && game.away_score !== null
-              ? calculateBetPoints(bet.home_bet, bet.away_bet, game.home_score, game.away_score, bet.has_joker ?? false)
+              ? calculateBetPoints(bet.home_bet, bet.away_bet, game.home_score, game.away_score, (bet.has_joker ?? false) && groupScoringJoker)
               : 0
 
             const resultIcon = !bet ? '—' : isExact ? '🎯' : isDiff ? '✅' : isWinner ? '👍' : '❌'
@@ -237,7 +237,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
                         <span className="text-lg">{resultIcon}</span>
                         <span className="text-sm font-bold text-slate-700">
                           Palpite: {bet.home_bet} × {bet.away_bet}
-                          {bet.has_joker && ' ⚡'}
+                          {bet.has_joker && groupScoringJoker && ' ⚡'}
                         </span>
                       </div>
                       {(isLive ? livePoints : (bet.points_earned ?? 0)) > 0 && (
