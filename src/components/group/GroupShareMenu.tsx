@@ -6,12 +6,13 @@ import { generateLiveBetsShareImage } from '@/components/group/LiveBetsShareCard
 interface Props {
   groupName: string
   hasLiveGame: boolean
+  activeRankingTab?: 'geral' | 'partidas' | 'grupos' | 'jornada'
 }
 
 type Step = 'closed' | 'choose-type' | 'choose-format'
 type ShareType = 'ranking' | 'live'
 
-export default function GroupShareMenu({ groupName, hasLiveGame }: Props) {
+export default function GroupShareMenu({ groupName, hasLiveGame, activeRankingTab = 'geral' }: Props) {
   const [step, setStep] = useState<Step>('closed')
   const [shareType, setShareType] = useState<ShareType | null>(null)
   const [generating, setGenerating] = useState(false)
@@ -31,7 +32,7 @@ export default function GroupShareMenu({ groupName, hasLiveGame }: Props) {
     setGenerating(true)
     reset()
     if (shareType === 'ranking') {
-      await generateRankingShareImage(fmt, groupName, false)
+      await generateRankingShareImage(fmt, groupName, false, activeRankingTab)
     } else {
       await generateLiveBetsShareImage(fmt, groupName)
     }

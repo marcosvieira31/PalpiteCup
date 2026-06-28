@@ -42,9 +42,11 @@ interface GroupStanding {
   team: string;
 }
 
-type RankingTab = 'geral' | 'partidas' | 'grupos' | 'jornada'
+export type RankingTab = 'geral' | 'partidas' | 'grupos' | 'jornada'
 
 interface RankingListProps {
+  activeTab?: RankingTab
+  onTabChange?: (tab: RankingTab) => void
   members: RankingMember[];
   detailedMembers?: DetailedMember[];
   groupStandings?: GroupStanding[];
@@ -73,9 +75,15 @@ const POSITION_LABELS = ['1º', '2º', '3º', '4º']
 export default function RankingList({
   members, detailedMembers = [], groupStandings = [],
   filterTeams = [], filterPhases = [], group, groupName, groupId,
-  initialLiveGames = [], initialLiveBets = []
+  initialLiveGames = [], initialLiveBets = [],
+  activeTab: externalActiveTab, onTabChange
 }: RankingListProps) {
-  const [activeTab, setActiveTab] = useState<RankingTab>('geral')
+  const [internalActiveTab, setInternalActiveTab] = useState<RankingTab>('geral')
+  const activeTab = externalActiveTab ?? internalActiveTab
+  const setActiveTab = (tab: RankingTab) => {
+    setInternalActiveTab(tab)
+    onTabChange?.(tab)
+  }
   const [showFilters, setShowFilters] = useState(false);
   const [liveGames, setLiveGames] = useState<LiveGame[]>(initialLiveGames)
   const [liveBets] = useState<LiveBet[]>(initialLiveBets)
@@ -239,6 +247,50 @@ export default function RankingList({
             points_total: m.points_total
           }))}
           groupName={groupName}
+          cardId="ranking"
+          label="RANKING"
+          hideButton
+        />
+      )}
+      {activeTab === 'partidas' && (
+        <RankingShareCard
+          members={sortedBets.map(m => ({
+            user_id: m.user_id,
+            username: (m.users as { username: string; avatar_url: string | null } | null)?.username ?? 'Usuário',
+            avatar_url: (m.users as { username: string; avatar_url: string | null } | null)?.avatar_url ?? null,
+            points_total: m.points_bets
+          }))}
+          groupName={groupName}
+          cardId="partidas"
+          label="PARTIDAS"
+          hideButton
+        />
+      )}
+      {activeTab === 'grupos' && (
+        <RankingShareCard
+          members={sortedGroups.map(m => ({
+            user_id: m.user_id,
+            username: (m.users as { username: string; avatar_url: string | null } | null)?.username ?? 'Usuário',
+            avatar_url: (m.users as { username: string; avatar_url: string | null } | null)?.avatar_url ?? null,
+            points_total: m.points_groups
+          }))}
+          groupName={groupName}
+          cardId="grupos"
+          label="GRUPOS"
+          hideButton
+        />
+      )}
+      {activeTab === 'jornada' && (
+        <RankingShareCard
+          members={sortedJourney.map(m => ({
+            user_id: m.user_id,
+            username: (m.users as { username: string; avatar_url: string | null } | null)?.username ?? 'Usuário',
+            avatar_url: (m.users as { username: string; avatar_url: string | null } | null)?.avatar_url ?? null,
+            points_total: m.points_journey
+          }))}
+          groupName={groupName}
+          cardId="jornada"
+          label="JORNADA"
           hideButton
         />
       )}

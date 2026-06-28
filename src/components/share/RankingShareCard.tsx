@@ -13,29 +13,31 @@ interface Props {
   groupName?: string
   isGlobal?: boolean
   hideButton?: boolean
+  cardId?: string
+  label?: string
 }
 
-export async function generateRankingShareImage(fmt: 'story' | 'post', groupName?: string, isGlobal?: boolean) {
+export async function generateRankingShareImage(fmt: 'story' | 'post', groupName?: string, isGlobal?: boolean, cardId?: string) {
   await new Promise(r => setTimeout(r, 100))
   await generateShareImage(
-    `share-card-${fmt}`,
+    `share-card-${cardId ?? 'ranking'}-${fmt}`,
     `palpitecup-${isGlobal ? 'global' : groupName?.replace(/\s/g, '-').toLowerCase()}`
   )
 }
 
-export default function RankingShareCard({ members, groupName, isGlobal, hideButton }: Props) {
+export default function RankingShareCard({ members, groupName, isGlobal, hideButton, cardId = 'ranking', label = 'RANKING' }: Props) {
   const top5 = members.slice(0, 5)
   const medals = ['👑', '🥈', '🥉', '4️⃣', '5️⃣']
 
   if (hideButton) {
-    return <RankingShareCardHidden members={members} groupName={groupName} isGlobal={isGlobal} />
+    return <RankingShareCardHidden members={members} groupName={groupName} isGlobal={isGlobal} cardId={cardId} label={label} />
   }
 
   return (
     <div>
       {/* Card Stories (9:16) — renderizado fora da tela */}
       <div
-        id="share-card-story"
+        id={`share-card-${cardId}-story`}
         style={{
           position: 'fixed',
           left: '-9999px',
@@ -61,7 +63,7 @@ export default function RankingShareCard({ members, groupName, isGlobal, hideBut
             padding: '6px 16px', borderRadius: '999px', letterSpacing: '1px', marginBottom: '20px',
           }}>
             <span style={{ width: '8px', height: '8px', background: 'white', borderRadius: '50%' }} />
-            RANKING
+            {label}
           </div>
           <div style={{
             fontSize: '54px', fontWeight: '900', letterSpacing: '1px', lineHeight: 1,
@@ -70,7 +72,7 @@ export default function RankingShareCard({ members, groupName, isGlobal, hideBut
             {isGlobal ? 'RANKING' : groupName?.toUpperCase()}
           </div>
           <div style={{ fontSize: '22px', color: 'rgba(255,255,255,0.85)', marginTop: '6px', fontWeight: '600' }}>
-            {isGlobal ? 'Ranking global do bolão' : 'Classificação do grupo'}
+            {isGlobal ? 'Ranking global do bolão' : `Ranking — ${label}`}
           </div>
         </div>
 
@@ -121,7 +123,7 @@ export default function RankingShareCard({ members, groupName, isGlobal, hideBut
 
       {/* Card Post (1:1) — renderizado fora da tela */}
       <div
-        id="share-card-post"
+        id={`share-card-${cardId}-post`}
         style={{
           position: 'fixed',
           left: '-9999px',
@@ -147,7 +149,7 @@ export default function RankingShareCard({ members, groupName, isGlobal, hideBut
             padding: '4px 12px', borderRadius: '999px', letterSpacing: '1px', marginBottom: '10px',
           }}>
             <span style={{ width: '6px', height: '6px', background: 'white', borderRadius: '50%' }} />
-            RANKING
+            {label}
           </div>
           <div style={{
             fontSize: '34px', fontWeight: '900', letterSpacing: '1px', lineHeight: 1,
@@ -197,14 +199,14 @@ export default function RankingShareCard({ members, groupName, isGlobal, hideBut
   )
 }
 
-function RankingShareCardHidden({ members, groupName, isGlobal }: Props) {
+function RankingShareCardHidden({ members, groupName, isGlobal, cardId = 'ranking', label = 'RANKING' }: Props) {
   const top5 = members.slice(0, 5)
   const medals = ['👑', '🥈', '🥉', '4️⃣', '5️⃣']
 
   return (
     <>
       <div
-        id="share-card-story"
+        id={`share-card-${cardId}-story`}
         style={{
           position: 'fixed',
           left: '-9999px',
@@ -229,7 +231,7 @@ function RankingShareCardHidden({ members, groupName, isGlobal }: Props) {
             padding: '6px 16px', borderRadius: '999px', letterSpacing: '1px', marginBottom: '20px',
           }}>
             <span style={{ width: '8px', height: '8px', background: 'white', borderRadius: '50%' }} />
-            RANKING
+            {label}
           </div>
           <div style={{
             fontSize: '54px', fontWeight: '900', letterSpacing: '1px', lineHeight: 1,
@@ -238,7 +240,7 @@ function RankingShareCardHidden({ members, groupName, isGlobal }: Props) {
             {isGlobal ? 'RANKING' : groupName?.toUpperCase()}
           </div>
           <div style={{ fontSize: '22px', color: 'rgba(255,255,255,0.85)', marginTop: '6px', fontWeight: '600' }}>
-            {isGlobal ? 'Ranking global do bolão' : 'Classificação do grupo'}
+            {isGlobal ? 'Ranking global do bolão' : `Ranking — ${label}`}
           </div>
         </div>
         <div style={{ position: 'relative', zIndex: 1, padding: '8px 36px' }}>
@@ -279,7 +281,7 @@ function RankingShareCardHidden({ members, groupName, isGlobal }: Props) {
       </div>
 
       <div
-        id="share-card-post"
+        id={`share-card-${cardId}-post`}
         style={{
           position: 'fixed', left: '-9999px', top: 0,
           width: '600px', height: '600px',
@@ -300,7 +302,7 @@ function RankingShareCardHidden({ members, groupName, isGlobal }: Props) {
             padding: '4px 12px', borderRadius: '999px', letterSpacing: '1px', marginBottom: '10px',
           }}>
             <span style={{ width: '6px', height: '6px', background: 'white', borderRadius: '50%' }} />
-            RANKING
+            {label}
           </div>
           <div style={{
             fontSize: '34px', fontWeight: '900', letterSpacing: '1px', lineHeight: 1,

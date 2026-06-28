@@ -1,11 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import GroupHeader from '@/components/group/GroupHeader'
-import RankingList from '@/components/group/RankingList'
+import GroupRankingWrapper from '@/components/group/GroupRankingWrapper'
 import GroupActions from '@/components/group/GroupModals'
 import PendingRequests from '@/components/group/PendingRequests'
 import LiveBetsShareCard from '@/components/group/LiveBetsShareCard'
-import GroupShareMenu from '@/components/group/GroupShareMenu'
 import { getGroupPoints, getGroupPointsDetailed } from './actions'
 
 export const dynamic = 'force-dynamic'
@@ -153,12 +152,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
           groupName={group.name}
         />
 
-        <GroupShareMenu
-          groupName={group.name}
-          hasLiveGame={liveGames.length > 0}
-        />
-
-        <RankingList
+        <GroupRankingWrapper
           members={computedMembers as unknown as import('@/components/group/RankingList').RankingMember[]}
           detailedMembers={detailedMembers as unknown as import('@/components/group/RankingList').DetailedMember[]}
           groupStandings={groupStandings ?? []}
@@ -169,6 +163,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
           groupId={Number(params.id)}
           initialLiveGames={liveGames}
           initialLiveBets={liveBets}
+          hasLiveGame={liveGames.length > 0}
         />
       </div>
     </div>
