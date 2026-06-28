@@ -5,10 +5,11 @@ import TeamFlag from '@/components/ui/TeamFlag'
 import { formatDateShort, formatTime } from '@/lib/dates'
 
 const ROUNDS = [
-  { key: 'Fase de 32', label: 'FASE DE 32', short: '32', matches: 16 },
-  { key: 'Oitavas de final', label: 'OITAVAS', short: '16', matches: 8 },
-  { key: 'Quartas de final', label: 'QUARTAS', short: 'QF', matches: 4 },
-  { key: 'Semifinal', label: 'SEMIS', short: 'SF', matches: 2 },
+  { key: 'R32', label: 'FASE DE 32', short: '32', matches: 16 },
+  { key: 'R16', label: 'OITAVAS', short: '16', matches: 8 },
+  { key: 'QF', label: 'QUARTAS', short: 'QF', matches: 4 },
+  { key: 'SF', label: 'SEMIS', short: 'SF', matches: 2 },
+  { key: '3rd', label: '3º LUGAR', short: '3º', matches: 1 },
   { key: 'Final', label: 'FINAL', short: 'F', matches: 1 },
 ]
 
@@ -26,7 +27,7 @@ interface BracketGame {
 export default function BracketTab() {
   const [games, setGames] = useState<BracketGame[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeRound, setActiveRound] = useState('Fase de 32')
+  const [activeRound, setActiveRound] = useState('R32')
 
   useEffect(() => {
     supabase
@@ -70,13 +71,13 @@ export default function BracketTab() {
         {roundGames.length === 0 && !loading && (
           <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6 text-center">
             <p className="font-bebas text-lg text-blue-700 tracking-wider">
-              {activeRound === 'Fase de 32'
+              {activeRound === 'R32'
                 ? '🔒 Confrontos definidos após a fase de grupos'
                 : '🔒 Confrontos definidos após a fase anterior'}
             </p>
             <p className="text-xs text-blue-500 mt-1">
-              {activeRound === 'Fase de 32'
-                ? 'A fase de grupos termina em 29/06/2026'
+              {activeRound === 'R32'
+                ? 'A fase de grupos terminou em 27/06/2026'
                 : 'Aguarde os resultados da fase anterior'}
             </p>
           </div>
@@ -156,11 +157,12 @@ export default function BracketTab() {
             <div key={round.key} className="flex justify-between text-xs text-slate-500">
               <span>{round.label}</span>
               <span className="font-medium">
-                {round.key === 'Fase de 32' ? '29/06 – 02/07' :
-                 round.key === 'Oitavas de final' ? '04/07 – 07/07' :
-                 round.key === 'Quartas de final' ? '09/07 – 12/07' :
-                 round.key === 'Semifinal' ? '14/07 – 15/07' :
-                 '18/07 – 19/07'}
+                {round.key === 'R32' ? '28/06 – 03/07' :
+                 round.key === 'R16' ? '04/07 – 07/07' :
+                 round.key === 'QF' ? '09/07 – 11/07' :
+                 round.key === 'SF' ? '14/07 – 15/07' :
+                 round.key === '3rd' ? '18/07' :
+                 '19/07'}
               </span>
             </div>
           ))}
