@@ -89,7 +89,6 @@ export async function getGroupPoints(groupId: number) {
           .select('game_id')
           .eq('user_id', member.user_id)
         ;(jokerPicks ?? []).forEach(jp => jokerPickGameIds.add(Number(jp.game_id)))
-        console.log(`[getGroupPoints] user=${member.user_id} scoring_joker=${group.scoring_joker} jokerPickGameIds=`, [...jokerPickGameIds])
       }
 
       totalPoints += (bets ?? []).reduce((sum, bet) => {
@@ -115,7 +114,6 @@ export async function getGroupPoints(groupId: number) {
         // Se coringa desativado e esse palpite usou coringa, divide por 2 (remove o x2)
         if (group.scoring_joker === false && jokerPickGameIds.has(Number(bet.game_id))) {
           points = Math.floor(points / 2)
-          console.log(`[getGroupPoints] desconto aplicado game_id=${bet.game_id} points_earned=${bet.points_earned} -> ${points}`)
         }
 
         return sum + points
