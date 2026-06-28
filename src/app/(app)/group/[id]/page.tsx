@@ -8,6 +8,8 @@ import LiveBetsShareCard from '@/components/group/LiveBetsShareCard'
 import GroupShareMenu from '@/components/group/GroupShareMenu'
 import { getGroupPoints, getGroupPointsDetailed } from './actions'
 
+export const dynamic = 'force-dynamic'
+
 export default async function GroupPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

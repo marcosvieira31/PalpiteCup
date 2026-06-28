@@ -5,6 +5,8 @@ import TeamFlag from '@/components/ui/TeamFlag'
 import { formatDateShort } from '@/lib/dates'
 import { calculateBetPoints } from '@/lib/scoring'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: { id: string }
   searchParams: { groupId?: string; groupName?: string }
