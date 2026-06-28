@@ -363,6 +363,8 @@ export async function getGroupPointsDetailed(groupId: number) {
       .select('group_name, position, predicted_team, points_earned')
       .eq('user_id', member.user_id)
 
+    console.log(`[getGroupPointsDetailed] member=${member.user_id} groupPreds count=${groupPreds?.length ?? 0} sample=`, (groupPreds ?? []).slice(0, 2).map(p => ({ group_name: p.group_name, points_earned: p.points_earned })))
+
     if (group.scoring_groups && !(cutoff && DEADLINES.groups < cutoff)) {
       const hasGroupFilter = (group.scoring_groups_filter?.length ?? 0) > 0
       groupsPoints = (groupPreds ?? []).reduce((sum, p) => {
