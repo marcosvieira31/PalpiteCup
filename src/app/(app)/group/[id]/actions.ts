@@ -358,3 +358,29 @@ export async function getGroupPointsDetailed(groupId: number) {
     return aName.localeCompare(bName)
   })
 }
+
+export async function leaveGroup(groupId: number | string) {
+  const id = Number(groupId)
+  if (!Number.isInteger(id) || id <= 0) throw new Error('Grupo inválido.')
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Não autenticado.')
+
+  const { data: group } = await supabase
+    .from('groups')
+    .select('owner_id')
+    .eq('id', id)
+    .single()
+
+  if (!group) throw new Error('Grupo não encontrado.')
+  if (group.owner_id === user.id) throw new Error('O líder não pode sair do grupo. Exclua o grupo ou transfira a liderança.')
+
+  const { error } = await supabase
+    .from('group_members')
+    .delete()
+    .eq('group_id', id)
+    .eq('user_id', user.id)
+
+  if (error) throw new Error(error.message)
+}

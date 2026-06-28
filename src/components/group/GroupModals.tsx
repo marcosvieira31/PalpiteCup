@@ -7,7 +7,7 @@ import { Group } from '@/types/database'
 import { useUnreadCount } from '@/hooks/useUnreadCount'
 import { saveScoringStartDate } from '@/app/(app)/group/[id]/actions'
 import { useRouter } from 'next/navigation'
-import { renameGroup, deleteGroup } from '@/app/(app)/group/[id]/actions'
+import { renameGroup, deleteGroup, leaveGroup } from '@/app/(app)/group/[id]/actions'
 
 interface Props {
   groupId: number | string
@@ -43,6 +43,9 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [leaveModalOpen, setLeaveModalOpen] = useState(false)
+  const [leaving, setLeaving] = useState(false)
+  const [leaveError, setLeaveError] = useState<string | null>(null)
 
   const toggleGroupFilter = async (groupName: string) => {
     const updated = scoringGroupsFilter.includes(groupName)
@@ -121,6 +124,19 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : 'Erro ao excluir.')
       setDeleting(false)
+    }
+  }
+
+  const handleLeaveGroup = async () => {
+    setLeaving(true)
+    setLeaveError(null)
+    try {
+      await leaveGroup(groupId)
+      router.push('/groups')
+      router.refresh()
+    } catch (err) {
+      setLeaveError(err instanceof Error ? err.message : 'Erro ao sair do grupo.')
+      setLeaving(false)
     }
   }
 
@@ -462,16 +478,29 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
 
 
               {/* Zona de perigo */}
-              <div className="bg-red-50 rounded-2xl border border-red-200 p-4 mt-6">
-                <p className="font-bold text-red-700 text-sm mb-1">🗑️ Excluir Grupo</p>
-                <p className="text-xs text-red-500 mb-3">Essa ação é permanente e remove todos os membros, mensagens e configurações do grupo.</p>
-                <button
-                  onClick={() => setDeleteModalOpen(true)}
-                  className="w-full bg-red-500 text-white font-bebas tracking-wider rounded-xl py-2.5 text-sm"
-                >
-                  EXCLUIR GRUPO
-                </button>
-              </div>
+              {isOwner ? (
+                <div className="bg-red-50 rounded-2xl border border-red-200 p-4 mt-6">
+                  <p className="font-bold text-red-700 text-sm mb-1">🗑️ Excluir Grupo</p>
+                  <p className="text-xs text-red-500 mb-3">Essa ação é permanente e remove todos os membros, mensagens e configurações do grupo.</p>
+                  <button
+                    onClick={() => setDeleteModalOpen(true)}
+                    className="w-full bg-red-500 text-white font-bebas tracking-wider rounded-xl py-2.5 text-sm"
+                  >
+                    EXCLUIR GRUPO
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-red-50 rounded-2xl border border-red-200 p-4 mt-6">
+                  <p className="font-bold text-red-700 text-sm mb-1">🚪 Sair do Grupo</p>
+                  <p className="text-xs text-red-500 mb-3">Você perderá acesso ao ranking, chat e palpites deste grupo.</p>
+                  <button
+                    onClick={() => setLeaveModalOpen(true)}
+                    className="w-full bg-red-500 text-white font-bebas tracking-wider rounded-xl py-2.5 text-sm"
+                  >
+                    SAIR DO GRUPO
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -510,6 +539,39 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
                 className="flex-1 bg-red-500 text-white font-bebas tracking-wider rounded-xl py-3 disabled:opacity-50"
               >
                 {deleting ? 'EXCLUINDO...' : 'EXCLUIR PERMANENTEMENTE'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Confirmar Saída */}
+      {leaveModalOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/60 flex items-end justify-center"
+          onClick={() => !leaving && setLeaveModalOpen(false)}>
+          <div className="bg-white w-full max-w-[390px] rounded-t-3xl p-5 space-y-4"
+            style={{ paddingBottom: '100px' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto" />
+            <p className="font-bebas text-2xl tracking-wider text-red-600">🚪 SAIR DO GRUPO</p>
+            <p className="text-sm text-slate-600">
+              Tem certeza que deseja sair de <span className="font-bold">{displayedName}</span>? Você perderá acesso ao ranking, chat e palpites deste grupo.
+            </p>
+            {leaveError && <p className="text-red-500 text-sm">{leaveError}</p>}
+            <div className="flex gap-2 pb-4">
+              <button
+                onClick={() => { setLeaveModalOpen(false); setLeaveError(null) }}
+                disabled={leaving}
+                className="flex-1 bg-slate-100 text-slate-600 font-bebas tracking-wider rounded-xl py-3 disabled:opacity-50"
+              >
+                CANCELAR
+              </button>
+              <button
+                onClick={handleLeaveGroup}
+                disabled={leaving}
+                className="flex-1 bg-red-500 text-white font-bebas tracking-wider rounded-xl py-3 disabled:opacity-50"
+              >
+                {leaving ? 'SAINDO...' : 'CONFIRMAR SAÍDA'}
               </button>
             </div>
           </div>
