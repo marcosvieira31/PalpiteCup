@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import TeamFlag from '@/components/ui/TeamFlag'
 
-const ADMIN_EMAILS = ['marcosnd.31@gmail.com']
+const ADMIN_EMAILS = ['marcosnd.31@gmail.com', 'rivelinoantonio39@gmail.com']
 
 interface Game {
   id: number
