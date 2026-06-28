@@ -88,7 +88,7 @@ export async function getGroupPoints(groupId: number) {
           .from('joker_picks')
           .select('game_id')
           .eq('user_id', member.user_id)
-        ;(jokerPicks ?? []).forEach(jp => jokerPickGameIds.add(jp.game_id))
+        ;(jokerPicks ?? []).forEach(jp => jokerPickGameIds.add(Number(jp.game_id)))
       }
 
       totalPoints += (bets ?? []).reduce((sum, bet) => {
@@ -112,7 +112,7 @@ export async function getGroupPoints(groupId: number) {
         let points = bet.points_earned ?? 0
 
         // Se coringa desativado e esse palpite usou coringa, divide por 2 (remove o x2)
-        if (group.scoring_joker === false && jokerPickGameIds.has(bet.game_id as number)) {
+        if (group.scoring_joker === false && jokerPickGameIds.has(Number(bet.game_id))) {
           points = Math.floor(points / 2)
         }
 
@@ -332,7 +332,7 @@ export async function getGroupPointsDetailed(groupId: number) {
         .from('joker_picks')
         .select('game_id')
         .eq('user_id', member.user_id)
-      ;(jokerPicks ?? []).forEach(jp => jokerPickGameIds.add(jp.game_id))
+      ;(jokerPicks ?? []).forEach(jp => jokerPickGameIds.add(Number(jp.game_id)))
     }
 
     if (group.scoring_bets !== false) {
@@ -346,7 +346,7 @@ export async function getGroupPointsDetailed(groupId: number) {
         const phaseMatch = !hasPhaseFilter || group.filter_phases!.includes(game.group_stage)
         if (!teamMatch || !phaseMatch) return sum
         let points = bet.points_earned ?? 0
-        if (group.scoring_joker === false && jokerPickGameIds.has(bet.game_id as number)) {
+        if (group.scoring_joker === false && jokerPickGameIds.has(Number(bet.game_id))) {
           points = Math.floor(points / 2)
         }
         return sum + points
