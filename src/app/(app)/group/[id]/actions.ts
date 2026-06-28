@@ -310,6 +310,7 @@ export async function getGroupPointsDetailed(groupId: number) {
     .single()
 
   if (!group) return []
+  console.log(`[getGroupPointsDetailed] groupId=${groupId} scoring_groups=${group.scoring_groups} scoring_journey=${group.scoring_journey} cutoff=${group.scoring_start_date}`)
 
   const cutoff = group.scoring_start_date ? new Date(group.scoring_start_date) : null
 
