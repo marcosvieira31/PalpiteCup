@@ -87,7 +87,6 @@ export interface Database {
           scoring_bets: boolean
           scoring_groups: boolean
           scoring_journey: boolean
-          scoring_joker: boolean
           scoring_groups_filter: string[] | null
           scoring_journey_filter: string[] | null
           scoring_start_date: string | null
@@ -109,7 +108,6 @@ export interface Database {
           scoring_bets?: boolean
           scoring_groups?: boolean
           scoring_journey?: boolean
-          scoring_joker?: boolean
           scoring_groups_filter?: string[] | null
           scoring_journey_filter?: string[] | null
           scoring_start_date?: string | null
@@ -131,7 +129,6 @@ export interface Database {
           scoring_bets?: boolean
           scoring_groups?: boolean
           scoring_journey?: boolean
-          scoring_joker?: boolean
           scoring_groups_filter?: string[] | null
           scoring_journey_filter?: string[] | null
           scoring_start_date?: string | null
@@ -385,7 +382,6 @@ export interface Bet {
   game_id: string
   home_bet: number
   away_bet: number
-  has_joker?: boolean
   points_earned: number | null
   submitted_at: string
 }

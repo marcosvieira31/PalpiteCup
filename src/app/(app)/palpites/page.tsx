@@ -42,11 +42,6 @@ export default async function PalpitesPage() {
     .eq('user_id', user?.id ?? '')
     .in('game_id', games.map(g => g.id))
 
-  const { data: jokerPicks } = user?.id ? await supabase
-    .from('joker_picks')
-    .select('game_id, round_number')
-    .eq('user_id', user.id) : { data: [] }
-
   // Todos os times
   const { data: allTeamsData } = await supabase
     .from('games')
@@ -72,7 +67,6 @@ export default async function PalpitesPage() {
     <PalpitesLayout
       games={games}
       existingBets={bets ?? []}
-      jokerPicks={jokerPicks ?? []}
       allTeams={allTeams}
       groupPredictions={groupPredictions ?? []}
       journeyPredictions={journeyPredictions ?? []}

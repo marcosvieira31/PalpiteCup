@@ -9,26 +9,15 @@ import { saveScoringStartDate } from '@/app/(app)/group/[id]/actions'
 import { useRouter } from 'next/navigation'
 import { renameGroup, deleteGroup } from '@/app/(app)/group/[id]/actions'
 
-export interface JokerAuditEntry {
-  user_id: string
-  game_id: number
-  round_number: number
-  username: string
-  avatar_url: string | null
-  home_team: string | null
-  away_team: string | null
-}
-
 interface Props {
   groupId: number | string
   userId: string
   isOwner: boolean
   group: Group
   allTeams: string[]
-  jokerAudit?: JokerAuditEntry[]
 }
 
-export default function GroupActions({ groupId, userId, isOwner, group, allTeams, jokerAudit = [] }: Props) {
+export default function GroupActions({ groupId, userId, isOwner, group, allTeams }: Props) {
   const [chatOpen, setChatOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [chatEnabled, setChatEnabled] = useState(group.chat_enabled ?? true)
@@ -37,8 +26,6 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
   const [scoringBets, setScoringBets] = useState(group?.scoring_bets ?? true)
   const [scoringGroups, setScoringGroups] = useState(group?.scoring_groups ?? false)
   const [scoringJourney, setScoringJourney] = useState(group?.scoring_journey ?? false)
-  const [scoringJoker, setScoringJoker] = useState(group?.scoring_joker ?? true)
-  const [jokerConfirmPending, setJokerConfirmPending] = useState<boolean | null>(null)
 
   const [scoringGroupsFilter, setScoringGroupsFilter] = useState<string[]>(group?.scoring_groups_filter ?? [])
   const [scoringJourneyFilter, setScoringJourneyFilter] = useState<string[]>(group?.scoring_journey_filter ?? [])
@@ -76,14 +63,13 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
   const { unreadCount, markAsRead } = useUnreadCount(groupId, userId)
 
   const handleToggleScoring = async (
-    field: 'scoring_bets' | 'scoring_groups' | 'scoring_journey' | 'scoring_joker',
+    field: 'scoring_bets' | 'scoring_groups' | 'scoring_journey',
     value: boolean
   ) => {
     const setters = {
       scoring_bets: setScoringBets,
       scoring_groups: setScoringGroups,
       scoring_journey: setScoringJourney,
-      scoring_joker: setScoringJoker,
     }
     setters[field](value)
     await supabase.from('groups').update({ [field]: value }).eq('id', String(groupId))

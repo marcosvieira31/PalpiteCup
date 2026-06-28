@@ -25,15 +25,6 @@ const rules = [
     color: 'bg-slate-50 border-slate-200',
     textColor: 'text-slate-700',
   },
-  {
-    icon: '⚡',
-    title: 'Coringa',
-    points: 2,
-    description: 'Dobra os pontos do jogo escolhido. 1 uso por rodada.',
-    color: 'bg-yellow-50 border-yellow-200',
-    textColor: 'text-yellow-700',
-    multiplier: true,
-  },
 ]
 
 
@@ -149,16 +140,6 @@ export default function RulesPage() {
                   </div>
                 </div>
                 <span className="text-slate-500 font-bold">0 pts</span>
-              </div>
-              <div className="flex justify-between items-center py-1.5 pt-2">
-                <div className="flex items-center gap-2">
-                  <span>⚡</span>
-                  <div>
-                    <span>Palpite <span className="text-green-400 font-bold">2×1</span> + Coringa</span>
-                    <p className="text-[10px] text-slate-500">placar exato com coringa</p>
-                  </div>
-                </div>
-                <span className="text-yellow-400 font-bold">+10 pts</span>
               </div>
             </div>
           </div>

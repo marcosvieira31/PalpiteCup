@@ -27,28 +27,12 @@ export default async function GroupsGlobalPage() {
         .in('game_id', liveGameIds)
     : { data: [] }
 
-  const { data: liveJokerPicks } = liveGameIds.length > 0
-    ? await supabase
-        .from('joker_picks')
-        .select('user_id, game_id')
-        .in('game_id', liveGameIds)
-    : { data: [] }
-
-  const liveJokerSet = new Set(
-    (liveJokerPicks ?? []).map(jp => `${jp.user_id}-${jp.game_id}`)
-  )
-
-  const liveBetsWithJoker = (liveBets ?? []).map(b => ({
-    ...b,
-    has_joker: liveJokerSet.has(`${b.user_id}-${b.game_id}`)
-  }))
-
   return (
     <RankingGlobal
       players={players ?? []}
       currentUserId={user?.id ?? ''}
       initialLiveGames={liveGames ?? []}
-      initialLiveBets={liveBetsWithJoker}
+      initialLiveBets={liveBets ?? []}
     />
   )
 }

@@ -17,11 +17,6 @@ export default function MyBetCard({ game, bet }: Props) {
     <div className="mx-4 mt-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
       <div className="flex justify-between items-center mb-3">
         <span className="font-bebas text-slate-700 tracking-wider text-sm">MEU PALPITE</span>
-        {bet.has_joker && (
-          <span className="bg-yellow-400 text-blue-900 font-bebas text-xs tracking-wider px-2 py-0.5 rounded-full">
-            ⚡ CORINGA
-          </span>
-        )}
       </div>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 flex-1">

@@ -35,7 +35,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
   if (searchParams.groupId) {
     const { data: group } = await supabase
       .from('groups')
-      .select('filter_teams, filter_phases, scoring_joker')
+      .select('filter_teams, filter_phases')
       .eq('id', searchParams.groupId)
       .single()
 
@@ -52,7 +52,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
   if (searchParams.groupId) {
     const { data: group } = await supabase
       .from('groups')
-      .select('filter_teams, filter_phases, scoring_joker')
+      .select('filter_teams, filter_phases')
       .eq('id', searchParams.groupId)
       .single()
 
@@ -71,16 +71,6 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
     }
   }
 
-  // Busca scoring_joker do grupo (para ajustar pontos de coringa na exibição)
-  let groupScoringJoker = true
-  if (searchParams.groupId) {
-    const { data: groupConfig } = await supabase
-      .from('groups')
-      .select('scoring_joker')
-      .eq('id', searchParams.groupId)
-      .single()
-    groupScoringJoker = groupConfig?.scoring_joker ?? true
-  }
 
   // Busca palpites do usuário
   const gameIds = (games ?? []).map(g => g.id)
@@ -90,32 +80,17 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
     .eq('user_id', params.id)
     .in('game_id', gameIds.length > 0 ? gameIds : ['00000000-0000-0000-0000-000000000000'])
 
-  // Busca joker_picks do usuário para cruzar com os palpites
-  const { data: jokerPicks } = await supabase
-    .from('joker_picks')
-    .select('game_id')
-    .eq('user_id', params.id)
 
-  const jokerGameIds = new Set((jokerPicks ?? []).map(jp => String(jp.game_id)))
-
-  const betsWithJoker = (bets ?? []).map(b => {
-    const has_joker = jokerGameIds.has(String(b.game_id))
-    const points_earned = (has_joker && !groupScoringJoker)
-      ? Math.floor((b.points_earned ?? 0) / 2)
-      : (b.points_earned ?? 0)
-    return { ...b, has_joker, points_earned }
-  })
-
-  const totalPoints = betsWithJoker.reduce((sum, b) => {
+  const totalPoints = (bets ?? []).reduce((sum, b) => {
     const game = games?.find(g => g.id === b.game_id)
     if (!game) return sum
     if (game.status === 'live') {
       if (game.home_score === null || game.away_score === null) return sum
-      return sum + calculateBetPoints(b.home_bet, b.away_bet, game.home_score, game.away_score, b.has_joker && groupScoringJoker)
+      return sum + calculateBetPoints(b.home_bet, b.away_bet, game.home_score, game.away_score)
     }
     return sum + (b.points_earned ?? 0)
   }, 0)
-  const exactScores = betsWithJoker.filter(b => {
+  const exactScores = (bets ?? []).filter(b => {
     const game = games?.find(g => g.id === b.game_id)
     return game && b.home_bet === game.home_score && b.away_bet === game.away_score
   }).length
@@ -176,7 +151,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
           </div>
         ) : (
           games.map(game => {
-            const bet = betsWithJoker.find(b => b.game_id === game.id)
+            const bet = (bets ?? []).find(b => b.game_id === game.id)
             const isLive = game.status === 'live'
 
             const isExact = bet && bet.home_bet === game.home_score && bet.away_bet === game.away_score
@@ -188,7 +163,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
             const isWinner = betWinner === realWinner && !isExact && !isDiff
 
             const livePoints = bet && game.home_score !== null && game.away_score !== null
-              ? calculateBetPoints(bet.home_bet, bet.away_bet, game.home_score, game.away_score, (bet.has_joker ?? false) && groupScoringJoker)
+              ? calculateBetPoints(bet.home_bet, bet.away_bet, game.home_score, game.away_score)
               : 0
 
             const resultIcon = !bet ? '—' : isExact ? '🎯' : isDiff ? '✅' : isWinner ? '👍' : '❌'
@@ -239,7 +214,6 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
                         <span className="text-lg">{resultIcon}</span>
                         <span className="text-sm font-bold text-slate-700">
                           Palpite: {bet.home_bet} × {bet.away_bet}
-                          {bet.has_joker && groupScoringJoker && ' ⚡'}
                         </span>
                       </div>
                       {(isLive ? livePoints : (bet.points_earned ?? 0)) > 0 && (

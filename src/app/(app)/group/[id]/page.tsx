@@ -75,21 +75,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
 
   const liveBetsData = liveBetsRaw ?? []
 
-  // Busca joker_picks para os jogos ao vivo
-  const { data: liveJokerPicks } = liveGameIds.length > 0 && memberIds.length > 0
-    ? await supabase
-        .from('joker_picks')
-        .select('user_id, game_id')
-        .in('game_id', liveGameIds)
-        .in('user_id', memberIds)
-    : { data: [] }
-
-  const liveBets = liveBetsData.map(b => ({
-    ...b,
-    has_joker: (liveJokerPicks ?? []).some(
-      jp => String(jp.game_id) === String(b.game_id) && jp.user_id === b.user_id
-    )
-  }))
+  const liveBets = liveBetsData
 
   const computedMembers = await getGroupPoints(Number(params.id))
 
@@ -102,25 +88,6 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
     .order('group_name')
     .order('position')
 
-  // Busca joker_picks de todos os membros com dados do jogo e do usuário (para auditoria do líder)
-  const { data: jokerAuditRaw } = isOwner && memberIds.length > 0
-    ? await supabase
-        .from('joker_picks')
-        .select('user_id, game_id, round_number, games!inner(home_team, away_team, status), users(username, avatar_url)')
-        .in('user_id', memberIds)
-        .eq('games.status', 'finished')
-        .order('round_number')
-    : { data: [] }
-
-  const jokerAudit = (jokerAuditRaw ?? []).map(jp => ({
-    user_id: jp.user_id,
-    game_id: jp.game_id,
-    round_number: jp.round_number,
-    username: (jp.users as { username: string; avatar_url: string | null } | null)?.username ?? 'Usuário',
-    avatar_url: (jp.users as { username: string; avatar_url: string | null } | null)?.avatar_url ?? null,
-    home_team: (jp.games as { home_team: string | null; away_team: string | null } | null)?.home_team ?? null,
-    away_team: (jp.games as { home_team: string | null; away_team: string | null } | null)?.away_team ?? null,
-  }))
 
   return (
     <div className="pb-24">
@@ -132,7 +99,6 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
           groupId={group.id}
           userId={user?.id ?? ''}
           isOwner={isOwner}
-          jokerAudit={jokerAudit as import('@/components/group/GroupModals').JokerAuditEntry[]}
           group={group as unknown as import('@/types/database').Group}
           allTeams={allTeams}
         />

@@ -12,7 +12,6 @@ export interface LiveBet {
   game_id: number | string
   home_bet: number
   away_bet: number
-  has_joker: boolean
 }
 
 export function calculateBetPoints(
@@ -20,22 +19,14 @@ export function calculateBetPoints(
   awayBet: number,
   homeScore: number,
   awayScore: number,
-  usedJoker: boolean
 ): number {
-  let basePoints = 0
-
-  if (homeBet === homeScore && awayBet === awayScore) {
-    basePoints = 5
-  } else if (
+  if (homeBet === homeScore && awayBet === awayScore) return 5
+  if (
     Math.sign(homeBet - awayBet) === Math.sign(homeScore - awayScore) &&
     (homeBet - awayBet) === (homeScore - awayScore)
-  ) {
-    basePoints = 3
-  } else if (Math.sign(homeBet - awayBet) === Math.sign(homeScore - awayScore)) {
-    basePoints = 1
-  }
-
-  return usedJoker ? basePoints * 2 : basePoints
+  ) return 3
+  if (Math.sign(homeBet - awayBet) === Math.sign(homeScore - awayScore)) return 1
+  return 0
 }
 
 // Soma pontos parciais de jogos AO VIVO por usuário, a partir dos palpites e placares atuais
@@ -50,8 +41,7 @@ export function sumLivePointsByUser(liveGames: LiveGame[], liveBets: LiveBet[]):
       bet.home_bet,
       bet.away_bet,
       game.home_score,
-      game.away_score,
-      bet.has_joker
+      game.away_score
     )
 
     result[bet.user_id] = (result[bet.user_id] ?? 0) + points

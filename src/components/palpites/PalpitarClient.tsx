@@ -1,46 +1,24 @@
 "use client"
 import { useState } from 'react'
 import { Game, Bet } from '@/types/database'
-import { submitBet, toggleJoker as toggleJokerAction } from '@/app/(app)/dashboard/actions'
+import { submitBet } from '@/app/(app)/dashboard/actions'
 import TeamFlag from '@/components/ui/TeamFlag'
 import { shareBet } from '@/lib/share'
 import ShareButtons from '@/components/ui/ShareButtons'
 import { formatDate, formatTime, isBeforeKickoff } from '@/lib/dates'
 
-interface JokerPick {
-  game_id: number
-  round_number: number
-}
-
 interface Props {
   games: Game[]
   existingBets: Bet[]
-  jokerPicks: JokerPick[]
 }
 
-export default function PalpitarClient({ games, existingBets, jokerPicks }: Props) {
+export default function PalpitarClient({ games, existingBets }: Props) {
   const [bets, setBets] = useState<Record<string, { home: number; away: number }>>(
-    Object.fromEntries(
-      existingBets.map(b => [b.game_id, {
-        home: b.home_bet,
-        away: b.away_bet,
-      }])
-    )
+    Object.fromEntries(existingBets.map(b => [b.game_id, { home: b.home_bet, away: b.away_bet }]))
   )
-
-  // jokerGameId: qual jogo tem o coringa ativo (por round_number, só 1 por rodada)
-  const [jokerByRound, setJokerByRound] = useState<Record<number, number>>(
-    Object.fromEntries(
-      jokerPicks.map(jp => [jp.round_number, jp.game_id])
-    )
-  )
-
   const [saving, setSaving] = useState<Record<string, boolean>>({})
   const [saved, setSaved] = useState<Record<string, boolean>>({})
-  const [jokerSaving, setJokerSaving] = useState<Record<string, boolean>>({})
-  const [savedGames, setSavedGames] = useState<Set<string | number>>(
-    new Set(existingBets.map(b => b.game_id))
-  )
+  const [savedGames, setSavedGames] = useState<Set<string | number>>(new Set(existingBets.map(b => b.game_id)))
   const [sharing, setSharing] = useState<string | number | null>(null)
 
   const updateBet = (gameId: string | number, field: 'home' | 'away', value: number) => {
@@ -48,31 +26,6 @@ export default function PalpitarClient({ games, existingBets, jokerPicks }: Prop
       ...prev,
       [gameId]: { ...prev[gameId] ?? { home: 0, away: 0 }, [field]: Math.max(0, value) }
     }))
-  }
-
-  const handleToggleJoker = async (game: Game) => {
-    const roundNumber = game.round_number ?? 1
-    const currentJokerGameId = jokerByRound[roundNumber]
-    const isActive = currentJokerGameId === game.id
-
-    setJokerSaving(prev => ({ ...prev, [game.id]: true }))
-    try {
-      if (isActive) {
-        // Desativar
-        await toggleJokerAction(game.id, roundNumber, false)
-        setJokerByRound(prev => {
-          const updated = { ...prev }
-          delete updated[roundNumber]
-          return updated
-        })
-      } else {
-        // Ativar (substitui qualquer coringa anterior da mesma rodada)
-        await toggleJokerAction(game.id, roundNumber, true)
-        setJokerByRound(prev => ({ ...prev, [roundNumber]: game.id }))
-      }
-    } finally {
-      setJokerSaving(prev => ({ ...prev, [game.id]: false }))
-    }
   }
 
   const handleSubmit = async (gameId: string | number) => {
@@ -102,7 +55,7 @@ export default function PalpitarClient({ games, existingBets, jokerPicks }: Prop
       <div className="bg-blue-50 rounded-2xl border border-blue-100 p-3 mt-4 mx-4 text-center">
         <p className="text-blue-700 text-xs font-bold">
           {pending.length > 0
-            ? `⚡ ${pending.length} jogo${pending.length > 1 ? 's' : ''} aguardando seu palpite`
+            ? `⚽ ${pending.length} jogo${pending.length > 1 ? 's' : ''} aguardando seu palpite`
             : '✅ Todos os palpites feitos!'}
         </p>
       </div>
@@ -112,7 +65,6 @@ export default function PalpitarClient({ games, existingBets, jokerPicks }: Prop
           <div className="text-center py-12">
             <p className="text-4xl mb-3">⚽</p>
             <p className="text-slate-500 font-medium">Nenhum jogo disponível para palpite.</p>
-            <p className="text-slate-400 text-sm mt-1">A Copa começa em 11 de junho!</p>
           </div>
         )}
 
@@ -124,13 +76,8 @@ export default function PalpitarClient({ games, existingBets, jokerPicks }: Prop
             <div className="space-y-4">
               {dateGames.map(game => {
                 const bet = bets[String(game.id)] ?? { home: 0, away: 0 }
-                const roundNumber = game.round_number ?? 1
-                const jokerGameIdForRound = jokerByRound[roundNumber]
-                const isJokerActive = jokerGameIdForRound === game.id
-                const isJokerUsedInRound = jokerGameIdForRound !== undefined
                 const isSaving = saving[String(game.id)]
                 const isSaved = saved[String(game.id)]
-                const isJokerSaving = jokerSaving[String(game.id)]
                 const hasExisting = savedGames.has(game.id)
                 const kickoff = new Date(game.kickoff_at)
                 const canBet = isBeforeKickoff(game.kickoff_at)
@@ -160,27 +107,19 @@ export default function PalpitarClient({ games, existingBets, jokerPicks }: Prop
                           <TeamFlag team={game.home_team ?? ''} size={28} />
                         </div>
                         <div className="flex items-center gap-1.5 px-1 flex-shrink-0">
-                          <input
-                            type="number" min="0" max="99"
-                            value={bet.home}
+                          <input type="number" min="0" max="99" value={bet.home}
                             onChange={e => updateBet(game.id, 'home', parseInt(e.target.value) || 0)}
-                            onFocus={e => e.target.select()}
-                            disabled={!canBet}
+                            onFocus={e => e.target.select()} disabled={!canBet}
                             className={`w-9 h-9 text-center font-bebas text-lg border-2 rounded-xl outline-none ${
                               !canBet ? 'border-slate-100 bg-slate-100 text-slate-500 cursor-not-allowed opacity-50' : 'border-slate-200 focus:border-green-500'
-                            }`}
-                          />
+                            }`} />
                           <span className="font-bebas text-lg text-slate-400">×</span>
-                          <input
-                            type="number" min="0" max="99"
-                            value={bet.away}
+                          <input type="number" min="0" max="99" value={bet.away}
                             onChange={e => updateBet(game.id, 'away', parseInt(e.target.value) || 0)}
-                            onFocus={e => e.target.select()}
-                            disabled={!canBet}
+                            onFocus={e => e.target.select()} disabled={!canBet}
                             className={`w-9 h-9 text-center font-bebas text-lg border-2 rounded-xl outline-none ${
                               !canBet ? 'border-slate-100 bg-slate-100 text-slate-500 cursor-not-allowed opacity-50' : 'border-slate-200 focus:border-green-500'
-                            }`}
-                          />
+                            }`} />
                         </div>
                         <div className="flex items-center gap-1.5 flex-1 min-w-0">
                           <TeamFlag team={game.away_team ?? ''} size={28} />
@@ -188,59 +127,28 @@ export default function PalpitarClient({ games, existingBets, jokerPicks }: Prop
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between mt-3">
-                        <button
-                          onClick={() => canBet && !isJokerSaving && handleToggleJoker(game)}
-                          disabled={!canBet || isJokerSaving || (!isJokerActive && isJokerUsedInRound)}
-                          className={`text-xs font-bebas tracking-wider px-3 py-1.5 rounded-full transition-colors ${
-                            !canBet
-                              ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                              : isJokerActive
-                              ? 'bg-yellow-400 text-blue-900'
-                              : isJokerUsedInRound
-                              ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                              : 'bg-slate-100 text-slate-500 hover:bg-yellow-100'
-                          }`}
-                        >
-                          {isJokerSaving ? '...' : `⚡ CORINGA ${isJokerActive ? '(ATIVO)' : ''}`}
-                        </button>
-
-                        <button
-                          onClick={() => canBet && handleSubmit(game.id)}
-                          disabled={!canBet || isSaving}
+                      <div className="flex items-center justify-end mt-3">
+                        <button onClick={() => canBet && handleSubmit(game.id)} disabled={!canBet || isSaving}
                           className={`font-bebas tracking-wider px-5 py-2 rounded-xl text-sm transition-colors ${
-                            !canBet
-                              ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                              : isSaved
-                              ? 'bg-green-500 text-white'
-                              : hasExisting
-                              ? 'bg-blue-900 text-yellow-400'
-                              : 'bg-green-500 text-white'
-                          }`}
-                        >
+                            !canBet ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                            : isSaved ? 'bg-green-500 text-white'
+                            : hasExisting ? 'bg-blue-900 text-yellow-400'
+                            : 'bg-green-500 text-white'
+                          }`}>
                           {!canBet ? '🔒 ENCERRADO' : isSaving ? 'SALVANDO...' : isSaved ? '✅ SALVO!' : hasExisting ? '✏️ EDITAR' : 'PALPITAR'}
                         </button>
                       </div>
 
                       {hasExisting && (
                         <div className="mt-2">
-                          <button
-                            onClick={() => setSharing(sharing === game.id ? null : game.id)}
-                            className="w-full text-xs text-green-600 font-bold py-1 flex items-center justify-center gap-1"
-                          >
+                          <button onClick={() => setSharing(sharing === game.id ? null : game.id)}
+                            className="w-full text-xs text-green-600 font-bold py-1 flex items-center justify-center gap-1">
                             🔗 {sharing === game.id ? 'Fechar' : 'Compartilhar palpite'}
                           </button>
-
                           {sharing === game.id && (
                             <div className="mt-2">
                               <ShareButtons
-                                {...shareBet(
-                                  game.home_team ?? '',
-                                  game.away_team ?? '',
-                                  bet.home,
-                                  bet.away,
-                                  'você'
-                                )}
+                                {...shareBet(game.home_team ?? '', game.away_team ?? '', bet.home, bet.away, 'você')}
                                 label="Compartilhar via"
                               />
                             </div>
