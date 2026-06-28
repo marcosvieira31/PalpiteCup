@@ -397,6 +397,12 @@ export async function getGroupPointsDetailed(groupId: number) {
     }
   }))
 
+  console.log(`[getGroupPointsDetailed] groupId=${groupId}`, results.map(r => ({ 
+    user_id: r.user_id, 
+    points_bets: r.points_bets, 
+    points_groups: r.points_groups, 
+    points_journey: r.points_journey 
+  })))
   return results.sort((a, b) => {
     if (b.points_total !== a.points_total) return b.points_total - a.points_total
     const aName = (a.users as { username: string } | null)?.username ?? ''
