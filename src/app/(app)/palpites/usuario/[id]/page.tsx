@@ -33,7 +33,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
   if (searchParams.groupId) {
     const { data: group } = await supabase
       .from('groups')
-      .select('filter_teams, filter_phases')
+      .select('filter_teams, filter_phases, scoring_joker')
       .eq('id', searchParams.groupId)
       .single()
 
@@ -50,7 +50,7 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
   if (searchParams.groupId) {
     const { data: group } = await supabase
       .from('groups')
-      .select('filter_teams, filter_phases')
+      .select('filter_teams, filter_phases, scoring_joker')
       .eq('id', searchParams.groupId)
       .single()
 
@@ -69,6 +69,17 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
     }
   }
 
+  // Busca scoring_joker do grupo (para ajustar pontos de coringa na exibição)
+  let groupScoringJoker = true
+  if (searchParams.groupId) {
+    const { data: groupConfig } = await supabase
+      .from('groups')
+      .select('scoring_joker')
+      .eq('id', searchParams.groupId)
+      .single()
+    groupScoringJoker = groupConfig?.scoring_joker ?? true
+  }
+
   // Busca palpites do usuário
   const gameIds = (games ?? []).map(g => g.id)
   const { data: bets } = await supabase
@@ -85,17 +96,20 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
 
   const jokerGameIds = new Set((jokerPicks ?? []).map(jp => String(jp.game_id)))
 
-  const betsWithJoker = (bets ?? []).map(b => ({
-    ...b,
-    has_joker: jokerGameIds.has(String(b.game_id))
-  }))
+  const betsWithJoker = (bets ?? []).map(b => {
+    const has_joker = jokerGameIds.has(String(b.game_id))
+    const points_earned = (has_joker && !groupScoringJoker)
+      ? Math.floor((b.points_earned ?? 0) / 2)
+      : (b.points_earned ?? 0)
+    return { ...b, has_joker, points_earned }
+  })
 
   const totalPoints = betsWithJoker.reduce((sum, b) => {
     const game = games?.find(g => g.id === b.game_id)
     if (!game) return sum
     if (game.status === 'live') {
       if (game.home_score === null || game.away_score === null) return sum
-      return sum + calculateBetPoints(b.home_bet, b.away_bet, game.home_score, game.away_score, b.has_joker)
+      return sum + calculateBetPoints(b.home_bet, b.away_bet, game.home_score, game.away_score, b.has_joker && groupScoringJoker)
     }
     return sum + (b.points_earned ?? 0)
   }, 0)
