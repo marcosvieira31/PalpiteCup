@@ -175,14 +175,12 @@ export default function GroupActions({ groupId, userId, isOwner, group, allTeams
             </span>
           )}
         </button>
-        {isOwner && (
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="flex-1 py-2.5 rounded-2xl font-bebas tracking-wider text-sm bg-blue-900 text-yellow-400"
-          >
-            ⚙️ CONFIGURAR
-          </button>
-        )}
+        <button
+          onClick={() => setSettingsOpen(true)}
+          className="flex-1 py-2.5 rounded-2xl font-bebas tracking-wider text-sm bg-blue-900 text-yellow-400"
+        >
+          ⚙️ CONFIGURAR
+        </button>
       </div>
 
       {/* Modal Chat */}
