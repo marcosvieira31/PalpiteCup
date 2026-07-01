@@ -158,6 +158,25 @@ export default function RankingList({
     const detailed = detailedMembers.find(m => m.user_id === userId)
     const isLiveGeral = tab === 'geral' && hasLiveGame && (livePointsByUser[userId] ?? 0) !== 0
 
+    const handleClick = () => {
+      if (tab === 'geral') {
+        setDetailModal({ member: detailed ?? {
+          user_id: userId,
+          users: { username, avatar_url: avatarUrl },
+          points_total: points,
+          points_bets: detailed?.points_bets ?? 0,
+          points_groups: detailed?.points_groups ?? 0,
+          points_journey: detailed?.points_journey ?? 0,
+          group_predictions: [],
+          journey_predictions: [],
+        }, tab: 'geral' })
+      } else if (tab === 'partidas') {
+        window.location.href = `/palpites/usuario/${userId}?groupId=${groupId ?? ''}&groupName=${encodeURIComponent(groupName ?? '')}`
+      } else if (detailed) {
+        setDetailModal({ member: detailed, tab })
+      }
+    }
+
     return (
       <div key={userId}>
         <div
@@ -165,13 +184,7 @@ export default function RankingList({
             "flex items-center gap-4 bg-white p-3 rounded-2xl shadow-sm border cursor-pointer active:scale-95 transition-transform",
             isTop1 ? "border-yellow-400 bg-yellow-50/30" : "border-slate-100"
           )}
-          onClick={() => {
-            if (tab === 'geral') {
-              window.location.href = `/palpites/usuario/${userId}?groupId=${groupId ?? ''}&groupName=${encodeURIComponent(groupName ?? '')}`
-            } else if (detailed) {
-              setDetailModal({ member: detailed, tab })
-            }
-          }}
+          onClick={handleClick}
         >
           <div className="w-8 flex justify-center items-center">
             {isTop1 ? <span className="text-2xl">👑</span>
@@ -371,13 +384,50 @@ export default function RankingList({
                   {(detailModal.member.users as { username: string; avatar_url: string | null } | null)?.username ?? 'Usuário'}
                 </p>
                 <p className="text-xs text-slate-500">
-                  {detailModal.tab === 'grupos' ? `${detailModal.member.points_groups} pts em Classificação de Grupos`
+                  {detailModal.tab === 'geral' ? `${detailModal.member.points_total} pts no total`
+                    : detailModal.tab === 'grupos' ? `${detailModal.member.points_groups} pts em Classificação de Grupos`
                     : `${detailModal.member.points_journey} pts em Jornada das Seleções`}
                 </p>
               </div>
             </div>
 
             <div className="px-4 py-4 space-y-4">
+              {detailModal.tab === 'geral' && (
+                <div className="space-y-3">
+                  {/* Total geral em destaque */}
+                  <div className="bg-blue-900 rounded-2xl p-4 text-center">
+                    <p className="text-blue-300 text-xs font-bold uppercase tracking-wider mb-1">Total Geral</p>
+                    <p className="font-bebas text-5xl text-yellow-400">{detailModal.member.points_total}</p>
+                    <p className="text-blue-300 text-xs mt-1">pontos</p>
+                  </div>
+
+                  {/* Breakdown por modalidade */}
+                  <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">⚽</span>
+                        <span className="font-bold text-slate-800 text-sm">Partidas</span>
+                      </div>
+                      <span className="font-bebas text-2xl text-green-600">{detailModal.member.points_bets}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">📊</span>
+                        <span className="font-bold text-slate-800 text-sm">Classificação dos Grupos</span>
+                      </div>
+                      <span className="font-bebas text-2xl text-green-600">{detailModal.member.points_groups}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🗺️</span>
+                        <span className="font-bold text-slate-800 text-sm">Até onde vai</span>
+                      </div>
+                      <span className="font-bebas text-2xl text-green-600">{detailModal.member.points_journey}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {detailModal.tab === 'grupos' && (() => {
                 const byGroup = detailModal.member.group_predictions.reduce((acc, p) => {
                   if (!acc[p.group_name]) acc[p.group_name] = []
