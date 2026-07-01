@@ -204,24 +204,41 @@ export default async function UserBetsPage({ params, searchParams }: Props) {
 
                   {/* Palpite */}
                   {bet ? (
-                    <div className={`flex items-center justify-between rounded-xl px-3 py-2 ${
-                      isExact ? 'bg-green-50 border border-green-200'
-                      : isDiff ? 'bg-blue-50 border border-blue-200'
-                      : isWinner ? 'bg-yellow-50 border border-yellow-200'
-                      : 'bg-red-50 border border-red-100'
-                    }`}>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{resultIcon}</span>
-                        <span className="text-sm font-bold text-slate-700">
-                          Palpite: {bet.home_bet} × {bet.away_bet}
+                    isLive ? (
+                      <div className="flex items-center justify-between rounded-xl px-3 py-2 bg-yellow-50 border border-yellow-300">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">⏳</span>
+                          <div>
+                            <span className="text-sm font-bold text-yellow-800">
+                              Palpite: {bet.home_bet} × {bet.away_bet}
+                            </span>
+                            <p className="text-[10px] text-yellow-600">resultado pode mudar</p>
+                          </div>
+                        </div>
+                        <span className="font-bebas text-xl text-yellow-700">
+                          +{livePoints} pts
                         </span>
                       </div>
-                      {(isLive ? livePoints : (bet.points_earned ?? 0)) > 0 && (
-                        <span className={`font-bebas text-xl ${isLive ? 'text-red-500' : resultColor}`}>
-                          +{isLive ? livePoints : bet.points_earned} pts{isLive ? ' (provisório)' : ''}
-                        </span>
-                      )}
-                    </div>
+                    ) : (
+                      <div className={`flex items-center justify-between rounded-xl px-3 py-2 ${
+                        isExact ? 'bg-green-50 border border-green-200'
+                        : isDiff ? 'bg-blue-50 border border-blue-200'
+                        : isWinner ? 'bg-yellow-50 border border-yellow-200'
+                        : 'bg-red-50 border border-red-100'
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{resultIcon}</span>
+                          <span className="text-sm font-bold text-slate-700">
+                            Palpite: {bet.home_bet} × {bet.away_bet}
+                          </span>
+                        </div>
+                        {(bet.points_earned ?? 0) > 0 && (
+                          <span className={`font-bebas text-xl ${resultColor}`}>
+                            +{bet.points_earned} pts
+                          </span>
+                        )}
+                      </div>
+                    )
                   ) : (
                     <div className="bg-slate-50 rounded-xl px-3 py-2 text-center">
                       <span className="text-slate-400 text-xs">Não palpitou neste jogo</span>
